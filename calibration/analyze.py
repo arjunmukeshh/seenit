@@ -145,18 +145,31 @@ def thresholds_from(file_description, function_description):
     skipped = {}
     languages = set(file_description) | set(function_description)
     for language in languages:
-        projects = max(
-            file_description.get(language, {}).get("projects", 0),
-            function_description.get(language, {}).get("projects", 0),
-        )
-        if projects < MIN_PROJECTS:
-            skipped[language] = f"only {projects} project(s)"
+        # Count projects PER POPULATION. Taking the max across the two let Go
+        # through on 4 function-contributing projects, and its thresholds came
+        # out at good=8/warn=20/bad=85 — wildly out of line with every other
+        # language, which is precisely the distortion this guard exists to
+        # catch. A language can have plenty of files while only a handful of
+        # projects contribute functions.
+        file_projects = file_description.get(language, {}).get("projects", 0)
+        fn_projects = function_description.get(language, {}).get("projects", 0)
+        if max(file_projects, fn_projects) < MIN_PROJECTS:
+            skipped[language] = f"only {max(file_projects, fn_projects)} project(s)"
             continue
         skipped.setdefault(language, [])  # collects per-metric exclusions below
 
         table = {}
         fn_metrics = function_description.get(language, {}).get("metrics", {})
         file_metrics = file_description.get(language, {}).get("metrics", {})
+
+        if fn_projects < MIN_PROJECTS:
+            skipped[language].append(
+                f"function-level metrics: only {fn_projects} project(s) contributed functions"
+            )
+            fn_metrics = {}
+        if file_projects < MIN_PROJECTS:
+            skipped[language].append(f"file-level metrics: only {file_projects} project(s)")
+            file_metrics = {}
 
         for name, source in from_functions.items():
             m = fn_metrics.get(source)
