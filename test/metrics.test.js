@@ -332,3 +332,59 @@ test('scoring: grade boundaries', () => {
   assert.equal(grade(10), 'F')
   assert.equal(grade(null), '?')
 })
+
+// ------------------------------------------------------------- per-language
+
+test('per-language: each language is scored against its own thresholds', async () => {
+  const { groupByLanguage, scoreMetricByLanguage } = await import('../lib/analyze/metrics/perLanguage.js')
+
+  // Same measured value, different languages: 9 is ordinary JavaScript but
+  // pathological TypeScript. A single global threshold cannot express that.
+  const tables = {
+    javascript: { cyclomatic: { good: 4, warn: 9, bad: 28 } },
+    typescript: { cyclomatic: { good: 2, warn: 4, bad: 13 } },
+  }
+  const thresholdsFor = (lang) => tables[lang]
+
+  const js = scoreMetricByLanguage(
+    groupByLanguage([{ language: 'javascript', v: 9 }], (i) => i.language),
+    { valueOf: (i) => i.v, metric: 'cyclomatic', thresholdsFor },
+  )
+  const ts = scoreMetricByLanguage(
+    groupByLanguage([{ language: 'typescript', v: 9 }], (i) => i.language),
+    { valueOf: (i) => i.v, metric: 'cyclomatic', thresholdsFor },
+  )
+  assert.ok(js.score > ts.score, 'the same value must score worse in the stricter language')
+})
+
+test('per-language: combination is weighted by observation count', async () => {
+  const { groupByLanguage, scoreMetricByLanguage } = await import('../lib/analyze/metrics/perLanguage.js')
+  const tables = {
+    javascript: { cyclomatic: { good: 4, warn: 9, bad: 28 } },
+    typescript: { cyclomatic: { good: 2, warn: 4, bad: 13 } },
+  }
+  const items = [
+    ...Array.from({ length: 999 }, () => ({ language: 'javascript', v: 1 })), // perfect
+    { language: 'typescript', v: 13 }, // worst possible
+  ]
+  const result = scoreMetricByLanguage(groupByLanguage(items, (i) => i.language), {
+    valueOf: (i) => i.v,
+    metric: 'cyclomatic',
+    thresholdsFor: (l) => tables[l],
+  })
+  // One bad TypeScript function among a thousand clean JS ones must barely move
+  // the number; an unweighted mean would have averaged 100 and 0 to 50.
+  assert.ok(result.score > 95, `expected >95, got ${result.score}`)
+})
+
+test('per-language: an uncalibrated language reports null, not a free 100', async () => {
+  const { groupByLanguage, scoreMetricByLanguage } = await import('../lib/analyze/metrics/perLanguage.js')
+  const result = scoreMetricByLanguage(
+    groupByLanguage([{ language: 'cobol', v: 40 }], (i) => i.language),
+    { valueOf: (i) => i.v, metric: 'cyclomatic', thresholdsFor: () => null },
+  )
+  // Scoring 100 would reward a codebase for being written in a language we
+  // cannot judge — the same lie as reporting missing coverage as 0%.
+  assert.equal(result.score, null)
+  assert.match(result.reason, /no calibrated thresholds/)
+})
