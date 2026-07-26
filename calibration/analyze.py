@@ -87,35 +87,90 @@ def describe(df):
     return out
 
 
-def thresholds_from(description):
-    """Section: good = p75, warn = p90, bad = p99 of observed code.
+def describe_functions(fdf):
+    """Per-language distributions over FUNCTIONS, not files.
+
+    This is the population the thresholds are actually applied to.
+    scoreComplexity() in lib/analyze/metrics/score.js flatMaps every function in
+    the repository and takes a percentile of that; calibrating against a
+    per-file maximum instead would compare different quantities and set the
+    thresholds far too high (TypeScript p90 of per-file max cyclomatic is 10,
+    versus 3 for the function distribution).
+    """
+    out = {}
+    for language, group in fdf.groupby("language"):
+        out[language] = {
+            "functions": int(len(group)),
+            "projects": int(group["project"].nunique()),
+            "metrics": {
+                name: {"n": int(group[name].notna().sum()), **percentiles(group[name])}
+                for name in ("cyclomatic", "cognitive", "nesting", "params", "lines")
+            },
+        }
+    return out
+
+
+def thresholds_from(file_description, function_description):
+    """good = p75, warn = p90, bad = p99 of observed code.
 
     A score then means something falsifiable -- "worse than 90% of comparable
     real-world code" -- rather than encoding anyone's taste.
+
+    Function-level thresholds come from the function distribution; file-level
+    thresholds from the file distribution. Mixing the two was a real error in an
+    earlier revision of this script.
     """
-    mapping = {
-        "maxCyclomatic": "cyclomatic",
-        "maxCognitive": "cognitive",
-        "p90FunctionLines": "functionLines",
-        "loc": "fileLines",
-        "maxParams": "params",
-        "maxNesting": "nesting",
+    from_functions = {
+        "cyclomatic": "cyclomatic",
+        "cognitive": "cognitive",
+        "functionLines": "lines",
+        "params": "params",
+        "nesting": "nesting",
     }
+    from_files = {"fileLines": "loc"}
+
+    # A single project is not a sample. Function counts can look reassuring
+    # while coming entirely from one codebase's house style -- php here had 801
+    # functions from exactly one repository -- so thresholds are only emitted
+    # where several independent projects contributed.
+    MIN_PROJECTS = 5
+
     out = {}
-    for language, entry in description.items():
+    skipped = {}
+    languages = set(file_description) | set(function_description)
+    for language in languages:
+        projects = max(
+            file_description.get(language, {}).get("projects", 0),
+            function_description.get(language, {}).get("projects", 0),
+        )
+        if projects < MIN_PROJECTS:
+            skipped[language] = f"only {projects} project(s)"
+            continue
+
         table = {}
-        for source, name in mapping.items():
-            m = entry["metrics"].get(source)
-            if not m or m["p75"] is None or m["n"] < 100:
-                continue  # too few observations to set a threshold from
+        fn_metrics = function_description.get(language, {}).get("metrics", {})
+        file_metrics = file_description.get(language, {}).get("metrics", {})
+
+        for name, source in from_functions.items():
+            m = fn_metrics.get(source)
+            if not m or m["p75"] is None or m["n"] < 500:
+                continue  # too few functions to set a threshold from
             table[name] = {
-                "good": round(m["p75"], 2),
-                "warn": round(m["p90"], 2),
-                "bad": round(m["p99"], 2),
-                "n": m["n"],
+                "good": round(m["p75"], 2), "warn": round(m["p90"], 2),
+                "bad": round(m["p99"], 2), "n": m["n"], "population": "functions",
+            }
+        for name, source in from_files.items():
+            m = file_metrics.get(source)
+            if not m or m["p75"] is None or m["n"] < 100:
+                continue
+            table[name] = {
+                "good": round(m["p75"], 2), "warn": round(m["p90"], 2),
+                "bad": round(m["p99"], 2), "n": m["n"], "population": "files",
             }
         if table:
             out[language] = table
+    if skipped:
+        out["_excluded"] = skipped
     return out
 
 
@@ -377,14 +432,22 @@ def main():
     print(f"{len(df):,} files · {df['project'].nunique()} projects · "
           f"{df['language'].nunique()} languages", file=sys.stderr)
 
+    fn_path = path.parent / path.name.replace("files-", "functions-")
+    fdf = pd.read_json(fn_path, lines=True) if fn_path.exists() else pd.DataFrame()
+    if not fdf.empty:
+        print(f"{len(fdf):,} functions", file=sys.stderr)
+
     RESULTS.mkdir(exist_ok=True)
     description = describe(df)
+    fn_description = describe_functions(fdf) if not fdf.empty else {}
     output = {
         "stage": args.stage,
         "files": int(len(df)),
+        "functions": int(len(fdf)),
         "projects": int(df["project"].nunique()),
         "descriptive": description,
-        "proposedThresholds": thresholds_from(description),
+        "descriptiveFunctions": fn_description,
+        "proposedThresholds": thresholds_from(description, fn_description),
     }
 
     if args.stage == "B":
@@ -394,15 +457,22 @@ def main():
     out_path.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")
     print(f"wrote {out_path}", file=sys.stderr)
 
-    for language, entry in description.items():
-        print(f"\n{language}  ({entry['files']} files, {entry['filesWithFunctions']} with functions, "
-              f"{entry['projects']} projects)")
-        print(f"  {'metric':<24} {'p50':>8} {'p75':>8} {'p90':>8} {'p95':>8} {'p99':>8}")
-        for metric, m in entry["metrics"].items():
-            if m["p50"] is None:
-                continue
-            print(f"  {metric:<24} {m['p50']:>8.2f} {m['p75']:>8.2f} {m['p90']:>8.2f} "
-                  f"{m['p95']:>8.2f} {m['p99']:>8.2f}")
+    for language, table in sorted(output["proposedThresholds"].items()):
+        if language.startswith("_"):  # metadata, not a language
+            continue
+        fn_count = fn_description.get(language, {}).get("functions", 0)
+        print(f"\n{language}  ({description.get(language, {}).get('files', 0)} files, "
+              f"{fn_count} functions, {description.get(language, {}).get('projects', 0)} projects)")
+        print(f"  {'threshold':<16} {'good(p75)':>10} {'warn(p90)':>10} {'bad(p99)':>10}   {'n':>7}  from")
+        for name, t in sorted(table.items()):
+            print(f"  {name:<16} {t['good']:>10.1f} {t['warn']:>10.1f} {t['bad']:>10.1f} "
+                  f"{t['n']:>9}  {t['population']}")
+
+    excluded = output["proposedThresholds"].get("_excluded", {})
+    if excluded:
+        print("\nno thresholds emitted (too few independent projects):")
+        for language, reason in sorted(excluded.items()):
+            print(f"  {language:<16} {reason}")
     return 0
 
 

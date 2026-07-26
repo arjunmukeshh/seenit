@@ -118,14 +118,33 @@ async function collectRepo(repo, { stage, maxFiles }) {
 
     const blobs = await readBlobsBatch(workdir, entries.map((e) => e.sha))
     const rows = []
+    const functionRows = []
     for (const entry of entries) {
       const buf = blobs.get(entry.sha)
       if (!buf) continue
       const facts = await analyzeSource(entry.path, buf)
       if (!facts || facts.parseError) continue // a mis-parsed file yields junk metrics
       rows.push({ ...toRow(repo, facts, history, headEpoch), analyzedAtPinned })
+
+      // Function-level rows, required because the thresholds being calibrated
+      // are applied to the p90 of the FUNCTION distribution
+      // (scoreComplexity in lib/analyze/metrics/score.js flatMaps every
+      // function before taking a percentile). Calibrating them against a
+      // per-file maximum would compare different quantities and set the
+      // thresholds far too high.
+      for (const fn of facts.functions) {
+        functionRows.push({
+          project: repo.repository,
+          language: facts.language,
+          cyclomatic: fn.cyclomatic,
+          cognitive: fn.cognitive,
+          nesting: fn.maxNesting,
+          params: fn.params,
+          lines: fn.lines,
+        })
+      }
     }
-    return { rows, historyStats, commit }
+    return { rows, functionRows, historyStats, commit }
   } finally {
     await rm(dir, { recursive: true, force: true })
   }
@@ -144,6 +163,7 @@ async function main() {
   const maxFiles = Number(flag('max-files', 4000))
   const corpusPath = flag('corpus', join(HERE, 'corpus.json'))
   const outPath = join(DATA, `files-stage${stage}.jsonl`)
+  const fnPath = join(DATA, `functions-stage${stage}.jsonl`)
   const statePath = join(DATA, `state-stage${stage}.json`)
 
   const corpus = JSON.parse(await readFile(corpusPath, 'utf8'))
@@ -171,12 +191,15 @@ async function main() {
     process.stderr.write(`[${i + 1}/${repos.length}] ${label} … `)
     const started = Date.now()
     try {
-      const { rows, skipped, historyStats } = await collectRepo(repo, { stage, maxFiles })
+      const { rows, functionRows, skipped, historyStats } = await collectRepo(repo, { stage, maxFiles })
       if (skipped) {
         summary.skipped.push({ repo: repo.repository, reason: skipped })
         process.stderr.write(`skipped (${skipped})\n`)
       } else {
         await appendFile(outPath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+        if (functionRows.length) {
+          await appendFile(fnPath, functionRows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+        }
         rowCount += rows.length
         if (historyStats) summary.historyStats[repo.repository] = historyStats
         process.stderr.write(`${rows.length} files in ${((Date.now() - started) / 1000).toFixed(1)}s\n`)
