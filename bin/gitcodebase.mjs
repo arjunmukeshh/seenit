@@ -169,6 +169,19 @@ const commands = {
     await startServer()
   },
 
+  async serve() {
+    const { startServer } = await import('../server/index.js')
+    const port = Number(flag('port', 4300))
+    const { url, root } = await startServer({ port })
+    console.log(`${C.bold}gitcodebase${C.reset} observatory for ${C.dim}${root}${C.reset}`)
+    console.log(`  ${url}\n`)
+    if (flag('open', true) !== 'false') {
+      const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
+      const { execFile } = await import('node:child_process')
+      execFile(opener, [url], () => {}) // best effort; headless environments have no opener
+    }
+  },
+
   help() {
     console.log(`
 ${C.bold}gitcodebase${C.reset} — a git-native code observatory

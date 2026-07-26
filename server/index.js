@@ -1,0 +1,233 @@
+// Local HTTP server for the observatory UI.
+//
+// Zero dependencies and no framework, following the footinthedoor pattern: a
+// node:http server that reads from the ledger and serves the built frontend.
+// There is no database — every response is derived from git objects, which is
+// the whole premise.
+//
+// Binds to 127.0.0.1 only. This exposes the full contents of a local repository,
+// so it must never be reachable from the network.
+
+import { createServer } from 'node:http'
+import { readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { join, extname, normalize, resolve, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+
+import { repoRoot, gitDir, currentBranch, commitMeta } from '../lib/git.js'
+import { openLedger, listSnapshots, readSnapshotFile, listSnapshotFiles, diffSnapshots, MAIN_REF } from '../lib/ledger.js'
+import { openCache } from '../lib/cache.js'
+import { analyzeWorkspace } from '../lib/analyze/index.js'
+import { workingChanges } from '../lib/workspace.js'
+
+const HERE = dirname(fileURLToPath(import.meta.url))
+const DIST = join(HERE, '..', 'dist')
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+}
+
+function json(res, body, status = 200) {
+  const payload = JSON.stringify(body)
+  res.writeHead(status, {
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': Buffer.byteLength(payload),
+    'cache-control': 'no-store',
+  })
+  res.end(payload)
+}
+
+// Workspace analysis is the expensive call and the UI polls it, so results are
+// cached briefly. Any file write invalidates via the mtime check in the caller.
+let workspaceCache = { at: 0, value: null }
+const WORKSPACE_TTL = 1500
+
+async function routes(ctx, url) {
+  const { root, ledger, cache } = ctx
+
+  switch (url.pathname) {
+    // Repo identity — shown in the header.
+    case '/api/repo': {
+      const [branch, head] = await Promise.all([currentBranch(root), commitMeta(root, 'HEAD', { limit: 1 })])
+      return {
+        root,
+        name: root.split('/').pop(),
+        branch,
+        head: head[0] ?? null,
+        ledgerPath: ledger.dir,
+      }
+    }
+
+    // The commit rail: every snapshot with its health, newest first.
+    case '/api/snapshots':
+      return { snapshots: await listSnapshots(ledger, { limit: Number(url.searchParams.get('limit')) || 200 }) }
+
+    // Current state including uncommitted work.
+    case '/api/workspace': {
+      if (Date.now() - workspaceCache.at < WORKSPACE_TTL && workspaceCache.value) {
+        return workspaceCache.value
+      }
+      const [result, changes, previous] = await Promise.all([
+        analyzeWorkspace(root, { cache }),
+        workingChanges(root),
+        listSnapshots(ledger, { limit: 1 }).then((s) => (s.length ? readSnapshotFile(ledger, s[0].sha, 'health.json') : null)),
+      ])
+      await cache.flush()
+      const value = {
+        health: result.health,
+        dimensions: result.dimensions,
+        fileCount: result.fileCount,
+        previous,
+        changes,
+        // Per-file rows drive the treemap and the file table.
+        files: result.facts.map((f) => ({
+          path: f.path,
+          language: f.language,
+          loc: f.loc,
+          functions: f.functions.length,
+          maxCognitive: f.functions.length ? Math.max(...f.functions.map((fn) => fn.cognitive)) : 0,
+          maxCyclomatic: f.functions.length ? Math.max(...f.functions.map((fn) => fn.cyclomatic)) : 0,
+          maxNesting: f.functions.length ? Math.max(...f.functions.map((fn) => fn.maxNesting)) : 0,
+          commentLines: f.commentLines,
+          exports: f.exports.length,
+          imports: f.imports,
+          isTest: /\.(test|spec)\.|(^|\/)(__tests__|tests?)\//.test(f.path),
+        })),
+      }
+      workspaceCache = { at: Date.now(), value }
+      return value
+    }
+
+    // Any file from any snapshot — health.json, graph/modules.json, etc.
+    case '/api/snapshot': {
+      const ref = url.searchParams.get('ref') ?? MAIN_REF
+      const file = url.searchParams.get('file')
+      if (!file) return { files: await listSnapshotFiles(ledger, ref) }
+      const content = await readSnapshotFile(ledger, ref, file)
+      if (content === null) throw Object.assign(new Error(`not in snapshot: ${file}`), { status: 404 })
+      return content
+    }
+
+    // The drift view: what changed about the codebase between two snapshots.
+    case '/api/diff': {
+      const from = url.searchParams.get('from')
+      const to = url.searchParams.get('to')
+      if (!from || !to) throw Object.assign(new Error('from and to are required'), { status: 400 })
+      const [names, patch] = await Promise.all([
+        diffSnapshots(ledger, from, to, { nameOnly: true }),
+        diffSnapshots(ledger, from, to),
+      ])
+      const [fromHealth, toHealth] = await Promise.all([
+        readSnapshotFile(ledger, from, 'health.json'),
+        readSnapshotFile(ledger, to, 'health.json'),
+      ])
+      return {
+        changed: names.split('\n').filter(Boolean).map((l) => {
+          const [status, path] = l.split('\t')
+          return { status, path }
+        }),
+        patch,
+        from: fromHealth,
+        to: toHealth,
+      }
+    }
+
+    // Health of one file across the whole ledger — the metric-blame view.
+    case '/api/history': {
+      const path = url.searchParams.get('path')
+      if (!path) throw Object.assign(new Error('path is required'), { status: 400 })
+      const snaps = await listSnapshots(ledger, { limit: 100 })
+      const series = []
+      for (const s of snaps) {
+        const record = await readSnapshotFile(ledger, s.sha, `files/${path}.json`)
+        if (record) {
+          series.push({ snapshot: s.sha, sourceCommit: s.sourceCommit, date: s.date, ...record })
+        }
+      }
+      return { path, series: series.reverse() }
+    }
+
+    default:
+      throw Object.assign(new Error('not found'), { status: 404 })
+  }
+}
+
+async function serveStatic(res, pathname) {
+  if (!existsSync(DIST)) {
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+    res.end(
+      `<!doctype html><meta charset=utf-8><title>gitcodebase</title>
+       <body style="font-family:system-ui;max-width:40rem;margin:4rem auto;line-height:1.6">
+       <h1>gitcodebase</h1>
+       <p>The UI has not been built yet. Run:</p>
+       <pre style="background:#f4f4f5;padding:1rem;border-radius:6px">npm run build</pre>
+       <p>The API is live — try <a href="/api/workspace">/api/workspace</a>.</p>`,
+    )
+    return
+  }
+
+  // Percent-decode BEFORE validating: url.pathname preserves encoding, so a
+  // check for ".." against the raw pathname never sees "%2e%2e" and would pass
+  // traversal straight through once dist/ exists.
+  let decoded
+  try {
+    decoded = decodeURIComponent(pathname)
+  } catch {
+    res.writeHead(400).end('bad request')
+    return
+  }
+  if (decoded.includes('\0')) {
+    res.writeHead(400).end('bad request')
+    return
+  }
+
+  const rel = normalize(decoded === '/' ? 'index.html' : decoded.replace(/^\/+/, ''))
+  const file = resolve(DIST, rel)
+  // Authoritative check: the resolved absolute path must live under DIST.
+  // Prefix-matching on the raw path is not enough (a sibling directory named
+  // "dist-old" would match "dist"), hence the separator.
+  if (file !== DIST && !file.startsWith(DIST + sep)) {
+    res.writeHead(403).end('forbidden')
+    return
+  }
+  try {
+    const body = await readFile(file)
+    res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' })
+    res.end(body)
+  } catch {
+    // SPA fallback — client-side routing owns unknown paths.
+    try {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+      res.end(await readFile(join(DIST, 'index.html')))
+    } catch {
+      res.writeHead(404).end('not found')
+    }
+  }
+}
+
+export async function startServer({ port = 4300, cwd = process.cwd() } = {}) {
+  const root = await repoRoot(cwd)
+  const ledger = await openLedger(root, await gitDir(cwd))
+  const ctx = { root, ledger, cache: openCache(ledger.dir) }
+
+  const server = createServer(async (req, res) => {
+    const url = new URL(req.url, 'http://localhost')
+    if (!url.pathname.startsWith('/api/')) return serveStatic(res, url.pathname)
+    try {
+      json(res, await routes(ctx, url))
+    } catch (err) {
+      json(res, { error: err.message }, err.status ?? 500)
+    }
+  })
+
+  // 127.0.0.1 rather than 0.0.0.0: this serves the full contents of a local
+  // repository and must not be reachable from the network.
+  await new Promise((resolve) => server.listen(port, '127.0.0.1', resolve))
+  return { server, url: `http://127.0.0.1:${port}`, root }
+}
