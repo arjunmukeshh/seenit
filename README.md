@@ -46,11 +46,39 @@ gitcodebase scan               # snapshot HEAD into the ledger
 gitcodebase backfill --limit 50   # build health history from past commits
 gitcodebase log                # health over time, as a git-style rail
 gitcodebase diff               # what changed about the codebase's health
+gitcodebase watch              # continuously review changes in the background
+gitcodebase serve              # open the observatory UI
 gitcodebase mcp                # run as an MCP server for coding agents
+gitcodebase hook               # one-line verdict, for a Claude Code Stop hook
 ```
 
 `gitcodebase check --fail-under 70` exits non-zero, so it works as a CI gate or
 a git hook.
+
+### The observatory UI
+
+`gitcodebase serve` opens a local view of the repository. The commit rail on the
+left is the time axis — each node's colour is health and its radius is churn, so
+a run of small green dots followed by one large amber one is legible at a
+glance. Selecting a snapshot loads that point in history; ⌘-click a second to
+compare them in the drift view, which renders a literal `git diff` of the
+analysis.
+
+The server binds to 127.0.0.1 only — it exposes the contents of a local
+repository and must not be reachable from the network.
+
+### After every agent turn (Claude Code hook)
+
+```json
+{ "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "npx gitcodebase hook --quiet" }] }] } }
+```
+
+Prints a one-line verdict when the score actually moves, and stays silent
+otherwise:
+
+```
+health 83.8  ▼ -0.9  3 files changed  dup: score.js ↔ api.js
+```
 
 ### For coding agents (MCP)
 
@@ -193,12 +221,20 @@ be told about.
 
 ## Status
 
-Working: the ledger engine, the analyzer, all seven dimensions, the CLI, and the
-MCP server. 39 tests passing.
+Working: the ledger engine, the analyzer, all seven dimensions, the CLI, the MCP
+server, the HTTP API, the observatory UI, watch mode and the Claude Code hook.
+39 tests passing. Dogfooded on three separate repositories.
 
-Not built yet: the web UI (commit rail, treemap, dependency graph, drift view),
-`watch` mode, symbol navigation and reference search, and publishing the ledger
-to a remote for sharing.
+Not built yet:
+
+- **Threshold calibration** — the largest outstanding item; see
+  [CALIBRATION.md](CALIBRATION.md)
+- **Symbol navigation and reference search** — deferred with the tree-sitter
+  decision, since syntax-only parsing makes cross-file resolution heuristic. A
+  TypeScript-compiler-API provider behind the same interface would make it exact
+- **Publishing the ledger** to a remote, so a team shares one health history
+- **Ingesting ESLint output** as a signal where a project already has it
+  configured, the same way coverage reports are read rather than recomputed
 
 ## Development
 
