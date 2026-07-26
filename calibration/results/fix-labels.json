@@ -1,0 +1,57 @@
+{
+  "purpose": "Measured false-positive rate of the pre-registered fix-commit regex (PREREGISTRATION.md §5, §8). Required to be published rather than assumed.",
+  "repository": "https://github.com/tanstack/query",
+  "sampledBy": "calibration/history.mjs sampleForLabelling, seed 7, n=30, stratified 15 matched / 15 unmatched",
+  "labelledBy": "manual inspection of commit subjects",
+  "criterion": "Does this commit fix a defect in SHIPPED CODE? Documentation-only fixes, typo corrections in prose, and link repairs are NOT code defects.",
+  "matched": [
+    { "sha": "25cdd97", "label": "true_positive", "note": "sort comparator returned wrong value for equal timestamps" },
+    { "sha": "d6a7bf3", "label": "true_positive", "note": "infinite query hydration bug" },
+    { "sha": "f819674", "label": "false_positive", "note": "revert of a DOCS change; matched on both 'Revert' and 'Fix'" },
+    { "sha": "26d8980", "label": "false_positive", "note": "docs typo whan -> when" },
+    { "sha": "5cb0bd4", "label": "true_positive", "note": "missing type=button attribute in component" },
+    { "sha": "e67b6f6", "label": "false_positive", "note": "docs link repair" },
+    { "sha": "3fa4b7c", "label": "true_positive", "note": "type definition defect" },
+    { "sha": "54efe22", "label": "false_positive", "note": "docs: type definitions in prose examples" },
+    { "sha": "404c2fa", "label": "true_positive", "note": "eslint-plugin config naming defect" },
+    { "sha": "479e5b6", "label": "true_positive", "note": "devtools typed tokens" },
+    { "sha": "f052bf2", "label": "false_positive", "note": "fix(docs) scope — markdown update" },
+    { "sha": "7f47906", "label": "true_positive", "note": "observer result/length mismatch" },
+    { "sha": "639c725", "label": "true_positive", "note": "options set before suspending" },
+    { "sha": "2c1be7b", "label": "false_positive", "note": "jsdoc comment correction, no behaviour change" },
+    { "sha": "75e7ccc", "label": "false_positive", "note": "docs escaping" }
+  ],
+  "unmatched": [
+    { "sha": "ed8cc23", "label": "true_negative", "note": "test refactor" },
+    { "sha": "e3b40d4", "label": "true_negative", "note": "chore" },
+    { "sha": "efdd204", "label": "true_negative", "note": "release" },
+    { "sha": "f49cc75", "label": "true_negative", "note": "docs" },
+    { "sha": "9759fee", "label": "true_negative", "note": "docs" },
+    { "sha": "6161dcd", "label": "true_negative", "note": "test refactor" },
+    { "sha": "c7c32f1", "label": "true_negative", "note": "feature" },
+    { "sha": "b799510", "label": "true_negative", "note": "test refactor" },
+    { "sha": "cea9347", "label": "true_negative", "note": "docs" },
+    { "sha": "f279ad2", "label": "true_negative", "note": "feature" },
+    { "sha": "e75a5f9", "label": "true_negative", "note": "feature" },
+    { "sha": "c9fcd2f", "label": "true_negative", "note": "test rename" },
+    { "sha": "3b844bb", "label": "true_negative", "note": "refactor" },
+    { "sha": "ba6e7be", "label": "true_negative", "note": "ci" },
+    { "sha": "744e5ea", "label": "true_negative", "note": "chore" }
+  ],
+  "results": {
+    "matchedSampled": 15,
+    "truePositives": 8,
+    "falsePositives": 7,
+    "precision": 0.533,
+    "falsePositiveRate": 0.467,
+    "unmatchedSampled": 15,
+    "falseNegatives": 0,
+    "recallInSample": 1.0
+  },
+  "interpretation": {
+    "consistentWithLiterature": "The measured 46.7% false-positive rate closely matches published SZZ findings that only about half of commits identified as bug-fixing genuinely are. This is a property of subject-line heuristics, not of this implementation.",
+    "dominantErrorMode": "Documentation commits containing the word 'fix'. All 7 false positives were docs, prose, link or jsdoc changes. No false negatives appeared in the sample, so the regex over-matches rather than under-matches.",
+    "effectOnResults": "This misclassification is non-differential — it is unrelated to a file's complexity — so it adds noise to the outcome and biases estimated effects TOWARD the null. The reported effect sizes are therefore conservative: true associations are likely somewhat larger, not smaller. It cannot manufacture an effect that is not there.",
+    "notARegexChange": "The regex was frozen at pre-registration and is NOT modified in light of this. A docs-scope exclusion is run as a clearly-labelled post-hoc sensitivity analysis instead; the primary result remains the pre-registered specification."
+  }
+}

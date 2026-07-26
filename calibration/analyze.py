@@ -45,6 +45,12 @@ FUNCTION_LEVEL = [
 FILE_LEVEL = ["loc", "commentRatio", "crypticIdentifierRatio"]
 METRICS = FUNCTION_LEVEL + FILE_LEVEL
 
+# `loc` is the control, so it cannot also be a predictor under test: entering
+# loc_z alongside log(loc) puts the same variable in the model twice and the
+# resulting coefficient is uninterpretable. Its effect is reported in every
+# model as log_loc_coef instead. Descriptive percentiles for loc are unaffected.
+INFERENCE_METRICS = [m for m in METRICS if m != "loc"]
+
 # Section 6: practical-significance floor. At large n, trivial effects reach
 # p < 0.05, so significance alone is not the decision criterion.
 MIN_IRR = 1.10
@@ -329,7 +335,7 @@ def infer(df):
     df = zscore_within_project(df, [m for m in METRICS if m in df.columns])
 
     glms, strats = [], []
-    for metric in METRICS:
+    for metric in INFERENCE_METRICS:
         if metric not in df.columns:
             continue
         population = df[df["functions"] > 0] if metric in FUNCTION_LEVEL else df

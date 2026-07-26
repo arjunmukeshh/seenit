@@ -19,12 +19,29 @@ export const FIX_PATTERN = /\b(fix(e[sd])?|bug|hotfix|patch|resolv(e|es|ed)|regr
 const SEP = '\x1e'
 const FIELD = '\x1f'
 
+// Environment for history walks over a partial (--filter=blob:none) clone.
+//
+// Without this, `git log --name-only` aborts on larger repositories with
+// "could not fetch ... from promisor remote": walking the log triggers lazy
+// object fetches, and when one fails git kills the whole command. It failed
+// silently in the sense that tryGit returned null and the repo simply recorded
+// zero history — 5 of 20 Stage B repos, and every one of the large ones, so the
+// loss was heavily biased toward exactly the projects with the most history.
+//
+// GIT_NO_LAZY_FETCH is safe here because blobless clones retain every tree, and
+// --name-only needs only trees. The commit-graph is disabled too: the failures
+// reported objects "in the commit graph file but not in the object database",
+// so a stale graph was part of it.
+const HISTORY_ENV = { GIT_NO_LAZY_FETCH: '1' }
+const HISTORY_CONFIG = ['-c', 'core.commitGraph=false']
+
 // One `git log` walk yields commits, fix commits and first/last touch per file.
 // Merges are excluded: they touch everything and would swamp the signal.
 export async function mineHistory(repoRoot, { ref = 'HEAD', maxCommits = 20_000 } = {}) {
   const out = await tryGit(
     repoRoot,
     [
+      ...HISTORY_CONFIG,
       'log',
       `--max-count=${maxCommits}`,
       '--no-merges',
@@ -32,8 +49,11 @@ export async function mineHistory(repoRoot, { ref = 'HEAD', maxCommits = 20_000 
       `--format=${SEP}%H${FIELD}%at${FIELD}%s`,
       ref,
     ],
-    { trim: false },
+    { trim: false, env: HISTORY_ENV },
   )
+  // Distinguish "no history" from "the walk failed" — conflating them is what
+  // let the promisor bug pass as a legitimate absence of data.
+  if (out === null) return { files: new Map(), commits: 0, fixCommits: 0, failed: true }
   if (!out) return { files: new Map(), commits: 0, fixCommits: 0 }
 
   const files = new Map()

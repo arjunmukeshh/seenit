@@ -34,8 +34,17 @@ const CLONE_TIMEOUT_MS = 300_000
 
 async function clone(url, dest, { stage }) {
   const args = ['clone', '--quiet', '--single-branch', '--no-tags']
-  if (stage === 'A') args.push('--depth', '1')
-  else args.push('--filter=blob:none') // full history, blobs fetched on demand
+  if (stage === 'A') {
+    // Percentiles need only the current source.
+    args.push('--depth', '1')
+  }
+  // Stage B takes a FULL clone. --filter=blob:none was the obvious choice and
+  // is wrong here: walking `git log --name-only` over full history triggers
+  // lazy object fetches that fail with "could not fetch from promisor remote",
+  // and GIT_NO_LAZY_FETCH only downgrades the abort to a warning before failing
+  // anyway. An earlier test appeared to clear it only because --max-count=200
+  // never reaches the missing objects. Stage B needs complete history, so a
+  // clone that cannot supply it is the wrong tool regardless of its cost.
   args.push(url, dest)
   await exec('git', args, { timeout: CLONE_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 })
 }
@@ -110,6 +119,11 @@ async function collectRepo(repo, { stage, maxFiles }) {
     let headEpoch = Date.now() / 1000
     if (stage === 'B') {
       const mined = await mineHistory(workdir, { ref: commit })
+      // A failed walk must abort the repo, not quietly yield rows with null
+      // outcomes. Treating failure as "this repo has no history" silently
+      // dropped the 5 largest projects from the first Stage B run.
+      if (mined.failed) throw new Error('history walk failed')
+      if (!mined.files.size) throw new Error('history walk returned no files')
       history = mined.files
       historyStats = { commits: mined.commits, fixCommits: mined.fixCommits }
       const epoch = await tryGit(workdir, ['log', '-1', '--format=%at', commit])
