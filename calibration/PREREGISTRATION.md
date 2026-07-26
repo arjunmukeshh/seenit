@@ -205,5 +205,36 @@ other way.
 
 ## Amendments
 
-*None. Any change after collection begins is appended here with a date and
-reason, never applied as an edit above.*
+### A1 — 2026-07-27 — analysis population for function-level metrics
+
+**Trigger.** The Stage A pilot (3 repos, 1,155 files) showed that **42.9% of
+analyzable non-test files contain no functions at all** — config files, constant
+tables, re-export barrels, type-only modules.
+
+**Why it matters.** Including them materially moves the thresholds:
+
+| metric | p50 | p90 | p99 |
+|---|---|---|---|
+| maxCyclomatic, all files | 1 | 6 | 17 |
+| maxCyclomatic, files with ≥1 function | 2 | 8 | 19 |
+| LOC, all files | 24 | 142 | 707 |
+| LOC, files with ≥1 function | 44 | 168 | 529 |
+
+**Change.** Collection is unchanged — every analyzable non-test file is still
+recorded, so nothing is lost and both populations remain reportable. The
+*analysis population* is now specified per metric family:
+
+- **Function-level metrics** (cyclomatic, cognitive, nesting, params, function
+  length): files with **≥1 function**.
+- **File-level metrics** (file length, comment ratio, identifier ratio): all
+  analyzable non-test files.
+
+**Reasoning.** A file with no functions has no function complexity. Recording it
+as `0` conflates "simple" with "not applicable" — precisely the error the tool
+already refuses to make when it reports missing coverage as `null` rather than
+0%. Consistency demands the same treatment here.
+
+**Why this is not result-fitting.** Stage A carries no outcome variable — every
+row has `fixes: null`. This decision concerns which files constitute source
+code and was made without any view of the outcome. It does not touch §6 or §7,
+and the hypotheses in §3 are unchanged.

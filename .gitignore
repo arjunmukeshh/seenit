@@ -6,3 +6,4 @@ dist/
 # (.git/gitcodebase/ledger.git), so it is never part of a working tree and
 # needs no ignore rule. Local scratch output does:
 .gitcodebase-cache/
+calibration/data/
