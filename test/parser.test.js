@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import { languageFor, parse, isAnalyzable, LANGUAGES } from '../lib/analyze/parser.js'
+import { languageFor, parse, isAnalyzable, isTestFile, LANGUAGES } from '../lib/analyze/parser.js'
 
 const require = createRequire(import.meta.url)
 const WASM_DIR = join(dirname(require.resolve('@vscode/tree-sitter-wasm/package.json')), 'wasm')
@@ -51,6 +51,44 @@ test('C files are analyzable and parse via the cpp grammar', async () => {
     assert.equal(parsed.language, 'cpp')
   } finally {
     parsed.tree.delete()
+  }
+})
+
+test('generated and build output is excluded', () => {
+  // Every case here was found in the calibration corpus, having slipped through
+  // the filters and landed in the measured distributions. The Next.js chunk was
+  // 10,741 lines and single-handedly set the p99 file-length threshold for
+  // JavaScript to a value no real source file could ever reach.
+  for (const path of [
+    'docs/_next/static/chunks/pages/_app.js', // _next, not .next
+    'packages/node-opcua-units/source/_generated_categorized_units.ts',
+    'src/__generated__/schema.ts',
+    'app/static/chunks/main.js',
+    'lib/bundle.min.js',
+    'api/service_pb2.py',
+  ]) {
+    assert.equal(isAnalyzable(path), false, `${path} should be excluded as generated/build output`)
+  }
+
+  // ...without excluding real source that merely looks similar.
+  for (const path of ['src/index.ts', 'lib/parser.js', 'src/generator.ts', 'app/staticRoutes.ts']) {
+    assert.equal(isAnalyzable(path), true, `${path} is real source and must be analyzed`)
+  }
+})
+
+test('test files are recognised across language conventions', () => {
+  for (const path of [
+    'crates/package-manager/src/install/tests.rs', // Rust module convention
+    'src/test.rs',
+    'a/conftest.py', // pytest
+    'src/testing/helper.ts',
+    'src/foo.test.ts',
+    'src/foo_test.go',
+  ]) {
+    assert.equal(isTestFile(path), true, `${path} should be treated as test code`)
+  }
+  for (const path of ['src/tester.ts', 'src/index.ts', 'src/latest.ts', 'src/protest.js']) {
+    assert.equal(isTestFile(path), false, `${path} is not a test file`)
   }
 })
 
