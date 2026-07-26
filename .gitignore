@@ -7,3 +7,4 @@ dist/
 # needs no ignore rule. Local scratch output does:
 .gitcodebase-cache/
 calibration/data/
+calibration/.venv/
