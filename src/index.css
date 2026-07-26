@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Terminal-adjacent palette. This is an instrument, not a marketing page — the
+   visual language should read as closer to `git log --graph` than to a SaaS
+   dashboard. */
+:root {
+  --bg: #0b0d10;
+  --panel: #12151a;
+  --panel-2: #171b21;
+  --border: #232830;
+  --text: #e4e7eb;
+  --muted: #8b939f;
+  --dim: #5a626d;
+
+  /* Health ramp. Deliberately not red/amber/green at equal spacing: most code
+     sits in the 70-95 band, so the gradient has to discriminate there. */
+  --h-bad: #e5484d;
+  --h-poor: #e08c3c;
+  --h-ok: #d7bb3f;
+  --h-good: #5bb85b;
+  --h-great: #3fb9a4;
+
+  --accent: #6ea8fe;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #262c35; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #333b46; }
+
+@layer components {
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace; }
+  .label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+}
+
+/* Diff colouring for the drift view — matches git's own conventions so the
+   output is immediately legible to anyone who reads diffs. */
+.diff-add { color: #7ee787; background: rgba(63, 185, 80, 0.09); }
+.diff-del { color: #ff7b72; background: rgba(248, 81, 73, 0.09); }
+.diff-hunk { color: var(--accent); }
+.diff-meta { color: var(--dim); }
