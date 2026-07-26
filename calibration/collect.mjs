@@ -32,6 +32,22 @@ const DATA = join(HERE, 'data')
 
 const CLONE_TIMEOUT_MS = 300_000
 
+// Refuse to start a clone without this much headroom. Stage B takes full
+// clones, and a run of several hundred repositories should stop cleanly rather
+// than fill the volume — the state file makes it resumable once space is freed.
+const MIN_FREE_GB = 15
+
+async function freeSpaceGb(path) {
+  try {
+    const { stdout } = await exec('df', ['-k', path])
+    const line = stdout.trim().split('\n').pop()
+    const available = Number(line.split(/\s+/)[3]) // 1K blocks
+    return available / 1024 / 1024
+  } catch {
+    return Infinity // if df is unavailable, do not block the run
+  }
+}
+
 async function clone(url, dest, { stage }) {
   const args = ['clone', '--quiet', '--single-branch', '--no-tags']
   if (stage === 'A') {
@@ -130,15 +146,23 @@ async function collectRepo(repo, { stage, maxFiles }) {
       if (epoch) headEpoch = Number(epoch)
     }
 
-    const blobs = await readBlobsBatch(workdir, entries.map((e) => e.sha))
     const rows = []
     const functionRows = []
-    for (const entry of entries) {
-      const buf = blobs.get(entry.sha)
-      if (!buf) continue
-      const facts = await analyzeSource(entry.path, buf)
-      if (!facts || facts.parseError) continue // a mis-parsed file yields junk metrics
-      rows.push({ ...toRow(repo, facts, history, headEpoch), analyzedAtPinned })
+
+    // Blobs are read and analyzed in batches so that only one batch of file
+    // contents is resident at a time. Reading every blob up front is fine for a
+    // 200-file package and is not fine across a full corpus, where the largest
+    // repository sets peak memory for the entire run.
+    const BATCH = 250
+    for (let start = 0; start < entries.length; start += BATCH) {
+      const slice = entries.slice(start, start + BATCH)
+      const blobs = await readBlobsBatch(workdir, slice.map((e) => e.sha))
+      for (const entry of slice) {
+        const buf = blobs.get(entry.sha)
+        if (!buf) continue
+        const facts = await analyzeSource(entry.path, buf)
+        if (!facts || facts.parseError) continue // a mis-parsed file yields junk metrics
+        rows.push({ ...toRow(repo, facts, history, headEpoch), analyzedAtPinned })
 
       // Function-level rows, required because the thresholds being calibrated
       // are applied to the p90 of the FUNCTION distribution
@@ -146,17 +170,19 @@ async function collectRepo(repo, { stage, maxFiles }) {
       // function before taking a percentile). Calibrating them against a
       // per-file maximum would compare different quantities and set the
       // thresholds far too high.
-      for (const fn of facts.functions) {
-        functionRows.push({
-          project: repo.repository,
-          language: facts.language,
-          cyclomatic: fn.cyclomatic,
-          cognitive: fn.cognitive,
-          nesting: fn.maxNesting,
-          params: fn.params,
-          lines: fn.lines,
-        })
+        for (const fn of facts.functions) {
+          functionRows.push({
+            project: repo.repository,
+            language: facts.language,
+            cyclomatic: fn.cyclomatic,
+            cognitive: fn.cognitive,
+            nesting: fn.maxNesting,
+            params: fn.params,
+            lines: fn.lines,
+          })
+        }
       }
+      blobs.clear() // release the batch before reading the next
     }
     return { rows, functionRows, historyStats, commit }
   } finally {
@@ -202,6 +228,15 @@ async function main() {
       process.stderr.write(`[${i + 1}/${repos.length}] ${label} — already done\n`)
       continue
     }
+    const free = await freeSpaceGb(tmpdir())
+    if (free < MIN_FREE_GB) {
+      process.stderr.write(
+        `\nstopping: only ${free.toFixed(1)}GB free (need ${MIN_FREE_GB}GB). ` +
+          `Free space and re-run — progress is saved in ${statePath}\n`,
+      )
+      break
+    }
+
     process.stderr.write(`[${i + 1}/${repos.length}] ${label} … `)
     const started = Date.now()
     try {

@@ -10,6 +10,8 @@
 // published rather than assumed away.
 
 import { tryGit } from '../lib/git.js'
+import { spawn } from 'node:child_process'
+import { createInterface } from 'node:readline'
 
 // Frozen at pre-registration. Word-boundaried to avoid matching "prefix",
 // "bugle", "dispatch" and similar. Changing this after collection begins would
@@ -37,56 +39,72 @@ const HISTORY_CONFIG = ['-c', 'core.commitGraph=false']
 
 // One `git log` walk yields commits, fix commits and first/last touch per file.
 // Merges are excluded: they touch everything and would swamp the signal.
+//
+// Streamed line by line rather than buffered. A repository with tens of
+// thousands of commits produces a `--name-only` log far too large to hold as a
+// single string — at full-corpus scale that is the difference between a bounded
+// footprint and exhausting memory on the largest repo in the sample. Only the
+// per-path aggregate is retained, which is bounded by file count, not history
+// length.
 export async function mineHistory(repoRoot, { ref = 'HEAD', maxCommits = 20_000 } = {}) {
-  const out = await tryGit(
-    repoRoot,
-    [
-      ...HISTORY_CONFIG,
-      'log',
-      `--max-count=${maxCommits}`,
-      '--no-merges',
-      '--name-only',
-      `--format=${SEP}%H${FIELD}%at${FIELD}%s`,
-      ref,
-    ],
-    { trim: false, env: HISTORY_ENV },
-  )
-  // Distinguish "no history" from "the walk failed" — conflating them is what
-  // let the promisor bug pass as a legitimate absence of data.
-  if (out === null) return { files: new Map(), commits: 0, fixCommits: 0, failed: true }
-  if (!out) return { files: new Map(), commits: 0, fixCommits: 0 }
+  const args = [
+    ...HISTORY_CONFIG,
+    'log',
+    `--max-count=${maxCommits}`,
+    '--no-merges',
+    '--name-only',
+    `--format=${SEP}%H${FIELD}%at${FIELD}%s`,
+    ref,
+  ]
 
   const files = new Map()
   let commits = 0
   let fixCommits = 0
+  let timestamp = 0
+  let isFix = false
 
-  for (const block of out.split(SEP)) {
-    if (!block.trim()) continue
-    const newlineAt = block.indexOf('\n')
-    const header = newlineAt === -1 ? block : block.slice(0, newlineAt)
-    const [sha, epoch, subject = ''] = header.split(FIELD)
-    if (!sha) continue
+  const child = spawn('git', args, {
+    cwd: repoRoot,
+    env: { ...process.env, ...HISTORY_ENV },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
 
-    const timestamp = Number(epoch)
-    const isFix = FIX_PATTERN.test(subject)
-    commits++
-    if (isFix) fixCommits++
+  let stderr = ''
+  child.stderr.on('data', (chunk) => {
+    // Keep only the tail; a failing walk can emit a great deal of output.
+    stderr = (stderr + chunk).slice(-2000)
+  })
 
-    const paths = newlineAt === -1 ? [] : block.slice(newlineAt + 1).split('\n')
-    for (const raw of paths) {
-      const path = raw.trim()
-      if (!path) continue
-      let record = files.get(path)
-      if (!record) {
-        files.set(path, (record = { commits: 0, fixes: 0, firstTouch: timestamp, lastTouch: timestamp }))
-      }
-      record.commits++
-      if (isFix) record.fixes++
-      // git log walks newest-first, so the last timestamp seen is the oldest.
-      if (timestamp < record.firstTouch) record.firstTouch = timestamp
-      if (timestamp > record.lastTouch) record.lastTouch = timestamp
+  const lines = createInterface({ input: child.stdout, crlfDelay: Infinity })
+  for await (const line of lines) {
+    if (line.startsWith(SEP)) {
+      // Commit header: SEP<sha>FIELD<epoch>FIELD<subject>
+      const [sha, epoch, subject = ''] = line.slice(1).split(FIELD)
+      if (!sha) continue
+      timestamp = Number(epoch)
+      isFix = FIX_PATTERN.test(subject)
+      commits++
+      if (isFix) fixCommits++
+      continue
     }
+    const path = line.trim()
+    if (!path) continue
+
+    let record = files.get(path)
+    if (!record) {
+      files.set(path, (record = { commits: 0, fixes: 0, firstTouch: timestamp, lastTouch: timestamp }))
+    }
+    record.commits++
+    if (isFix) record.fixes++
+    // git log walks newest-first, so the oldest timestamp arrives last.
+    if (timestamp < record.firstTouch) record.firstTouch = timestamp
+    if (timestamp > record.lastTouch) record.lastTouch = timestamp
   }
+
+  const code = await new Promise((resolve) => child.on('close', resolve))
+  // Distinguish "no history" from "the walk failed" — conflating them is what
+  // let the promisor bug pass as a legitimate absence of data.
+  if (code !== 0) return { files: new Map(), commits: 0, fixCommits: 0, failed: true, stderr }
 
   return { files, commits, fixCommits }
 }
