@@ -164,6 +164,52 @@ const commands = {
     console.log(out || '(no change in analysis)')
   },
 
+  // Continuous background review — the tweet's core ask.
+  async watch() {
+    const { root, ledger, cache } = await open()
+    const { watchRepo, verdict } = await import('../lib/watch.js')
+    console.log(`${C.dim}watching ${root} — ctrl-c to stop${C.reset}\n`)
+
+    let first = true
+    watchRepo(root, {
+      ledger,
+      cache,
+      onResult: (result) => {
+        const line = verdict(result, result.previous?.overall)
+        const time = new Date().toLocaleTimeString()
+        console.log(`${C.dim}${time}${C.reset}  ${line}`)
+        if (first) {
+          first = false
+          console.log(`${C.dim}       ${result.fileCount} files · comparing against last snapshot${C.reset}`)
+        }
+      },
+      onError: (err) => console.error(`${C.red}watch:${C.reset} ${err.message}`),
+    })
+  },
+
+  // Designed for a Claude Code Stop hook: one line, silent when nothing moved.
+  // Prints to stderr so it surfaces without being captured as tool output.
+  async hook() {
+    const { root, ledger, cache } = await open()
+    const { verdict } = await import('../lib/watch.js')
+    const [result, changes, snaps] = await Promise.all([
+      analyzeWorkspace(root, { cache }),
+      workingChanges(root),
+      listSnapshots(ledger, { limit: 1 }),
+    ])
+    await cache.flush()
+
+    const previous = snaps.length ? await readSnapshotFile(ledger, snaps[0].sha, 'health.json') : null
+    const delta = previous?.overall != null ? result.health - previous.overall : null
+
+    // Stay quiet unless something actually moved — a hook that prints on every
+    // turn is one the user stops reading.
+    const quiet = flag('quiet', false) !== false
+    if (quiet && (delta === null || Math.abs(delta) < 0.5)) return
+
+    console.error(verdict({ ...result, changes }, previous?.overall))
+  },
+
   async mcp() {
     const { startServer } = await import('../mcp/server.js')
     await startServer()
@@ -191,7 +237,10 @@ ${C.bold}gitcodebase${C.reset} — a git-native code observatory
   ${C.bold}gitcodebase backfill${C.reset}        build health history from past commits  ${C.dim}[--limit 50]${C.reset}
   ${C.bold}gitcodebase log${C.reset}             health over time, as a git-like rail
   ${C.bold}gitcodebase diff${C.reset}            what changed about the codebase's health
+  ${C.bold}gitcodebase watch${C.reset}           continuously review changes in the background
+  ${C.bold}gitcodebase serve${C.reset}           open the observatory UI  ${C.dim}[--port 4300]${C.reset}
   ${C.bold}gitcodebase mcp${C.reset}             run as an MCP server for coding agents
+  ${C.bold}gitcodebase hook${C.reset}            one-line verdict, for a Claude Code Stop hook
 
 ${C.dim}Analysis is stored in .git/gitcodebase/ledger.git — a real git repo, so you can
 run log, diff, blame and bisect against your codebase's health directly.

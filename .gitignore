@@ -1,9 +1,8 @@
-
-# (.git/gitcodebase/ledger.git), so it is never part of a working tree and
-# The analysis ledger lives inside the *target* repo's .git/ directory
-# Vite build output
-# needs no ignore rule. Local scratch output does:
-*.log
-.gitcodebase-cache/
-dist/
 node_modules/
+dist/
+*.log
+
+# The analysis ledger lives inside the *target* repo's .git/ directory
+# (.git/gitcodebase/ledger.git), so it is never part of a working tree and
+# needs no ignore rule. Local scratch output does:
+.gitcodebase-cache/
