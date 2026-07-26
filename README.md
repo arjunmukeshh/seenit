@@ -134,12 +134,13 @@ actually predicts defects — is an open question in the literature and no test
 suite settles it. The tool's job is to measure what it says it measures, and to
 be transparent that the composite scores built on top are judgement.
 
-**Known weakness.** Thresholds were calibrated against 4 repositories / 101
-files / 984 functions. That corpus is far too narrow to set thresholds from —
-it is enough to catch a threshold that is structurally broken, not enough to
-claim the numbers are right. It did catch one: the `params` threshold sat above
-the p99 of observed code and could never fire. Broadening the corpus is the main
-outstanding work on credibility.
+**Known weakness — the thresholds are uncalibrated.** They are literature-derived
+defaults, not measurements, so today's derived scores are honest as *relative*
+signals (is this getting better or worse) but should not be read as absolute
+grades. [CALIBRATION.md](CALIBRATION.md) specifies the corpus and method that
+would fix this, including an outcome-linked approach that tests whether each
+metric actually predicts defect density — the check a linter structurally cannot
+run, because it needs git history.
 
 Dimensions that cannot be measured report `null`, not `0`. "No coverage report
 found" and "nothing is covered" are different facts, and rendering the first as
