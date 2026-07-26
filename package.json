@@ -1,0 +1,20 @@
+{
+  "name": "gitcodebase",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A git-native code observatory. Repository health, version-controlled by the git engine itself.",
+  "bin": {
+    "gitcodebase": "./bin/gitcodebase.mjs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "node bin/gitcodebase.mjs serve",
+    "test": "node --test 'test/*.test.js'"
+  },
+  "dependencies": {
+    "@vscode/tree-sitter-wasm": "0.3.1",
+    "web-tree-sitter": "0.26.11"
+  }
+}
