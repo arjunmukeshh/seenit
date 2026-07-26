@@ -152,6 +152,7 @@ def thresholds_from(file_description, function_description):
         if projects < MIN_PROJECTS:
             skipped[language] = f"only {projects} project(s)"
             continue
+        skipped.setdefault(language, [])  # collects per-metric exclusions below
 
         table = {}
         fn_metrics = function_description.get(language, {}).get("metrics", {})
@@ -161,6 +162,16 @@ def thresholds_from(file_description, function_description):
             m = fn_metrics.get(source)
             if not m or m["p75"] is None or m["n"] < 500:
                 continue  # too few functions to set a threshold from
+            # An all-zero distribution is an extraction failure, not a
+            # measurement: some tree-sitter grammars do not expose a
+            # 'parameters' field, so params reads 0 for every function. Emitting
+            # good=warn=bad=0 would make every function fail instantly on a
+            # metric we never actually measured.
+            if m["p99"] == 0:
+                skipped.setdefault(language, [])
+                if isinstance(skipped[language], list):
+                    skipped[language].append(f"{name}: all-zero (extraction unsupported)")
+                continue
             table[name] = {
                 "good": round(m["p75"], 2), "warn": round(m["p90"], 2),
                 "bad": round(m["p99"], 2), "n": m["n"], "population": "functions",
@@ -175,6 +186,8 @@ def thresholds_from(file_description, function_description):
             }
         if table:
             out[language] = table
+    # Drop languages whose only "exclusion" was an empty placeholder.
+    skipped = {k: v for k, v in skipped.items() if v}
     if skipped:
         out["_excluded"] = skipped
     return out
