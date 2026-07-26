@@ -21,8 +21,12 @@ import { openLedger, listSnapshots, readSnapshotFile, MAIN_REF } from '../lib/le
 import { openCache } from '../lib/cache.js'
 import { analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
-import { grade } from '../lib/analyze/metrics/score.js'
 import { findClones } from '../lib/analyze/metrics/duplication.js'
+// Shared with the CLI. Bars and colour are off here: this output lands in an
+// agent's context window, where glyphs and escape codes are wasted tokens.
+import { formatHealth as renderHealth } from '../lib/format.js'
+
+const formatHealth = (health, dimensions, previous) => renderHealth(health, dimensions, previous)
 
 const TOOLS = [
   {
@@ -102,27 +106,6 @@ async function context() {
   const ledger = await openLedger(root, gd)
   ctx = { root, ledger, cache: openCache(ledger.dir) }
   return ctx
-}
-
-// Compact text beats JSON here: this output goes into an agent's context window,
-// where every token spent on braces is a token not spent on the finding.
-function formatHealth(health, dimensions, previous) {
-  const lines = []
-  const delta = previous?.overall != null ? health - previous.overall : null
-  const arrow = delta === null ? '' : delta > 0.5 ? ` ▲ +${delta.toFixed(1)}` : delta < -0.5 ? ` ▼ ${delta.toFixed(1)}` : ' (flat)'
-  lines.push(`HEALTH ${health?.toFixed(1) ?? 'n/a'} (${grade(health)})${arrow}`)
-
-  for (const [name, d] of Object.entries(dimensions)) {
-    if (d.score === null || d.score === undefined) {
-      lines.push(`  ${name.padEnd(14)}    n/a   ${d.reason ?? 'not measured'}`)
-      continue
-    }
-    const prev = previous?.dimensions?.[name]?.score
-    const dd = prev != null ? d.score - prev : null
-    const mark = dd === null || Math.abs(dd) < 0.5 ? '' : dd > 0 ? ` (+${dd.toFixed(1)})` : ` (${dd.toFixed(1)})`
-    lines.push(`  ${name.padEnd(14)} ${d.score.toFixed(1).padStart(6)}${mark}`)
-  }
-  return lines.join('\n')
 }
 
 async function previousHealth(ledger) {

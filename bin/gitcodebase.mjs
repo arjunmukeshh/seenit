@@ -11,7 +11,7 @@ import { openLedger, writeTree, commitSnapshot, updateRef, listSnapshots, analyz
 import { openCache } from '../lib/cache.js'
 import { analyzeCommit, analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
-import { grade } from '../lib/analyze/metrics/score.js'
+import { formatHealth, formatSnapshotRow, colorsFor } from '../lib/format.js'
 
 const args = process.argv.slice(2)
 const command = args.find((a) => !a.startsWith('-')) ?? 'check'
@@ -20,11 +20,7 @@ const flag = (name, fallback) => {
   return i === -1 ? fallback : args[i + 1] ?? true
 }
 
-const C = process.stdout.isTTY
-  ? { dim: '\x1b[2m', bold: '\x1b[1m', red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', reset: '\x1b[0m' }
-  : { dim: '', bold: '', red: '', green: '', yellow: '', reset: '' }
-
-const scoreColor = (s) => (s === null || s === undefined ? C.dim : s >= 80 ? C.green : s >= 60 ? C.yellow : C.red)
+const C = colorsFor(process.stdout.isTTY)
 
 async function open() {
   const cwd = process.cwd()
@@ -38,22 +34,8 @@ async function open() {
   return { root, ledger, cache: openCache(ledger.dir) }
 }
 
-function printHealth(health, dimensions, previous) {
-  const delta = previous?.overall != null ? health - previous.overall : null
-  const arrow = delta === null ? '' : delta > 0.5 ? `${C.green} ▲ +${delta.toFixed(1)}${C.reset}` : delta < -0.5 ? `${C.red} ▼ ${delta.toFixed(1)}${C.reset}` : `${C.dim} (flat)${C.reset}`
-  console.log(`\n${C.bold}HEALTH ${scoreColor(health)}${health?.toFixed(1) ?? 'n/a'}${C.reset} ${C.dim}(${grade(health)})${C.reset}${arrow}\n`)
-  for (const [name, d] of Object.entries(dimensions)) {
-    if (d.score === null || d.score === undefined) {
-      console.log(`  ${name.padEnd(14)} ${C.dim}   n/a   ${d.reason ?? ''}${C.reset}`)
-      continue
-    }
-    const prev = previous?.dimensions?.[name]?.score
-    const dd = prev != null ? d.score - prev : null
-    const mark = dd === null || Math.abs(dd) < 0.5 ? '' : dd > 0 ? `${C.green} +${dd.toFixed(1)}${C.reset}` : `${C.red} ${dd.toFixed(1)}${C.reset}`
-    const bar = '█'.repeat(Math.round(d.score / 5)).padEnd(20, '·')
-    console.log(`  ${name.padEnd(14)} ${scoreColor(d.score)}${d.score.toFixed(1).padStart(6)}${C.reset} ${C.dim}${bar}${C.reset}${mark}`)
-  }
-}
+const printHealth = (health, dimensions, previous) =>
+  console.log('\n' + formatHealth(health, dimensions, previous, { colors: C, bars: true }))
 
 async function previousHealth(ledger) {
   const snaps = await listSnapshots(ledger, { limit: 1 })
@@ -165,14 +147,7 @@ const commands = {
     console.log()
     let prev = null
     for (const s of [...snaps].reverse()) {
-      const d = prev === null || s.health === null ? null : s.health - prev
-      const mark = d === null ? ' ' : d > 0.5 ? `${C.green}▲${C.reset}` : d < -0.5 ? `${C.red}▼${C.reset}` : `${C.dim}·${C.reset}`
-      const bar = s.health === null ? '' : '█'.repeat(Math.round(s.health / 5))
-      console.log(
-        `  ${mark} ${C.dim}${s.sourceCommit.slice(0, 7)}${C.reset} ` +
-        `${scoreColor(s.health)}${String(s.health?.toFixed(1) ?? '—').padStart(5)}${C.reset} ` +
-        `${C.dim}${bar.padEnd(20, '·')}${C.reset}  ${(s.subject ?? '').replace(/^snapshot: \w+ /, '').slice(0, 50)}`,
-      )
+      console.log(formatSnapshotRow(s, prev, { colors: C }))
       prev = s.health
     }
     console.log()
