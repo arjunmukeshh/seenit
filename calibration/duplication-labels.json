@@ -52,10 +52,10 @@
     "vite docs socialLinks vs team.js links \u2014 two unrelated arrays of { icon, link } objects"
   ],
   "knownGaps": [
-    "RECALL IS UNMEASURED, and now matters more: the alignment filter discards most candidate pairs. Nothing counts what it wrongly discards.",
-    "n = 8 after the change, far too small. The 30-case pre-change sample is the larger evidence base, and the post-change number should not be quoted without this caveat.",
-    "Both repositories are JavaScript/TypeScript. Nothing is known about other languages.",
-    "MIN_ALIGNED = 9 is fitted to the same 30 cases used to evaluate it. An independent sample has not tested it.",
+    "RECALL IS UNMEASURED and is now the binding constraint. The relative cutoff trades recall for precision \u2014 it removed the last JSX false positive on seenit and also three borderline true positives (flag(), CLI-vs-MCP, and two near-identical stat components). Nothing counts what it wrongly discards.",
+    "The post-change labelled sample is n = 8, far too small. The 30-case pre-change sample remains the larger evidence base.",
+    "The p90 percentile is a judgement, chosen because it behaved on two repositories. It has not been set from an outcome the way the complexity thresholds were.",
+    "Both labelled repositories are JavaScript/TypeScript. Nothing is known about other languages.",
     "Labelled by the tool's author. A floor-check, not an independent evaluation."
   ],
   "ranking": {
@@ -66,7 +66,7 @@
       "inverse document frequency \u2014 real 2.00 vs noise 2.70 mean files-per-shape, too close to rank on",
       "contiguous line blocks \u2014 every case landed at 4-5, because winnowing samples lines too sparsely for blocks to differ"
     ],
-    "threshold": "MIN_ALIGNED = 9, set from the gap in the labelled set and the weakest evidence here"
+    "threshold": "RELATIVE: this repository's own p90 of aligned runs, floored at 9. A fixed number cannot serve both ends \u2014 measured across 34 corpus repositories, the p99 of coincidental overlap has a median of 46 and reaches 349, while seenit's own p99 is 27 and vite's is 449. A flat 9 keeps a fifth of candidate pairs in a median repo; a flat 46 would delete every real find in a small one. Effect: vite 55 findings -> 4, seenit 5 -> 3. See results/alignment.json."
   },
   "clustering": "Pairs are grouped into findings by union-find over the clone graph: files transitively linked by clone pairs are one finding. seenit 8 pairs -> 5 findings; vite 468 -> 55."
 }

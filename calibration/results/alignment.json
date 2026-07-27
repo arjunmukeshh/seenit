@@ -1,0 +1,90 @@
+{
+  "measuredAt": "2026-07-27",
+  "method": "One observation per repository, weighted equally. Pooling pairs let a single repo contribute 69% of the mass.",
+  "reposMeasured": 34,
+  "reposRequested": 45,
+  "reposWithNoCandidates": 4,
+  "totalCandidatePairs": 246423,
+  "p99AcrossRepos": {
+    "median": 46,
+    "p75": 79,
+    "p90": 102,
+    "max": 349
+  },
+  "keptByCutoff": {
+    "5": {
+      "median": 0.32,
+      "p75": 0.5625,
+      "p90": 0.7143,
+      "max": 1
+    },
+    "7": {
+      "median": 0.2353,
+      "p75": 0.4528,
+      "p90": 0.6337,
+      "max": 0.7292
+    },
+    "9": {
+      "median": 0.2,
+      "p75": 0.4043,
+      "p90": 0.6332,
+      "max": 0.729
+    },
+    "12": {
+      "median": 0.1176,
+      "p75": 0.25,
+      "p90": 0.5625,
+      "max": 0.7143
+    },
+    "15": {
+      "median": 0.1086,
+      "p75": 0.1835,
+      "p90": 0.3223,
+      "max": 0.7143
+    },
+    "20": {
+      "median": 0.0606,
+      "p75": 0.1322,
+      "p90": 0.3128,
+      "max": 0.6667
+    },
+    "30": {
+      "median": 0.0216,
+      "p75": 0.0828,
+      "p90": 0.2322,
+      "max": 0.6667
+    }
+  },
+  "mostPairs": [
+    {
+      "repo": "https://github.com/finos/legend-studio",
+      "files": 1499,
+      "pairs": 61691,
+      "p99": 32
+    },
+    {
+      "repo": "https://github.com/evmts/evmts-monorepo",
+      "files": 1496,
+      "pairs": 58103,
+      "p99": 25
+    },
+    {
+      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
+      "files": 1496,
+      "pairs": 44559,
+      "p99": 59
+    },
+    {
+      "repo": "https://github.com/kristiandupont/extract-pg-schema",
+      "files": 784,
+      "pairs": 31382,
+      "p99": 13
+    },
+    {
+      "repo": "https://github.com/microsoft/cadl",
+      "files": 1500,
+      "pairs": 23568,
+      "p99": 152
+    }
+  ]
+}

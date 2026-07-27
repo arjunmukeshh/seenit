@@ -37,9 +37,13 @@ What it does **not** catch: a copy that behaves the same but is built differentl
 
 ## How often is it right?
 
-**Precision 60% on 30 hand-labelled findings** — 18 real, 12 not. Measured, not asserted: [calibration/duplication-labels.json](calibration/duplication-labels.json).
+**Precision 60% on 30 hand-labelled findings** under the original ranking — 18 real, 12 not. Measured, not asserted: [calibration/duplication-labels.json](calibration/duplication-labels.json).
 
-It is not uniform, and the split matters more than the average. On logic-heavy code it finds genuine copies. On view code it is poor — **37% on this repo**, where ten of sixteen false positives were JSX: a `return` plus `className` and `style` props normalises to the same token stream across unrelated components. Recall is unmeasured. The labelling was done by the author, so treat it as a floor-check rather than an independent evaluation.
+Findings are ranked by *longest aligned run*: the number of matches holding a constant offset between the two files. Copy-paste preserves that offset; coincidental matches scatter. On the labelled set real duplication scored 10–27 aligned and idiomatic noise 3–8, with no overlap — so ranking on it lifted precision to 7 of 8 on this repo, where raw overlap had put a run of `useState` declarations above a threshold ladder written twice.
+
+The bar is **relative to your codebase** — its own p90, floored. A fixed number cannot serve both ends: across 34 corpus repositories the 99th percentile of coincidental overlap has a median of 46 and reaches 349, while this repo's is 27. A flat cutoff either floods a large repo or silences a small one.
+
+**Recall is unmeasured, and that is now the binding limitation.** The filter discards most candidates; nothing counts what it wrongly discards.
 
 ## For coding agents
 
