@@ -104,7 +104,6 @@ export function HealthPanel({ health, dimensions, previous, weights }) {
 function DimensionCard({ name, dimension, previous, weight }) {
   const measured = dimension.score !== null && dimension.score !== undefined
   const delta = measured && previous != null ? dimension.score - previous : null
-  const detail = DIMENSION_DETAIL[name]?.(dimension) ?? []
 
   return (
     <div className="panel p-3">
@@ -116,54 +115,68 @@ function DimensionCard({ name, dimension, previous, weight }) {
           </span>
         )}
         <span className="ml-auto flex items-baseline gap-1.5">
-          {measured ? (
-            <>
-              <span className="mono text-lg font-semibold" style={{ color: healthColor(dimension.score) }}>
-                {fmt(dimension.score)}
-              </span>
-              {delta !== null && Math.abs(delta) >= 0.05 && (
-                <span className="mono text-[10px]" style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}>
-                  {delta > 0 ? '+' : ''}
-                  {delta.toFixed(1)}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="mono text-xs" style={{ color: 'var(--dim)' }}>
-              not measured
-            </span>
-          )}
+          <CardScore score={dimension.score} delta={delta} measured={measured} />
         </span>
       </div>
 
       {/* Unmeasured dimensions show why, rather than rendering a red zero —
           "no report found" and "nothing covered" are different facts. */}
-      {!measured ? (
+      {measured ? (
+        <CardDetail name={name} dimension={dimension} />
+      ) : (
         <div className="text-[11px]" style={{ color: 'var(--dim)' }}>
           {dimension.reason ?? 'no data'}
         </div>
-      ) : (
-        <>
-          <div className="h-1 rounded-full mb-2.5 overflow-hidden" style={{ background: 'var(--panel-2)' }}>
-            <div
-              className="h-full rounded-full"
-              style={{ width: `${dimension.score}%`, background: healthColor(dimension.score) }}
-            />
-          </div>
-          {/* Single column until there is genuinely room for two — at narrow
-              widths the label and value collided into each other. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-            {detail.map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-2 text-[11px]">
-                <span className="truncate" style={{ color: 'var(--dim)' }}>{k}</span>
-                <span className="mono shrink-0" style={{ color: 'var(--muted)' }}>
-                  {v ?? '—'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
       )}
     </div>
+  )
+}
+
+function CardScore({ score, delta, measured }) {
+  if (!measured) {
+    return (
+      <span className="mono text-xs" style={{ color: 'var(--dim)' }}>
+        not measured
+      </span>
+    )
+  }
+  return (
+    <>
+      <span className="mono text-lg font-semibold" style={{ color: healthColor(score) }}>
+        {fmt(score)}
+      </span>
+      {delta !== null && Math.abs(delta) >= 0.05 && (
+        <span className="mono text-[10px]" style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}>
+          {delta > 0 ? '+' : ''}
+          {delta.toFixed(1)}
+        </span>
+      )}
+    </>
+  )
+}
+
+function CardDetail({ name, dimension }) {
+  const detail = DIMENSION_DETAIL[name]?.(dimension) ?? []
+  return (
+    <>
+      <div className="h-1 rounded-full mb-2.5 overflow-hidden" style={{ background: 'var(--panel-2)' }}>
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${dimension.score}%`, background: healthColor(dimension.score) }}
+        />
+      </div>
+      {/* Single column until there is genuinely room for two — at narrow widths
+          the label and value collided into each other. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+        {detail.map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-2 text-[11px]">
+            <span className="truncate" style={{ color: 'var(--dim)' }}>{k}</span>
+            <span className="mono shrink-0" style={{ color: 'var(--muted)' }}>
+              {v ?? '—'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }

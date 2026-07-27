@@ -33,6 +33,7 @@ import { scoreDuplication, findClones } from '../lib/analyze/metrics/duplication
 import { scoreStandards } from '../lib/analyze/metrics/standards.js'
 import { buildGraph, findCycles, scoreExtensibility } from '../lib/analyze/graph.js'
 import { percentile, scoreAgainst, rollup, grade, scoreComplexity } from '../lib/analyze/metrics/score.js'
+import { thresholdsFor } from '../lib/analyze/metrics/thresholds.js'
 
 async function facts(path, source) {
   const parsed = await parse(path, source)
@@ -466,4 +467,36 @@ test('branches: anonymous keyword tokens are not double-counted', async () => {
   // would score this 3 instead of 2.
   const php = await facts('t.php', '<?php function f($a){ if($a){ return 1; } return 2; }')
   assert.equal(php.functions[0].cyclomatic, 2)
+})
+
+// The scale is percentile-anchored, and the whole meaning of a health number
+// rests on that anchoring holding.
+//
+// Thresholds are generated as good = p75, warn = p90, bad = p99 of the
+// calibration corpus, and scoreAgainst is built so those land on 100 / 70 / 0.
+// That is what makes "70 = typical" true and what the grade documentation
+// promises. A future change to either the generator's percentiles or the decay
+// curve could silently move it, turning every published grade into a different
+// claim without any test failing.
+test('grades mean what they say: p75/p90/p99 score 100/70/0', () => {
+  const languages = ['javascript', 'typescript', 'tsx', 'python', 'go', 'rust', 'java']
+  let checked = 0
+
+  for (const language of languages) {
+    const thresholds = thresholdsFor(language)
+    if (!thresholds) continue
+    for (const [metric, t] of Object.entries(thresholds)) {
+      // Degenerate tables (all-zero, or good == warn) have no curve to check.
+      if (!(t.good < t.warn && t.warn < t.bad)) continue
+      const where = `${language}.${metric}`
+      assert.equal(scoreAgainst(t.good, t), 100, `${where}: corpus p75 must score 100`)
+      assert.equal(scoreAgainst(t.warn, t), 70, `${where}: corpus p90 must score 70 — "C is typical" depends on this`)
+      assert.equal(scoreAgainst(t.bad, t), 0, `${where}: corpus p99 must score 0`)
+      checked++
+    }
+  }
+
+  assert.ok(checked >= 20, `expected many calibrated tables, checked ${checked}`)
+  assert.equal(grade(70), 'C', 'a typical repository must grade C')
+  assert.equal(grade(69.9), 'D')
 })

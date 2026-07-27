@@ -14,10 +14,41 @@ import { workingChanges } from '../lib/workspace.js'
 import { formatHealth, formatSnapshotRow, colorsFor } from '../lib/format.js'
 
 const args = process.argv.slice(2)
-const command = args.find((a) => !a.startsWith('-')) ?? 'check'
+
+// Only the first token can be the command. Scanning for "the first argument
+// without a dash" instead made `gitcodebase --port 4300` read 4300 as the
+// command and silently fall through to help.
+const command = args[0] && !args[0].startsWith('-') ? args[0] : 'check'
+
 const flag = (name, fallback) => {
   const i = args.indexOf(`--${name}`)
   return i === -1 ? fallback : args[i + 1] ?? true
+}
+
+// Flags each command accepts. Anything else is a typo worth reporting: silently
+// ignoring `--json` and printing the default output looks like the flag worked.
+const FLAGS = {
+  check: ['fail-under'],
+  scan: ['ref'],
+  backfill: ['limit', 'ref'],
+  log: ['limit'],
+  diff: ['path'],
+  watch: [],
+  hook: ['quiet'],
+  serve: ['port', 'open'],
+  mcp: [],
+  help: [],
+}
+
+function validateFlags(name) {
+  const allowed = new Set(FLAGS[name] ?? [])
+  const passed = args.filter((a) => a.startsWith('--')).map((a) => a.slice(2).split('=')[0])
+  const unknown = passed.filter((f) => !allowed.has(f) && f !== 'help')
+  if (!unknown.length) return
+
+  console.error(`${C.red}gitcodebase ${name}:${C.reset} unknown flag ${unknown.map((f) => `--${f}`).join(', ')}`)
+  console.error(allowed.size ? `Accepts: ${[...allowed].map((f) => `--${f}`).join(', ')}` : 'This command takes no flags.')
+  process.exit(1)
 }
 
 const C = colorsFor(process.stdout.isTTY)
@@ -249,7 +280,15 @@ Nothing is written to your working tree.${C.reset}
   },
 }
 
-const run = commands[command] ?? commands.help
+if (!commands[command]) {
+  console.error(`${C.red}gitcodebase:${C.reset} unknown command "${command}"`)
+  commands.help()
+  process.exit(1)
+}
+
+const run = args.includes('--help') || args.includes('-h') ? commands.help : commands[command]
+if (run !== commands.help) validateFlags(command)
+
 run().catch((err) => {
   console.error(`${C.red}gitcodebase:${C.reset} ${err.message}`)
   process.exit(1)

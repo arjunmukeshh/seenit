@@ -59,69 +59,90 @@ export function CommitRail({ snapshots, selected, compareWith, onSelect, onCompa
         strokeWidth="2"
       />
 
-      {rows.map((s, i) => {
-        const y = i * ROW + 16
-        const previous = rows[i + 1] // next in array is older
-        const delta = previous?.health != null && s.health != null ? s.health - previous.health : null
-        const isSelected = s.sha === selected
-        const isCompare = s.sha === compareWith
-        const color = healthColor(s.health)
-
-        return (
-          <g
-            key={s.sha}
-            onClick={(e) => (e.metaKey || e.shiftKey ? onCompare?.(s.sha) : onSelect?.(s.sha))}
-            style={{ cursor: 'pointer' }}
-          >
-            {/* Hit area and selection highlight span the full row */}
-            <rect
-              x={0}
-              y={y - ROW / 2}
-              width="100%"
-              height={ROW}
-              fill={isSelected ? 'rgba(110,168,254,0.10)' : isCompare ? 'rgba(110,168,254,0.05)' : 'transparent'}
-            />
-            {(isSelected || isCompare) && (
-              <rect x={0} y={y - ROW / 2} width={2} height={ROW} fill="var(--accent)" opacity={isSelected ? 1 : 0.5} />
-            )}
-
-            <circle cx={RAIL_X} cy={y} r={radiusFor(s)} fill={color} />
-            {isSelected && <circle cx={RAIL_X} cy={y} r={radiusFor(s) + 4} fill="none" stroke={color} strokeWidth="1.5" opacity="0.6" />}
-
-            <text x={RAIL_X + COL.sha} y={y + 4} className="mono" fontSize="11" fill="var(--dim)">
-              {s.sourceCommit.slice(0, 7)}
-            </text>
-
-            <text x={RAIL_X + COL.health} y={y + 4} className="mono" fontSize="11.5" fill={color} fontWeight="600">
-              {fmt(s.health)}
-            </text>
-
-            {delta !== null && Math.abs(delta) >= 0.05 && (
-              <text
-                x={RAIL_X + COL.delta}
-                y={y + 4}
-                className="mono"
-                fontSize="10"
-                fill={delta > 0 ? 'var(--h-good)' : 'var(--h-bad)'}
-              >
-                {delta > 0 ? '▲' : '▼'}
-                {Math.abs(delta).toFixed(1)}
-              </text>
-            )}
-
-            {showSubject && (
-              <text x={RAIL_X + COL.subject} y={y + 4} fontSize="11.5" fill="var(--muted)">
-                {truncate(s.subject?.replace(/^snapshot: \w+ /, '') ?? '', subjectChars)}
-              </text>
-            )}
-
-            {/* Without room for the subject the row would be unidentifiable, so
-                the full message becomes a native tooltip instead. */}
-            <title>{`${s.sourceCommit.slice(0, 7)} · health ${fmt(s.health)}\n${s.subject ?? ''}`}</title>
-          </g>
-        )
-      })}
+      {rows.map((s, i) => (
+        <RailRow
+          key={s.sha}
+          snapshot={s}
+          y={i * ROW + 16}
+          previous={rows[i + 1]} // next in array is older
+          radius={radiusFor(s)}
+          isSelected={s.sha === selected}
+          isCompare={s.sha === compareWith}
+          showSubject={showSubject}
+          subjectChars={subjectChars}
+          onSelect={onSelect}
+          onCompare={onCompare}
+        />
+      ))}
     </svg>
+  )
+}
+
+// One row of the rail. Split out of the map callback, which the tool scored at
+// cyclomatic 16 against a measured TSX warn of 4 — past `bad` for the language,
+// and the worst single function in the codebase.
+function RailRow({ snapshot: s, y, previous, radius, isSelected, isCompare, showSubject, subjectChars, onSelect, onCompare }) {
+  const delta = previous?.health != null && s.health != null ? s.health - previous.health : null
+  const color = healthColor(s.health)
+  const sha = s.sourceCommit.slice(0, 7)
+
+  return (
+    <g
+      onClick={(e) => (e.metaKey || e.shiftKey ? onCompare?.(s.sha) : onSelect?.(s.sha))}
+      style={{ cursor: 'pointer' }}
+    >
+      <RowBackground y={y} isSelected={isSelected} isCompare={isCompare} />
+
+      <circle cx={RAIL_X} cy={y} r={radius} fill={color} />
+      {isSelected && (
+        <circle cx={RAIL_X} cy={y} r={radius + 4} fill="none" stroke={color} strokeWidth="1.5" opacity="0.6" />
+      )}
+
+      <text x={RAIL_X + COL.sha} y={y + 4} className="mono" fontSize="11" fill="var(--dim)">
+        {sha}
+      </text>
+
+      <text x={RAIL_X + COL.health} y={y + 4} className="mono" fontSize="11.5" fill={color} fontWeight="600">
+        {fmt(s.health)}
+      </text>
+
+      <DeltaTick x={RAIL_X + COL.delta} y={y + 4} delta={delta} />
+
+      {showSubject && (
+        <text x={RAIL_X + COL.subject} y={y + 4} fontSize="11.5" fill="var(--muted)">
+          {truncate(s.subject?.replace(/^snapshot: \w+ /, '') ?? '', subjectChars)}
+        </text>
+      )}
+
+      {/* Without room for the subject the row would be unidentifiable, so the
+          full message becomes a native tooltip instead. */}
+      <title>{`${sha} · health ${fmt(s.health)}\n${s.subject ?? ''}`}</title>
+    </g>
+  )
+}
+
+// Hit area and selection highlight, spanning the full row.
+function RowBackground({ y, isSelected, isCompare }) {
+  const fill = isSelected ? 'rgba(110,168,254,0.10)' : isCompare ? 'rgba(110,168,254,0.05)' : 'transparent'
+  return (
+    <>
+      <rect x={0} y={y - ROW / 2} width="100%" height={ROW} fill={fill} />
+      {(isSelected || isCompare) && (
+        <rect x={0} y={y - ROW / 2} width={2} height={ROW} fill="var(--accent)" opacity={isSelected ? 1 : 0.5} />
+      )}
+    </>
+  )
+}
+
+// Health change against the previous snapshot. Movements under 0.05 are noise
+// and would only add visual clutter to a rail of otherwise steady commits.
+function DeltaTick({ x, y, delta }) {
+  if (delta === null || Math.abs(delta) < 0.05) return null
+  return (
+    <text x={x} y={y} className="mono" fontSize="10" fill={delta > 0 ? 'var(--h-good)' : 'var(--h-bad)'}>
+      {delta > 0 ? '▲' : '▼'}
+      {Math.abs(delta).toFixed(1)}
+    </text>
   )
 }
 

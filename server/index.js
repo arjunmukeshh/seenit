@@ -48,114 +48,123 @@ function json(res, body, status = 200) {
 let workspaceCache = { at: 0, value: null }
 const WORKSPACE_TTL = 1500
 
-async function routes(ctx, url) {
-  const { root, ledger, cache } = ctx
+const httpError = (message, status) => Object.assign(new Error(message), { status })
 
-  switch (url.pathname) {
-    // Repo identity — shown in the header.
-    case '/api/repo': {
-      const [branch, head] = await Promise.all([currentBranch(root), commitMeta(root, 'HEAD', { limit: 1 })])
-      return {
-        root,
-        name: root.split('/').pop(),
-        branch,
-        head: head[0] ?? null,
-        ledgerPath: ledger.dir,
-      }
-    }
+// Require a query parameter, or fail with a 400 rather than a confusing 500
+// further down. Every handler that needs an argument goes through this.
+function required(url, name) {
+  const value = url.searchParams.get(name)
+  if (!value) throw httpError(`${name} is required`, 400)
+  return value
+}
 
-    // The commit rail: every snapshot with its health, newest first.
-    case '/api/snapshots':
-      return { snapshots: await listSnapshots(ledger, { limit: Number(url.searchParams.get('limit')) || 200 }) }
+const IS_TEST_PATH = /\.(test|spec)\.|(^|\/)(__tests__|tests?)\//
 
-    // Current state including uncommitted work.
-    case '/api/workspace': {
-      if (Date.now() - workspaceCache.at < WORKSPACE_TTL && workspaceCache.value) {
-        return workspaceCache.value
-      }
-      const [result, changes, previous] = await Promise.all([
-        analyzeWorkspace(root, { cache }),
-        workingChanges(root),
-        listSnapshots(ledger, { limit: 1 }).then((s) => (s.length ? readSnapshotFile(ledger, s[0].sha, 'health.json') : null)),
-      ])
-      await cache.flush()
-      const value = {
-        health: result.health,
-        dimensions: result.dimensions,
-        fileCount: result.fileCount,
-        previous,
-        changes,
-        // Per-file rows drive the treemap and the file table.
-        files: result.facts.map((f) => ({
-          path: f.path,
-          language: f.language,
-          loc: f.loc,
-          functions: f.functions.length,
-          maxCognitive: f.functions.length ? Math.max(...f.functions.map((fn) => fn.cognitive)) : 0,
-          maxCyclomatic: f.functions.length ? Math.max(...f.functions.map((fn) => fn.cyclomatic)) : 0,
-          maxNesting: f.functions.length ? Math.max(...f.functions.map((fn) => fn.maxNesting)) : 0,
-          commentLines: f.commentLines,
-          exports: f.exports.length,
-          imports: f.imports,
-          isTest: /\.(test|spec)\.|(^|\/)(__tests__|tests?)\//.test(f.path),
-        })),
-      }
-      workspaceCache = { at: Date.now(), value }
-      return value
-    }
-
-    // Any file from any snapshot — health.json, graph/modules.json, etc.
-    case '/api/snapshot': {
-      const ref = url.searchParams.get('ref') ?? MAIN_REF
-      const file = url.searchParams.get('file')
-      if (!file) return { files: await listSnapshotFiles(ledger, ref) }
-      const content = await readSnapshotFile(ledger, ref, file)
-      if (content === null) throw Object.assign(new Error(`not in snapshot: ${file}`), { status: 404 })
-      return content
-    }
-
-    // The drift view: what changed about the codebase between two snapshots.
-    case '/api/diff': {
-      const from = url.searchParams.get('from')
-      const to = url.searchParams.get('to')
-      if (!from || !to) throw Object.assign(new Error('from and to are required'), { status: 400 })
-      const [names, patch] = await Promise.all([
-        diffSnapshots(ledger, from, to, { nameOnly: true }),
-        diffSnapshots(ledger, from, to),
-      ])
-      const [fromHealth, toHealth] = await Promise.all([
-        readSnapshotFile(ledger, from, 'health.json'),
-        readSnapshotFile(ledger, to, 'health.json'),
-      ])
-      return {
-        changed: names.split('\n').filter(Boolean).map((l) => {
-          const [status, path] = l.split('\t')
-          return { status, path }
-        }),
-        patch,
-        from: fromHealth,
-        to: toHealth,
-      }
-    }
-
-    // Health of one file across the whole ledger — the metric-blame view.
-    case '/api/history': {
-      const path = url.searchParams.get('path')
-      if (!path) throw Object.assign(new Error('path is required'), { status: 400 })
-      const snaps = await listSnapshots(ledger, { limit: 100 })
-      const series = []
-      for (const s of snaps) {
-        const record = await readSnapshotFile(ledger, s.sha, `files/${path}.json`)
-        if (record) {
-          series.push({ snapshot: s.sha, sourceCommit: s.sourceCommit, date: s.date, ...record })
-        }
-      }
-      return { path, series: series.reverse() }
-    }
-
-    default:
-      throw Object.assign(new Error('not found'), { status: 404 })
+// Per-file rows drive the treemap and the file table. The per-function metrics
+// are collapsed to a per-file maximum here, matching how the ledger stores them.
+function fileRow(f) {
+  const max = (pick) => (f.functions.length ? Math.max(...f.functions.map(pick)) : 0)
+  return {
+    path: f.path,
+    language: f.language,
+    loc: f.loc,
+    functions: f.functions.length,
+    maxCognitive: max((fn) => fn.cognitive),
+    maxCyclomatic: max((fn) => fn.cyclomatic),
+    maxNesting: max((fn) => fn.maxNesting),
+    commentLines: f.commentLines,
+    exports: f.exports.length,
+    imports: f.imports,
+    isTest: IS_TEST_PATH.test(f.path),
   }
+}
+
+// One handler per endpoint, keyed by pathname.
+//
+// This was a single switch. Splitting it is not cosmetic: gitcodebase scored
+// the combined function at cyclomatic 19 against a measured JavaScript warn of
+// 6, and a health tool that ignores its own reading about itself is not worth
+// much. Each handler now sits in the low single digits and the dispatcher is
+// a map lookup.
+const ROUTES = {
+  // Repo identity — shown in the header.
+  '/api/repo': async ({ root, ledger }) => {
+    const [branch, head] = await Promise.all([currentBranch(root), commitMeta(root, 'HEAD', { limit: 1 })])
+    return { root, name: root.split('/').pop(), branch, head: head[0] ?? null, ledgerPath: ledger.dir }
+  },
+
+  // The commit rail: every snapshot with its health, newest first.
+  '/api/snapshots': async ({ ledger }, url) => ({
+    snapshots: await listSnapshots(ledger, { limit: Number(url.searchParams.get('limit')) || 200 }),
+  }),
+
+  // Current state including uncommitted work.
+  '/api/workspace': async ({ root, ledger, cache }) => {
+    if (Date.now() - workspaceCache.at < WORKSPACE_TTL && workspaceCache.value) return workspaceCache.value
+
+    const [result, changes, previous] = await Promise.all([
+      analyzeWorkspace(root, { cache }),
+      workingChanges(root),
+      listSnapshots(ledger, { limit: 1 }).then((s) => (s.length ? readSnapshotFile(ledger, s[0].sha, 'health.json') : null)),
+    ])
+    await cache.flush()
+
+    const value = {
+      health: result.health,
+      dimensions: result.dimensions,
+      fileCount: result.fileCount,
+      previous,
+      changes,
+      files: result.facts.map(fileRow),
+    }
+    workspaceCache = { at: Date.now(), value }
+    return value
+  },
+
+  // Any file from any snapshot — health.json, graph/modules.json, etc.
+  '/api/snapshot': async ({ ledger }, url) => {
+    const ref = url.searchParams.get('ref') ?? MAIN_REF
+    const file = url.searchParams.get('file')
+    if (!file) return { files: await listSnapshotFiles(ledger, ref) }
+    const content = await readSnapshotFile(ledger, ref, file)
+    if (content === null) throw httpError(`not in snapshot: ${file}`, 404)
+    return content
+  },
+
+  // The drift view: what changed about the codebase between two snapshots.
+  '/api/diff': async ({ ledger }, url) => {
+    const from = required(url, 'from')
+    const to = required(url, 'to')
+    const [names, patch, fromHealth, toHealth] = await Promise.all([
+      diffSnapshots(ledger, from, to, { nameOnly: true }),
+      diffSnapshots(ledger, from, to),
+      readSnapshotFile(ledger, from, 'health.json'),
+      readSnapshotFile(ledger, to, 'health.json'),
+    ])
+    const changed = names.split('\n').filter(Boolean).map((line) => {
+      const [status, path] = line.split('\t')
+      return { status, path }
+    })
+    return { changed, patch, from: fromHealth, to: toHealth }
+  },
+
+  // Health of one file across the whole ledger — the metric-blame view.
+  '/api/history': async ({ ledger }, url) => {
+    const path = required(url, 'path')
+    const snaps = await listSnapshots(ledger, { limit: 100 })
+    const series = []
+    for (const s of snaps) {
+      const record = await readSnapshotFile(ledger, s.sha, `files/${path}.json`)
+      if (record) series.push({ snapshot: s.sha, sourceCommit: s.sourceCommit, date: s.date, ...record })
+    }
+    return { path, series: series.reverse() }
+  },
+}
+
+async function routes(ctx, url) {
+  const handler = ROUTES[url.pathname]
+  if (!handler) throw httpError('not found', 404)
+  return handler(ctx, url)
 }
 
 async function serveStatic(res, pathname) {
