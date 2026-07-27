@@ -18,7 +18,7 @@ const args = process.argv.slice(2)
 // Only the first token can be the command. Scanning for "the first argument
 // without a dash" instead made `seenit --port 4300` read 4300 as the
 // command and silently fall through to help.
-const command = args[0] && !args[0].startsWith('-') ? args[0] : 'check'
+const command = args[0] && !args[0].startsWith('-') ? args[0] : 'default_'
 
 const flag = (name, fallback) => {
   const i = args.indexOf(`--${name}`)
@@ -28,7 +28,9 @@ const flag = (name, fallback) => {
 // Flags each command accepts. Anything else is a typo worth reporting: silently
 // ignoring `--json` and printing the default output looks like the flag worked.
 const FLAGS = {
-  check: ['fail-under'],
+  default_: [],
+  health: ['fail-under'],
+  check: ['fail-under'], // alias, kept so existing CI gates keep working
   scan: ['ref'],
   backfill: ['limit', 'ref'],
   log: ['limit'],
@@ -37,7 +39,7 @@ const FLAGS = {
   hook: ['quiet'],
   serve: ['port', 'open'],
   mcp: [],
-  help: [],
+  help: ['all'],
 }
 
 function validateFlags(name) {
@@ -74,8 +76,57 @@ async function previousHealth(ledger) {
 }
 
 const commands = {
-  // Default: measure right now, including uncommitted work.
-  async check() {
+  // THE DEFAULT. One job: has this already been written?
+  //
+  // Everything else this tool can do still works and is still shipped — health
+  // scoring, the ledger, the observatory UI, the module DAG — but it is not
+  // what someone typing `npx seenit` for the first time should meet. They get
+  // the answer to one question, in under a second, on a repository they have
+  // never scanned.
+  async default_() {
+    const { root, cache } = await open()
+    const result = await analyzeWorkspace(root, { cache })
+    await cache.flush()
+
+    const dup = result.dimensions.duplication
+    const pairs = dup?.worstPairs ?? []
+
+    console.log()
+    if (!pairs.length) {
+      console.log(`  ${C.green}Nothing duplicated.${C.reset} ${C.dim}${result.productFiles} files checked.${C.reset}`)
+      console.log(`\n  ${C.dim}Add to your agent so it checks before writing:  seenit mcp${C.reset}\n`)
+      return
+    }
+
+    const shown = pairs.slice(0, 5)
+    console.log(
+      `  ${C.bold}${dup.clonePairs}${C.reset} near-duplicate ${dup.clonePairs === 1 ? 'pair' : 'pairs'}` +
+        ` ${C.dim}across ${dup.filesInvolved} of ${result.productFiles} files${C.reset}`,
+    )
+    console.log()
+    for (const p of shown) {
+      const at = p.samples?.[0]
+      console.log(`  ${C.bold}${p.a}${C.reset}${at ? `${C.dim}:${at.aLine}${C.reset}` : ''}`)
+      console.log(`  ${C.dim}↔${C.reset} ${C.bold}${p.b}${C.reset}${at ? `${C.dim}:${at.bLine}${C.reset}` : ''}`)
+      console.log(`     ${C.dim}${p.shared} shared fingerprints${C.reset}`)
+      console.log()
+    }
+    if (pairs.length > shown.length) {
+      console.log(`  ${C.dim}…and ${pairs.length - shown.length} more${C.reset}\n`)
+    }
+
+    // Identifiers are normalized before fingerprinting, so this is not a text
+    // search — say so, because "why didn't grep find this" is the first
+    // question anyone asks.
+    console.log(
+      `  ${C.dim}Renamed copies count: identifiers and literals are normalized\n` +
+        `  before matching, so grep would not find these.${C.reset}`,
+    )
+    console.log(`\n  ${C.dim}Let your agent check before it writes:  seenit mcp${C.reset}\n`)
+  },
+
+  // The full health report. Was the default; now one command among several.
+  async health() {
     const { root, ledger, cache } = await open()
     const [result, previous] = await Promise.all([analyzeWorkspace(root, { cache }), previousHealth(ledger)])
     await cache.flush()
@@ -266,19 +317,36 @@ const commands = {
     }
   },
 
-  help() {
-    console.log(`
-${C.bold}seenit${C.reset} — a git-native code observatory
+  // `check` predates the rename and the re-scope. Kept as an alias because it
+  // is the command anyone's CI gate already runs.
+  async check() {
+    return commands.health()
+  },
 
-  ${C.bold}seenit${C.reset}                 measure health now, including uncommitted work
-  ${C.bold}seenit scan${C.reset}            snapshot HEAD into the ledger
-  ${C.bold}seenit backfill${C.reset}        build health history from past commits  ${C.dim}[--limit 50]${C.reset}
-  ${C.bold}seenit log${C.reset}             health over time, as a git-like rail
-  ${C.bold}seenit diff${C.reset}            what changed about the codebase's health
-  ${C.bold}seenit watch${C.reset}           continuously review changes in the background
-  ${C.bold}seenit serve${C.reset}           open the observatory UI  ${C.dim}[--port 4300]${C.reset}
-  ${C.bold}seenit mcp${C.reset}             run as an MCP server for coding agents
-  ${C.bold}seenit hook${C.reset}            one-line verdict, for a Claude Code Stop hook
+  help() {
+    const all = args.includes('--all')
+    console.log(`
+${C.bold}seenit${C.reset} — has this already been written?
+
+  ${C.bold}npx seenit${C.reset}            find near-duplicate code, including renamed copies
+  ${C.bold}seenit mcp${C.reset}            run as an MCP server so your agent checks before it writes
+`)
+    if (!all) {
+      console.log(`${C.dim}seenit also tracks repository health over time, version-controlled in git.
+Run \`seenit help --all\` for those commands.${C.reset}
+`)
+      return
+    }
+    console.log(`${C.bold}Health and history${C.reset}
+
+  ${C.bold}seenit health${C.reset}         full health report  ${C.dim}[--fail-under 70]${C.reset}
+  ${C.bold}seenit scan${C.reset}           snapshot HEAD into the ledger
+  ${C.bold}seenit backfill${C.reset}       build health history from past commits  ${C.dim}[--limit 50]${C.reset}
+  ${C.bold}seenit log${C.reset}            health over time, as a git-like rail
+  ${C.bold}seenit diff${C.reset}           what changed about the codebase's health
+  ${C.bold}seenit watch${C.reset}          continuously review changes in the background
+  ${C.bold}seenit serve${C.reset}          open the observatory UI  ${C.dim}[--port 4300]${C.reset}
+  ${C.bold}seenit hook${C.reset}           one-line verdict, for a Claude Code Stop hook
 
 ${C.dim}Analysis is stored in .git/seenit/ledger.git — a real git repo, so you can
 run log, diff, blame and bisect against your codebase's health directly.
@@ -296,7 +364,13 @@ if (!commands[command]) {
 const run = args.includes('--help') || args.includes('-h') ? commands.help : commands[command]
 if (run !== commands.help) validateFlags(command)
 
-run().catch((err) => {
-  console.error(`${C.red}seenit:${C.reset} ${err.message}`)
-  process.exit(1)
-})
+// Promise.resolve, not run().catch: `help` is synchronous and returns
+// undefined, so calling .catch on its result crashed the CLI immediately after
+// printing the help text. It looked fine in a pipe and failed for every user
+// who ran `seenit help` on its own.
+Promise.resolve()
+  .then(run)
+  .catch((err) => {
+    console.error(`${C.red}seenit:${C.reset} ${err.message}`)
+    process.exit(1)
+  })
