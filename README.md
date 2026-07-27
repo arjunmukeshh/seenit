@@ -106,11 +106,11 @@ get made, and they are **not** equally solid:
 flowchart TD
     Q["<b>1. Question</b><br/>Do these metrics predict defects?"] --> H
     H["<b>2. Hypothesis</b><br/>H1 size predicts fixes ✱<br/>H2 complexity does NOT, after size<br/>H4 comment density does NOT"] --> P
-    P["<b>3. Pre-register</b><br/>model, covariates, decision rule<br/><i>committed before any data existed</i>"] --> M
+    P["<b>3. Pre-register</b><br/>model, covariates, decision rule<br/>significant <b>AND</b> IRR ≥ 1.10<br/><i>committed before any data existed</i>"] --> M
     M["<b>4. Method</b><br/>1,114 repos · stratified random<br/>Poisson GLM · cluster-robust SE"] --> T
-    T["<b>5. Test</b><br/>39,028 files · 386 projects"] --> R
-    R["<b>6. Result</b><br/>H1 ✅ p=2.5e-8<br/>H2 ✅ null q=0.26<br/>H4 ✅ null q=0.68"] --> C
-    C["<b>7. Act on it</b><br/>size 0.12 → 0.37<br/>complexity 0.22 → 0.05"]
+    T["<b>5. Test</b><br/>153,696 files · 1,078 projects"] --> R
+    R["<b>6. Result</b><br/>H1 ✅ p=4.7e-5<br/>H2 ⚠️ q=0.019 but IRR 1.029<br/>H4 ✅ null q=0.68"] --> C
+    C["<b>7. Act on it</b><br/>size 0.12 → 0.30<br/>complexity 0.22 → 0.11<br/><i>sub-floor ⇒ halve, not delete</i>"]
     style P fill:#8957e5,color:#fff
     style R fill:#238636,color:#fff
     style C fill:#bb8009,color:#fff
@@ -214,25 +214,43 @@ That twelve independently-sampled ecosystems, from different registries and
 different maintainer communities, converge on the same narrow band is itself
 corroborating. **Noise does not converge.**
 
-### Only size predicts defects
+### Size dominates. Everything else is a rounding error.
 
-| metric | IRR/SD | q | verdict |
+Effects are per standard deviation, after controlling for `log(LOC)`. The
+pre-registered bar was **significant AND IRR ≥ 1.10** — both, fixed in advance.
+
+| metric | IRR/SD | q | clears floor? |
 |---|---|---|---|
-| **log(LOC)** | — | **p=2.5e-8** | ✅ robust predictor |
-| maxNesting | 1.097 | 0.053 | ✗ |
-| maxCyclomatic | 1.020 | 0.26 | ✗ |
-| maxCognitive | 1.020 | 0.26 | ✗ |
-| commentRatio | 1.010 | 0.68 | ✗ |
-| crypticIdentifierRatio | 1.013 | 0.68 | ✗ |
+| **log(LOC)** | — | **p=4.7e-5** | ✅ the one large effect |
+| maxNesting | 1.098 | 2.7e-4 | ✗ *(by 0.002)* |
+| maxParams | 1.036 | 0.079 | ✗ |
+| p90FunctionLines | 1.031 | 6.8e-3 | ✗ |
+| maxCyclomatic | 1.029 | 0.019 | ✗ |
+| maxCognitive | 1.029 | 0.013 | ✗ |
+| commentRatio | 0.970 | 0.079 | ✗ |
+| crypticIdentifierRatio | 1.007 | 0.68 | ✗ |
 
-**⚠️ The pilot was wrong, and the full run caught it.** At 19 projects,
-cyclomatic complexity looked significant at q=7.7e-5. At 386 projects it is
-q=0.26. Cluster-robust standard errors are *anti-conservative when clusters are
-few* — roughly 40+ are needed before the estimator can be trusted. Every
-complexity "finding" the pilot produced was an artefact of cluster count.
+**⚠️ Significance flipped three times. Effect size never did.**
 
-**This does not mean complexity is meaningless** — only that it does not predict
-*this* outcome, measured *this* way, beyond size. The fix signal carries a
+| | 19 proj | 386 proj | 1,078 proj |
+|---|---|---|---|
+| cyclomatic q | 7.7e-5 | 0.26 | 0.019 |
+| significant? | yes | **no** | yes |
+| IRR/SD | 1.080 | 1.020 | 1.029 |
+| ≥ 1.10 floor? | no | no | no |
+
+Read on significance alone, the same metric was a predictor, then a null, then a
+predictor again — three sample sizes, three different products. Read on effect
+size, the answer never moved. **This is what pre-registering a decision rule
+buys you**, and it is the strongest result in the study.
+
+It also caught my own error. The 386-project null was underpowered, I cut
+complexity's weight to 0.05 on it, and the full run put it back to **0.11** —
+the *halve* branch of the rule, not the *remove* branch.
+
+**This does not mean complexity is meaningless** — only that its partial effect
+beyond size is roughly **3% more fixes per SD**, too small to dominate a score
+and too real to discard. The fix signal carries a
 **measured 46.7% false-positive rate** (30 hand-labelled commits), which being
 non-differential biases estimates *toward* the null. These results are
 conservative. Complexity stays fully measured and displayed: **the rule governs

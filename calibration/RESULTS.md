@@ -88,85 +88,102 @@ running it against ecosystems it had never seen.
 ## Stage B — does any of it predict defects?
 
 Poisson GLM, cluster-robust standard errors by project, `log(LOC)` covariate,
-`offset(log(commits))`. **n = 39,028 files across 386 projects.** Dispersion
-1.36, below the pre-registered 1.5 switch, so Poisson was retained. All VIFs
-1.00–1.18, so coefficients are interpretable.
+`offset(log(commits))`. **n = 153,696 files across 1,078 projects** for the
+function-level metrics (per amendment A1, restricted to files containing at
+least one function); 199,485 files across 1,091 projects for the two file-level
+ones. Dispersion 1.42, below the pre-registered 1.5 switch, so Poisson was
+retained. All VIFs 1.01–1.26, so coefficients are interpretable.
 
 | metric | IRR / SD | 95% CI | q | stratified ρ | pre-registered action |
 |---|---|---|---|---|---|
-| maxNesting | 1.097 | [1.02, 1.17] | 0.053 | 0.140 | diagnostic weight |
-| maxParams | 1.050 | [0.98, 1.12] | 0.26 | 0.041 | **remove from scoring** |
-| p90FunctionLines | 1.033 | [1.00, 1.07] | 0.15 | 0.104 | diagnostic weight |
-| maxCyclomatic | 1.020 | [0.99, 1.05] | 0.26 | 0.123 | diagnostic weight |
-| maxCognitive | 1.020 | [1.00, 1.05] | 0.26 | 0.125 | diagnostic weight |
-| commentRatio | 1.010 | [0.96, 1.06] | 0.68 | 0.026 | **remove from scoring** |
-| crypticIdentifierRatio | 1.013 | [0.97, 1.06] | 0.68 | 0.034 | **remove from scoring** |
+| maxNesting | 1.098 | [1.05, 1.15] | 2.7e-4 | 0.117 | halve weight; mark advisory |
+| maxParams | 1.036 | [1.00, 1.07] | 7.9e-2 | 0.014 | **remove from scoring** |
+| p90FunctionLines | 1.031 | [1.01, 1.05] | 6.8e-3 | 0.090 | halve weight; mark advisory |
+| maxCyclomatic | 1.029 | [1.01, 1.05] | 1.9e-2 | 0.099 | halve weight; mark advisory |
+| maxCognitive | 1.029 | [1.01, 1.05] | 1.3e-2 | 0.100 | halve weight; mark advisory |
+| commentRatio | 0.970 | [0.94, 1.00] | 7.9e-2 | 0.014 | **remove from scoring** |
+| crypticIdentifierRatio | 1.007 | [0.97, 1.04] | 6.8e-1 | 0.002 | **remove from scoring** |
 
-### The pilot was wrong, and why that matters
+### Significance flipped three times. Effect size never did.
 
-The 19-project pilot reported cyclomatic complexity as significant at
-q = 7.7e-5. At 386 projects it is q = 0.26.
+This is the single most important thing this study produced, and it is an
+argument for pre-registration rather than an argument about complexity.
 
-| metric | pilot q (19 proj) | full q (386 proj) |
-|---|---|---|
-| maxCyclomatic | 7.7e-5 | 0.26 |
-| maxCognitive | 1.8e-3 | 0.26 |
-| maxNesting | 4.2e-5 | 0.053 |
-| p90FunctionLines | 3.2e-3 | 0.15 |
+| | 19 projects | 386 projects | 1,078 projects |
+|---|---|---|---|
+| maxCyclomatic q | 7.7e-5 | 0.26 | 0.019 |
+| **significant?** | yes | **no** | yes |
+| maxCyclomatic IRR/SD | 1.080 | 1.020 | 1.029 |
+| **≥ 1.10 effect floor?** | no | no | no |
 
-This is not noise, it is a known failure mode: **cluster-robust standard errors
-are anti-conservative when clusters are few.** With 19 projects the estimator
-understates uncertainty and manufactures significance; the usual guidance is
-that roughly 40+ clusters are needed before it can be trusted. Every "finding"
-the pilot produced about complexity was an artefact of cluster count, and the
-pilot's own conclusion that nesting "beats" complexity does not survive.
+Read on significance alone, the same metric was a real predictor, then a clean
+null, then a real predictor again — three sample sizes, three different
+products. Read on effect size, the answer never moved: complexity's partial
+association with fixes is around **3% more fixes per standard deviation**, well
+under the 1.10 floor §6 fixed in advance.
 
-Worth stating plainly because the pilot results were reported as findings before
-this run existed. A study that can correct itself is the point of running it at
-scale.
+The middle column is the known failure mode in both directions. **Cluster-robust
+standard errors are anti-conservative when clusters are few** — with 19 projects
+the estimator understates uncertainty and manufactures significance, and roughly
+40+ clusters are the usual guidance before it can be trusted. But the 386-project
+null was underpowered in the other direction, and reading it as evidence of
+absence is the mistake I made: complexity's weight was cut to 0.05 on the
+strength of it, and that cut is corrected below.
+
+The rule that survived all three runs is the conjunction: **statistically
+significant AND IRR ≥ 1.10.** Neither criterion alone gives a stable answer;
+requiring both, in advance, gives the same answer every time.
 
 ### Against the hypotheses
 
-**H1 — size predicts fixes. SUPPORTED**, and strengthened: `log(LOC)`
-coefficient 0.166, p = 2.5e-8 (pilot: 4.1e-6). The positive control holds, so a
-pipeline capable of finding an effect is the one reporting the nulls below.
+**H1 — size predicts fixes. SUPPORTED.** `log(LOC)` coefficient 0.107,
+p = 4.7e-5. The positive control holds, so a pipeline capable of finding an
+effect is the one reporting the small effects below.
 
-**H2 — complexity has no partial effect after controlling for size. SUPPORTED.**
-Cyclomatic q = 0.26, cognitive q = 0.26. This is the clean null the
-pre-registration expected, and it reproduces Herraiz & Hassan on modern
-JavaScript, TypeScript and Python rather than 2000s-era Java.
+**H2 — complexity has no partial effect after controlling for size. PARTIALLY
+SUPPORTED, and stated honestly:** at full scale the effect is statistically
+detectable (cyclomatic q = 0.019, cognitive q = 0.013) but far below the
+pre-registered practical floor (IRR 1.029 vs 1.10). Herraiz & Hassan's finding
+reproduces in *magnitude* on modern JavaScript, TypeScript and Python — but with
+1,078 clusters there is enough power to reject the strict null, and claiming a
+clean null here would be overreach.
 
-**H3 — nesting and parameters have no effect. SUPPORTED.** Nesting q = 0.053
-just misses; parameters q = 0.26 with a stratified ρ of 0.041, failing both
-tests and removed from scoring outright.
+**H3 — nesting and parameters have no effect. MIXED.** Nesting is the strongest
+non-size signal (IRR 1.098, q = 2.7e-4, ρ = 0.117) and sits just under the
+floor — close enough that a larger corpus could clear it. Parameters fail both
+tests (q = 0.079, ρ = 0.014) and are removed from scoring outright.
 
 **H4 — comment density and cryptic identifiers have no effect. SUPPORTED.**
-q = 0.68 for both. Named in advance as most likely to fail, so removing them is
-a pre-committed consequence rather than a post-hoc rationalisation.
+Cryptic identifiers q = 0.68 with ρ = 0.002, the cleanest null in the study.
+Comment ratio is *negatively* signed (IRR 0.970) and misses significance anyway.
+Both were named in advance as most likely to fail, so removing them is a
+pre-committed consequence rather than a post-hoc rationalisation.
 
-### The awkward consequence, registered in advance and now applied
+### The consequence, registered in advance and now applied
 
-The pre-registration stated that if complexity showed no meaningful partial
-effect, weighting `complexity: 0.22` above `size: 0.12` is backwards and size
-takes the larger share. That condition is met. Applied:
+| dimension | asserted | interim (386) | **final (1,078)** | basis |
+|---|---|---|---|---|
+| size | 0.12 | 0.37 | **0.30** | measured — the one large effect |
+| extensibility | 0.17 | 0.17 | 0.17 | untested |
+| coverage | 0.15 | 0.15 | 0.15 | untested |
+| duplication | 0.13 | 0.13 | 0.13 | untested |
+| complexity | 0.22 | 0.05 | **0.11** | measured — significant, sub-floor |
+| standards | 0.08 | 0.08 | 0.08 | untested |
+| readability | 0.13 | 0.05 | 0.06 | measured — components null |
 
-| dimension | before | after | basis |
-|---|---|---|---|
-| size | 0.12 | **0.37** | measured — the one robust predictor |
-| extensibility | 0.17 | 0.17 | untested |
-| coverage | 0.15 | 0.15 | untested |
-| duplication | 0.13 | 0.13 | untested |
-| standards | 0.08 | 0.08 | untested |
-| complexity | 0.22 | **0.05** | measured — null after size control |
-| readability | 0.13 | **0.05** | measured — components null |
+Two corrections in one table. Size still rises over its asserted 0.12, because
+it is the only dimension with a large measured effect. But complexity moves back
+**up** from the interim 0.05 to 0.11: the "halve weight; mark advisory" branch
+of the decision rule, not the "remove" branch. Cutting it to 0.05 treated an
+underpowered null as a finding.
 
-**What this does not mean.** Not that complexity is meaningless — only that it
-does not predict *this* outcome, measured *this* way, beyond size. The fix
-signal carries a measured 46.7% false-positive rate; being non-differential, it
-biases every estimate toward the null, so these results are conservative.
-Complexity stays fully measured and displayed. The rule governs what is
-**scored**, not what is **shown**, and a metric that fails to predict defects
-can still tell you something true about code you have to read.
+**What this does not mean.** Not that complexity is meaningless — only that its
+partial effect on *this* outcome, measured *this* way, beyond size, is small.
+The fix signal carries a measured 46.7% false-positive rate; being
+non-differential, it biases every estimate toward the null, so these effect
+sizes are conservative. Complexity stays fully measured and displayed. The rule
+governs what is **scored**, not what is **shown**, and a metric with a 3% effect
+on defect density can still tell you something true about code you have to read.
 
 **Four dimensions were never tested.** duplication, standards, extensibility and
 coverage had no file-level outcome model fitted against them. Their weights are
@@ -194,19 +211,22 @@ whether a commit message says "docs: fix typo" is unrelated to the complexity of
 the files it touches — so it adds noise to the outcome and pulls estimates
 **toward the null**. Reported effects are therefore conservative; true
 associations are likely somewhat larger. Crucially, it cannot manufacture an
-effect that is not there, so the significant findings survive this caveat while
-the nulls (H4) are weakened by it.
+effect that is not there, so the effects that were found survive this caveat
+while the nulls (H4) are weakened by it.
 
 The regex was frozen at pre-registration and has **not** been changed in light
 of this measurement.
 
 ## Limitations
 
-- **Stage B inference is still pilot-scale** (19 projects) pending the full run.
-  Stage A is complete at 391 projects.
-- **Two ecosystems sampled.** npm and PyPI. Rust, Java, C++ and Go appear only
-  as incidental files inside those repositories, which is why their project
-  counts are low and several fall below the threshold minimum.
+- **Effects near the floor are not settled.** Nesting at IRR 1.098 sits a
+  hair under the 1.10 cutoff. A larger corpus could push it over, and the
+  cutoff itself is a judgement — recorded in §6 before the data, but a
+  judgement. It is not a law of nature that 1.10 matters and 1.098 does not.
+- **Eight registries sampled**, but coverage is uneven: npm, PyPI, crates.io,
+  Go, Maven, RubyGems, Packagist and NuGet. Several languages appear mainly as
+  incidental files inside repositories drawn for another ecosystem, which is why
+  a few project counts fall below the threshold minimum.
 - **Survivorship.** Only surviving, depended-upon packages are sampled. Code bad
   enough to be abandoned is absent, which likely attenuates effects further.
 - **Association, not causation.** Nothing here supports "reducing nesting will
