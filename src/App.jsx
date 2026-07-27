@@ -5,10 +5,11 @@ import { HealthPanel } from './components/HealthPanel'
 import { Treemap } from './components/Treemap'
 import { DriftView } from './components/DriftView'
 import { StructurePanel } from './components/StructurePanel'
+import { DuplicateList } from './components/DuplicateList'
 import { useElementWidth } from './lib/useElementWidth'
 import { useTheme } from './lib/useTheme'
 
-const TABS = ['health', 'structure', 'drift']
+const TABS = ['duplicates', 'health', 'structure', 'drift']
 
 const dirtyCount = ({ changes }) => changes.added.length + changes.modified.length + changes.deleted.length
 
@@ -17,7 +18,7 @@ export default function App() {
   const [repo, setRepo] = useState(null)
   const [snapshots, setSnapshots] = useState([])
   const [workspace, setWorkspace] = useState(null)
-  const [tab, setTab] = useState('health')
+  const [tab, setTab] = useState('duplicates')
   const [selected, setSelected] = useState(null) // null = working tree
   const [compareWith, setCompareWith] = useState(null)
   const [snapshotHealth, setSnapshotHealth] = useState(null)
@@ -144,6 +145,20 @@ function TabBar({ tab, onTab, selected }) {
 // render function further past the complexity threshold the tool itself
 // reports.
 function TabBody({ tab, viewing, previous, selected, workspace, snapshots, compareWith }) {
+  if (tab === 'duplicates') {
+    // Snapshots do not carry the clustered findings, only the live workspace
+    // does — so say that rather than rendering an empty list.
+    if (selected) {
+      return (
+        <p className="pt-10 text-[12.5px]" style={{ color: 'var(--ink-3)' }}>
+          Duplication findings are computed for the working tree. Select the working tree above to
+          see them.
+        </p>
+      )
+    }
+    return <DuplicateList duplication={workspace.dimensions?.duplication} />
+  }
+
   if (tab === 'health') {
     if (!viewing) return <PanelSkeleton />
     return (

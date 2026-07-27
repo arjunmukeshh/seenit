@@ -1,50 +1,72 @@
 {
-  "what": "Hand-labelled precision sample for the duplication finder — the metric the product now depends on.",
-  "method": "Top-N findings by shared fingerprint count from two repositories, ranked as a user would see them. Each pair was judged by reading the code at both anchors. A finding counts as TRUE if a developer would want to be told about it before writing similar code; FALSE if the two regions merely share a shape (JSX scaffolding, hook declarations, unrelated object or Set literals, lists of string literals).",
+  "what": "Hand-labelled precision sample for the duplication finder \u2014 the metric the product now depends on.",
+  "method": "Top-N findings from two repositories, ranked as a user sees them, each judged by reading the code at both anchors. TRUE if a developer would want to be told before writing similar code; FALSE if the two regions merely share a shape (JSX scaffolding, hook declarations, unrelated object/Set literals, lists of string literals).",
   "bias": "Labelled by the tool's own author, on repositories the author knows. This is a floor-check, not an independent evaluation, and it should be redone by someone with no stake before the number is used in a pitch.",
   "sampledAt": "2026-07-27",
   "analyzerVersion": 1,
   "results": {
-    "n": 30,
-    "truePositives": 18,
-    "falsePositives": 12,
-    "precision": 0.6
+    "before": {
+      "ranking": "raw shared fingerprint count",
+      "n": 30,
+      "truePositives": 18,
+      "falsePositives": 12,
+      "precision": 0.6
+    },
+    "after": {
+      "ranking": "longest aligned run, clustered into findings",
+      "n": 8,
+      "truePositives": 7,
+      "falsePositives": 1,
+      "precision": 0.875,
+      "note": "n is small because the alignment filter removed 26 of 34 seenit pairs outright. Those removals were overwhelmingly the JSX false positives, but a filter that discards most candidates needs its RECALL checked, which is not done."
+    }
   },
   "byRepository": {
     "seenit": {
-      "n": 16,
-      "truePositives": 6,
-      "falsePositives": 10,
-      "precision": 0.375,
-      "note": "Ten of the sixteen are JSX — a return statement plus className/style props normalizes to the same token stream across unrelated components. Precision is far worse on view-layer code than on logic."
+      "n": 8,
+      "truePositives": 7,
+      "falsePositives": 1,
+      "precision": 0.875,
+      "note": "The one survivor that is still wrong is a run of const [x, setX] = useState(null) shared between App.jsx and StructurePanel.jsx. Every other JSX false positive was removed by the alignment filter."
     },
     "vite": {
-      "n": 14,
-      "truePositives": 12,
-      "falsePositives": 2,
-      "precision": 0.857,
-      "note": "Inflated by clustering. Eight create-vite template files that really are copies of one another produce twelve pairs, so twelve 'findings' are one fact. Counted as distinct findings rather than pairs, vite yields roughly two: the template cluster (true) and literal-list collisions (false)."
+      "pairs": 468,
+      "findings": 55,
+      "wasPairs": 914,
+      "note": "Not re-labelled after the ranking change. Clustering collapsed a style.css copied across 22 create-vite templates from roughly 200 pairs into one finding, which was the largest readability problem at this scale."
     }
   },
   "trueExamples": [
-    "lib/analyze/metrics/score.js grade() vs src/lib/api.js healthColor() — the same 90/80/70/55 threshold ladder encoded twice; changing a band means editing both",
-    "calibration/corpus.mjs vs calibration/history.mjs — mulberry32 PRNG copy-pasted verbatim",
-    "calibration/collect.mjs vs calibration/corpus.mjs — an identical four-line flag() argument parser",
-    "calibration/collect.mjs vs lib/analyze/index.js — collect.mjs reimplements fileRecord()",
-    "bin/seenit.mjs health() vs mcp/server.js review_changes() — both reimplement analyze-then-compare-to-previous",
-    "packages/create-vite/template-react vs template-preact vs template-solid — the same App component per framework"
+    "lib/analyze/metrics/score.js grade() vs src/lib/api.js healthColor() \u2014 the same 90/80/70/55 threshold ladder encoded twice; changing a band means editing both",
+    "calibration/corpus.mjs vs calibration/history.mjs \u2014 mulberry32 PRNG copy-pasted verbatim",
+    "calibration/collect.mjs vs calibration/corpus.mjs \u2014 an identical four-line flag() argument parser",
+    "calibration/collect.mjs vs lib/analyze/index.js \u2014 collect.mjs reimplements fileRecord()",
+    "bin/seenit.mjs health() vs mcp/server.js review_changes() \u2014 both reimplement analyze-then-compare-to-previous",
+    "packages/create-vite/template-react vs template-preact vs template-solid \u2014 the same App component per framework"
   ],
   "falseExamples": [
-    "src/App.jsx vs src/components/StructurePanel.jsx — a run of const [x, setX] = useState(null)",
-    "src/App.jsx vs src/components/HealthPanel.jsx — a JSX return with className and style props",
-    "calibration/apply.mjs FALLBACK vs score.js WEIGHT_PROVENANCE — two unrelated object literals",
-    "lib/analyze/extract.js BRANCH vs lib/analyze/parser.js SKIP_DIRS — two unrelated new Set([...]) literals",
-    "vite docs socialLinks vs team.js links — two unrelated arrays of { icon, link } objects"
+    "src/App.jsx vs src/components/StructurePanel.jsx \u2014 a run of const [x, setX] = useState(null)",
+    "src/App.jsx vs src/components/HealthPanel.jsx \u2014 a JSX return with className and style props",
+    "calibration/apply.mjs FALLBACK vs score.js WEIGHT_PROVENANCE \u2014 two unrelated object literals",
+    "lib/analyze/extract.js BRANCH vs lib/analyze/parser.js SKIP_DIRS \u2014 two unrelated new Set([...]) literals",
+    "vite docs socialLinks vs team.js links \u2014 two unrelated arrays of { icon, link } objects"
   ],
   "knownGaps": [
-    "n = 30, at the low end of a useful sample, and drawn from two repositories in one language family.",
-    "Precision is reported at the pair level. Clustering means a single duplicated file family inflates the count; a finding-level metric would be lower on vite and is the better measure.",
-    "Recall is unmeasured entirely. There is no count of real duplication the tool misses, and the loop-versus-reduce case in the README is known to be missed by construction.",
-    "Ranking is by shared fingerprint count. That is raw evidence rather than a calibrated confidence, and the sample shows it puts JSX noise above real logic duplication on view-heavy repositories."
-  ]
+    "RECALL IS UNMEASURED, and now matters more: the alignment filter discards most candidate pairs. Nothing counts what it wrongly discards.",
+    "n = 8 after the change, far too small. The 30-case pre-change sample is the larger evidence base, and the post-change number should not be quoted without this caveat.",
+    "Both repositories are JavaScript/TypeScript. Nothing is known about other languages.",
+    "MIN_ALIGNED = 9 is fitted to the same 30 cases used to evaluate it. An independent sample has not tested it.",
+    "Labelled by the tool's author. A floor-check, not an independent evaluation."
+  ],
+  "ranking": {
+    "signal": "longest aligned run \u2014 the largest set of shared fingerprints holding a constant (lineA - lineB) offset",
+    "why": "Genuine copy-paste preserves a constant offset across the copied block; incidental matches between unrelated code scatter across many offsets. Raw overlap ranks by file size instead, which put a useState run (30 shared) above grade()-vs-healthColor() (13 shared).",
+    "separation": "real duplication 10-27 aligned, idiomatic noise 3-8, no overlap on the labelled set",
+    "rejected": [
+      "inverse document frequency \u2014 real 2.00 vs noise 2.70 mean files-per-shape, too close to rank on",
+      "contiguous line blocks \u2014 every case landed at 4-5, because winnowing samples lines too sparsely for blocks to differ"
+    ],
+    "threshold": "MIN_ALIGNED = 9, set from the gap in the labelled set and the weakest evidence here"
+  },
+  "clustering": "Pairs are grouped into findings by union-find over the clone graph: files transitively linked by clone pairs are one finding. seenit 8 pairs -> 5 findings; vite 468 -> 55."
 }

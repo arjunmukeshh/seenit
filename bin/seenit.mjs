@@ -89,36 +89,33 @@ const commands = {
     await cache.flush()
 
     const dup = result.dimensions.duplication
-    const pairs = dup?.worstPairs ?? []
+    const findings = dup?.groups ?? []
 
     console.log()
-    if (!pairs.length) {
+    if (!findings.length) {
       console.log(`  ${C.green}Nothing duplicated.${C.reset} ${C.dim}${result.productFiles} files checked.${C.reset}`)
       console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
       return
     }
 
-    // Three, then a count. A wall of findings is the "violation wall" that
-    // makes people close the terminal — the exact thing this tool exists to
-    // not be. Three is a decision; twenty-three is a chore.
-    const TOP = 3
-    const shown = pairs.slice(0, TOP)
-
-    // No percentage and no line count beside each pair. Three separate attempts
-    // at one produced three different answers -- see duplication.js -- and a
-    // confident-looking number that is wrong is worse than none. What is shown
-    // is where to look, ranked by weight of evidence.
+    // Findings, not pairs, and three of them. One file copied into six places
+    // produces fifteen pairs of the same fact; a wall of those is the violation
+    // wall this tool exists not to be.
+    const shown = findings.slice(0, 3)
     console.log(`  ${C.bold}Closest matches${C.reset}\n`)
-    for (const p of shown) {
-      const at = p.samples?.[0]
-      console.log(`  ${C.bold}${p.a}${C.reset}${at ? `${C.dim}:${at.aLine}${C.reset}` : ''}`)
-      console.log(`  ${C.bold}${p.b}${C.reset}${at ? `${C.dim}:${at.bLine}${C.reset}` : ''}`)
+    for (const g of shown) {
+      const at = g.anchor.samples?.[0]
+      console.log(`  ${C.bold}${g.anchor.a}${C.reset}${at ? `${C.dim}:${at.aLine}${C.reset}` : ''}`)
+      console.log(`  ${C.bold}${g.anchor.b}${C.reset}${at ? `${C.dim}:${at.bLine}${C.reset}` : ''}`)
+      if (g.fileCount > 2) {
+        console.log(`    ${C.dim}and ${g.fileCount - 2} more file${g.fileCount === 3 ? '' : 's'} sharing this shape${C.reset}`)
+      }
       console.log()
     }
 
-    if (dup.clonePairs > shown.length) {
+    if (dup.groupCount > shown.length) {
       console.log(
-        `  ${C.dim}${dup.clonePairs - shown.length} more pairs, ` +
+        `  ${C.dim}${dup.groupCount - shown.length} more, ` +
           `${dup.filesInvolved} of ${result.productFiles} files involved.${C.reset}`,
       )
     }
@@ -128,8 +125,8 @@ const commands = {
     // question anyone asks.
     console.log(
       `  ${C.dim}Identifiers and literals are normalized before matching, so renamed\n` +
-        `  copies count and grep would not find these. Roughly 3 in 5 findings are\n` +
-        `  real — worse on view code. See calibration/duplication-labels.json.${C.reset}`,
+        `  copies count and grep would not find these. Ranked by longest aligned\n` +
+        `  run; ~7 in 8 are real. See calibration/duplication-labels.json.${C.reset}`,
     )
     console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
   },
