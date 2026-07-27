@@ -15,7 +15,8 @@
 // Source: ecosyste.ms — free, no API key, and covers npm/PyPI/crates/Go/Maven/
 // RubyGems with dependent counts, repository URLs and repo metadata.
 
-import { writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir, readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -387,7 +388,38 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     await mkdir(HERE, { recursive: true })
     const path = join(HERE, 'corpus.json')
-    await writeFile(path, JSON.stringify(corpus, null, 2) + '\n')
-    console.error(`wrote ${path}`)
+
+    // Merge with an existing corpus by default rather than overwriting it.
+    //
+    // Adding six registries to an existing two-registry corpus silently
+    // destroyed the original 396-repo sample, which had to be recovered from
+    // git. Extending a corpus is the normal case; replacing one should be the
+    // explicit request.
+    let merged = corpus
+    if (existsSync(path) && !args.includes('--replace')) {
+      const previous = JSON.parse(await readFile(path, 'utf8'))
+      const seen = new Set()
+      const repos = []
+      // Existing entries win: their SHAs may already have been collected
+      // against, and re-pinning mid-study would silently change the sample.
+      for (const repo of [...previous.repos, ...corpus.repos]) {
+        if (seen.has(repo.repository)) continue
+        seen.add(repo.repository)
+        repos.push(repo)
+      }
+      merged = {
+        ...previous,
+        generatedAt: new Date().toISOString(),
+        ecosystems: { ...previous.ecosystems, ...corpus.ecosystems },
+        repos,
+      }
+      console.error(
+        `merged with existing corpus: ${previous.repos.length} + ${corpus.repos.length} ` +
+          `-> ${repos.length} unique (pass --replace to overwrite instead)`,
+      )
+    }
+
+    await writeFile(path, JSON.stringify(merged, null, 2) + '\n')
+    console.error(`wrote ${path} — ${merged.repos.length} repos across ${Object.keys(merged.ecosystems).length} ecosystems`)
   }
 }
