@@ -186,7 +186,73 @@ test('metamorphic: duplicating a file is detected as duplication', async () => {
 
   // Copy-paste with every symbol renamed must still be caught — that is the
   // characteristic shape of duplication in agent-generated code.
-  assert.equal(scoreDuplication([original, copy]).score, 0)
+  //
+  // Asserted on the measurement, not on a grade. Duplication no longer emits a
+  // 0-100 score: the old scale divided by every distinct fingerprint in the
+  // repository, so it read 100.0 on codebases that were visibly duplicated, and
+  // its thresholds were asserted rather than measured.
+  const result = scoreDuplication([original, copy])
+  assert.equal(result.score, null, 'duplication is counted, not graded')
+  assert.ok(result.reason, 'and says why it is not graded')
+  assert.equal(result.clonePairs, 1)
+
+  // `lines` is a LOWER BOUND on the duplicated region, never presented as a
+  // measurement: winnowing samples roughly one fingerprint per few tokens, so
+  // covered lines undercount. It must still be positive and plausible here.
+  assert.ok(clones[0].lines >= 1, 'a duplicated region must report covered lines')
+  assert.ok(clones[0].shared >= 3, 'and the fingerprint overlap that found it')
+})
+
+test('a small helper copied into a large file is still found', async () => {
+  // The duplicated unit is a region, not a file. A helper copied verbatim into
+  // a much larger module has to surface even though the two files share little
+  // of their overall bulk — which is why this reports a region rather than a
+  // "these files are N% alike" percentage.
+  const helper = `
+    export function normalizeKey(input) {
+      if (!input) throw new Error('missing')
+      const cleaned = String(input).trim().toLowerCase()
+      if (cleaned.length === 0) throw new Error('empty')
+      const parts = cleaned.split(':')
+      if (parts.length !== 2) throw new Error('bad shape')
+      return { scope: parts[0], key: parts[1] }
+    }
+  `
+  const filler = Array.from(
+    { length: 14 },
+    (_, i) => `export const widen${i} = (a, b) => Math.max(a * ${i}, b - ${i}) + a.length`,
+  ).join('\n')
+
+  const small = await facts('small.js', helper)
+  const large = await facts('large.js', `${helper}\n${filler}`)
+
+  const [pair] = findClones([small, large])
+  assert.ok(pair, 'the copied helper must be found despite the size difference')
+  assert.ok(pair.shared >= 3)
+})
+
+test('long literal lists do not collide with each other', async () => {
+  // After normalization every string is STR, so a list of a hundred strings is
+  // byte-identical to any other list of a hundred strings. Left unfiltered this
+  // was the largest source of false positives in the product: on vite, the top
+  // SIX findings were all literal lists colliding — a list of rollup hook names
+  // against a list of reserved words against a list of spec file paths, at
+  // 2,428 shared fingerprints, burying every real result.
+  const list = (items) => `export const values = [\n${items.map((v) => `  '${v}',`).join('\n')}\n]\n`
+  const hooks = await facts(
+    'hooks.js',
+    list(Array.from({ length: 90 }, (_, i) => `buildHook${i}`)),
+  )
+  const words = await facts(
+    'words.js',
+    list(Array.from({ length: 90 }, (_, i) => `reserved-word-${i}`)),
+  )
+
+  assert.deepEqual(
+    findClones([hooks, words]),
+    [],
+    'two unrelated literal lists share a shape by construction, not by copying',
+  )
 })
 
 test('metamorphic: shared import blocks are not duplication', async () => {

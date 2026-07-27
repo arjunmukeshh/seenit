@@ -94,35 +94,44 @@ const commands = {
     console.log()
     if (!pairs.length) {
       console.log(`  ${C.green}Nothing duplicated.${C.reset} ${C.dim}${result.productFiles} files checked.${C.reset}`)
-      console.log(`\n  ${C.dim}Add to your agent so it checks before writing:  seenit mcp${C.reset}\n`)
+      console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
       return
     }
 
-    const shown = pairs.slice(0, 5)
-    console.log(
-      `  ${C.bold}${dup.clonePairs}${C.reset} near-duplicate ${dup.clonePairs === 1 ? 'pair' : 'pairs'}` +
-        ` ${C.dim}across ${dup.filesInvolved} of ${result.productFiles} files${C.reset}`,
-    )
-    console.log()
+    // Three, then a count. A wall of findings is the "violation wall" that
+    // makes people close the terminal — the exact thing this tool exists to
+    // not be. Three is a decision; twenty-three is a chore.
+    const TOP = 3
+    const shown = pairs.slice(0, TOP)
+
+    // No percentage and no line count beside each pair. Three separate attempts
+    // at one produced three different answers -- see duplication.js -- and a
+    // confident-looking number that is wrong is worse than none. What is shown
+    // is where to look, ranked by weight of evidence.
+    console.log(`  ${C.bold}Closest matches${C.reset}\n`)
     for (const p of shown) {
       const at = p.samples?.[0]
       console.log(`  ${C.bold}${p.a}${C.reset}${at ? `${C.dim}:${at.aLine}${C.reset}` : ''}`)
-      console.log(`  ${C.dim}↔${C.reset} ${C.bold}${p.b}${C.reset}${at ? `${C.dim}:${at.bLine}${C.reset}` : ''}`)
-      console.log(`     ${C.dim}${p.shared} shared fingerprints${C.reset}`)
+      console.log(`  ${C.bold}${p.b}${C.reset}${at ? `${C.dim}:${at.bLine}${C.reset}` : ''}`)
       console.log()
     }
-    if (pairs.length > shown.length) {
-      console.log(`  ${C.dim}…and ${pairs.length - shown.length} more${C.reset}\n`)
+
+    if (dup.clonePairs > shown.length) {
+      console.log(
+        `  ${C.dim}${dup.clonePairs - shown.length} more pairs, ` +
+          `${dup.filesInvolved} of ${result.productFiles} files involved.${C.reset}`,
+      )
     }
 
     // Identifiers are normalized before fingerprinting, so this is not a text
     // search — say so, because "why didn't grep find this" is the first
     // question anyone asks.
     console.log(
-      `  ${C.dim}Renamed copies count: identifiers and literals are normalized\n` +
-        `  before matching, so grep would not find these.${C.reset}`,
+      `  ${C.dim}Identifiers and literals are normalized before matching, so renamed\n` +
+        `  copies count and grep would not find these. Roughly 3 in 5 findings are\n` +
+        `  real — worse on view code. See calibration/duplication-labels.json.${C.reset}`,
     )
-    console.log(`\n  ${C.dim}Let your agent check before it writes:  seenit mcp${C.reset}\n`)
+    console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
   },
 
   // The full health report. Was the default; now one command among several.

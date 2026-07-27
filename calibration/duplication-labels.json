@@ -1,0 +1,50 @@
+{
+  "what": "Hand-labelled precision sample for the duplication finder — the metric the product now depends on.",
+  "method": "Top-N findings by shared fingerprint count from two repositories, ranked as a user would see them. Each pair was judged by reading the code at both anchors. A finding counts as TRUE if a developer would want to be told about it before writing similar code; FALSE if the two regions merely share a shape (JSX scaffolding, hook declarations, unrelated object or Set literals, lists of string literals).",
+  "bias": "Labelled by the tool's own author, on repositories the author knows. This is a floor-check, not an independent evaluation, and it should be redone by someone with no stake before the number is used in a pitch.",
+  "sampledAt": "2026-07-27",
+  "analyzerVersion": 1,
+  "results": {
+    "n": 30,
+    "truePositives": 18,
+    "falsePositives": 12,
+    "precision": 0.6
+  },
+  "byRepository": {
+    "seenit": {
+      "n": 16,
+      "truePositives": 6,
+      "falsePositives": 10,
+      "precision": 0.375,
+      "note": "Ten of the sixteen are JSX — a return statement plus className/style props normalizes to the same token stream across unrelated components. Precision is far worse on view-layer code than on logic."
+    },
+    "vite": {
+      "n": 14,
+      "truePositives": 12,
+      "falsePositives": 2,
+      "precision": 0.857,
+      "note": "Inflated by clustering. Eight create-vite template files that really are copies of one another produce twelve pairs, so twelve 'findings' are one fact. Counted as distinct findings rather than pairs, vite yields roughly two: the template cluster (true) and literal-list collisions (false)."
+    }
+  },
+  "trueExamples": [
+    "lib/analyze/metrics/score.js grade() vs src/lib/api.js healthColor() — the same 90/80/70/55 threshold ladder encoded twice; changing a band means editing both",
+    "calibration/corpus.mjs vs calibration/history.mjs — mulberry32 PRNG copy-pasted verbatim",
+    "calibration/collect.mjs vs calibration/corpus.mjs — an identical four-line flag() argument parser",
+    "calibration/collect.mjs vs lib/analyze/index.js — collect.mjs reimplements fileRecord()",
+    "bin/seenit.mjs health() vs mcp/server.js review_changes() — both reimplement analyze-then-compare-to-previous",
+    "packages/create-vite/template-react vs template-preact vs template-solid — the same App component per framework"
+  ],
+  "falseExamples": [
+    "src/App.jsx vs src/components/StructurePanel.jsx — a run of const [x, setX] = useState(null)",
+    "src/App.jsx vs src/components/HealthPanel.jsx — a JSX return with className and style props",
+    "calibration/apply.mjs FALLBACK vs score.js WEIGHT_PROVENANCE — two unrelated object literals",
+    "lib/analyze/extract.js BRANCH vs lib/analyze/parser.js SKIP_DIRS — two unrelated new Set([...]) literals",
+    "vite docs socialLinks vs team.js links — two unrelated arrays of { icon, link } objects"
+  ],
+  "knownGaps": [
+    "n = 30, at the low end of a useful sample, and drawn from two repositories in one language family.",
+    "Precision is reported at the pair level. Clustering means a single duplicated file family inflates the count; a finding-level metric would be lower on vite and is the better measure.",
+    "Recall is unmeasured entirely. There is no count of real duplication the tool misses, and the loop-versus-reduce case in the README is known to be missed by construction.",
+    "Ranking is by shared fingerprint count. That is raw evidence rather than a calibrated confidence, and the sample shows it puts JSX noise above real logic duplication on view-heavy repositories."
+  ]
+}
