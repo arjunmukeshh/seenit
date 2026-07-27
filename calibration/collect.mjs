@@ -62,7 +62,20 @@ async function clone(url, dest, { stage }) {
   // never reaches the missing objects. Stage B needs complete history, so a
   // clone that cannot supply it is the wrong tool regardless of its cost.
   args.push(url, dest)
-  await exec('git', args, { timeout: CLONE_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 })
+  try {
+    await exec('git', args, {
+      // Full clones of repos with deep history need more headroom than the
+      // shallow Stage A clones.
+      timeout: stage === 'A' ? CLONE_TIMEOUT_MS : CLONE_TIMEOUT_MS * 3,
+      maxBuffer: 64 * 1024 * 1024,
+    })
+  } catch (err) {
+    // execFile's message is the full command line, which buries the actual
+    // cause — every failure logged identically as "Command failed: git clone
+    // --quiet ...". Surface git's own stderr and whether it was a timeout.
+    const reason = err.killed ? 'timeout' : (err.stderr || '').trim().split('\n').pop() || err.message
+    throw new Error(`clone failed: ${reason}`)
+  }
 }
 
 // Per-file rows. Field names mirror the pre-registered model variables so the
@@ -222,44 +235,71 @@ async function main() {
   const summary = { completed: [...done], failed: [], skipped: [], historyStats: {} }
   let rowCount = 0
 
-  for (const [i, repo] of repos.entries()) {
-    const label = repo.repository.replace('https://github.com/', '')
-    if (done.has(repo.repository)) {
-      process.stderr.write(`[${i + 1}/${repos.length}] ${label} — already done\n`)
-      continue
-    }
-    const free = await freeSpaceGb(tmpdir())
-    if (free < MIN_FREE_GB) {
-      process.stderr.write(
-        `\nstopping: only ${free.toFixed(1)}GB free (need ${MIN_FREE_GB}GB). ` +
-          `Free space and re-run — progress is saved in ${statePath}\n`,
-      )
-      break
-    }
+  const pending = repos.filter((r) => !done.has(r.repository))
+  process.stderr.write(`${pending.length} to process (${done.size} already done)\n`)
 
-    process.stderr.write(`[${i + 1}/${repos.length}] ${label} … `)
-    const started = Date.now()
-    try {
-      const { rows, functionRows, skipped, historyStats } = await collectRepo(repo, { stage, maxFiles })
-      if (skipped) {
-        summary.skipped.push({ repo: repo.repository, reason: skipped })
-        process.stderr.write(`skipped (${skipped})\n`)
-      } else {
-        await appendFile(outPath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
-        if (functionRows.length) {
-          await appendFile(fnPath, functionRows.map((r) => JSON.stringify(r)).join('\n') + '\n')
-        }
-        rowCount += rows.length
-        if (historyStats) summary.historyStats[repo.repository] = historyStats
-        process.stderr.write(`${rows.length} files in ${((Date.now() - started) / 1000).toFixed(1)}s\n`)
-      }
-      summary.completed.push(repo.repository)
-    } catch (err) {
-      summary.failed.push({ repo: repo.repository, error: err.message.slice(0, 200) })
-      process.stderr.write(`FAILED (${err.message.slice(0, 60)})\n`)
-    }
-    await writeFile(statePath, JSON.stringify(summary, null, 2))
+  // Appends are serialized through a promise chain. Work runs concurrently but
+  // two workers appending multi-megabyte buffers to the same file at once can
+  // interleave and corrupt lines, which would be invisible until the JSONL
+  // failed to parse hours later.
+  let writeChain = Promise.resolve()
+  const append = (path, text) => {
+    writeChain = writeChain.then(() => appendFile(path, text)).catch(() => {})
+    return writeChain
   }
+
+  // Concurrency is bounded rather than unlimited: clone is network-bound so
+  // parallelism helps a lot, but each worker holds a full clone on disk and a
+  // batch of file contents in memory. Four keeps peak disk near 4x the largest
+  // repo (~720MB given the 200MB corpus cap) which is comfortably safe.
+  const CONCURRENCY = stage === 'A' ? 6 : 4
+  let cursor = 0
+  let finished = 0
+  let stopped = false
+
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, pending.length) }, async () => {
+      while (!stopped && cursor < pending.length) {
+        const repo = pending[cursor++]
+        const label = repo.repository.replace('https://github.com/', '')
+
+        const free = await freeSpaceGb(tmpdir())
+        if (free < MIN_FREE_GB) {
+          stopped = true
+          process.stderr.write(
+            `\nstopping: only ${free.toFixed(1)}GB free (need ${MIN_FREE_GB}GB). ` +
+              `Progress is saved in ${statePath} — free space and re-run.\n`,
+          )
+          return
+        }
+
+        const started = Date.now()
+        try {
+          const { rows, functionRows, skipped, historyStats } = await collectRepo(repo, { stage, maxFiles })
+          if (skipped) {
+            summary.skipped.push({ repo: repo.repository, reason: skipped })
+          } else {
+            await append(outPath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+            if (functionRows.length) {
+              await append(fnPath, functionRows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+            }
+            rowCount += rows.length
+            if (historyStats) summary.historyStats[repo.repository] = historyStats
+          }
+          summary.completed.push(repo.repository)
+          process.stderr.write(
+            `[${++finished}/${pending.length}] ${label} — ${skipped ? `skipped (${skipped})` : `${rows.length} files`}` +
+              ` in ${((Date.now() - started) / 1000).toFixed(1)}s\n`,
+          )
+        } catch (err) {
+          summary.failed.push({ repo: repo.repository, error: err.message.slice(0, 200) })
+          process.stderr.write(`[${++finished}/${pending.length}] ${label} — FAILED: ${err.message.slice(0, 70)}\n`)
+        }
+        await writeFile(statePath, JSON.stringify(summary, null, 2))
+      }
+    }),
+  )
+  await writeChain
 
   process.stderr.write(
     `\n${rowCount} rows written to ${outPath}\n` +
