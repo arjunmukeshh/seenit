@@ -3,38 +3,50 @@
 Reported against [PREREGISTRATION.md](PREREGISTRATION.md), written and committed
 before any data was collected.
 
-## Stage A — distributions (complete)
+## Stage A — distributions (complete, verified)
 
-**60,343 files and 392,954 functions across 391 projects**, 13 languages, zero
-collection failures. Repositories selected by a dependents floor plus stratified
-random draw over the entire eligible population (npm's floor of 10 dependents is
-not reached until roughly package #85,000), pinned to commit SHAs and
-reproducible from a seed. Median dependents 26 — ordinary packages, not
-megaprojects.
+**198,571 files and 1,620,805 functions across 1,090 projects**, sampled from
+**8 package registries** — npm, PyPI, crates.io, the Go module proxy, Maven,
+NuGet, Packagist and RubyGems. Zero collection failures.
+
+Repositories selected by a dependents floor plus stratified random draw over the
+entire eligible population (npm's floor of 10 dependents is not reached until
+roughly package #85,000), pinned to commit SHAs, reproducible from a seed.
+Median dependents 21–67 per ecosystem — ordinary packages, not megaprojects.
 
 Thresholds are `good` = p75, `warn` = p90, `bad` = p99 of observed code, so a
 score means something falsifiable: *worse than 90% of comparable real code*.
 
+**All 335 automated verification checks pass** (`node calibration/verify.mjs`).
+
 ### Measured thresholds (good / warn / bad)
 
-| language | cyclomatic | cognitive | fn lines | functions | projects |
-|---|---|---|---|---|---|
-| python | 3 / 6 / 19 | 5 / 12 / 48 | 21 / 45 / 143 | 119,690 | 204 |
-| typescript | 3 / 5 / 19 | 3 / 9 / 44 | 15 / 33 / 128 | 111,332 | 120 |
-| javascript | 3 / 6 / 24 | 3 / 10 / 53 | 5 / 18 / 123 | 84,813 | 173 |
-| tsx | 2 / 4 / 13 | 2 / 5 / 24 | 16 / 40 / 211 | 36,869 | 45 |
-| rust | 3 / 5 / 16 | 4 / 9 / 41 | 17 / 35 / 121 | 18,838 | 12 |
-| cpp | 3 / 7 / 25 | 5 / 14 / 74 | 20 / 47 / 160 | 9,172 | 30 |
-| java | 2 / 4 / 14 | 2 / 7 / 36 | 9 / 21 / 65 | 7,116 | 11 |
-| bash | 3 / 4 / 17 | 4 / 6 / 33 | 20 / 38 / 236 | 558 | 43 |
-| **previous, asserted** | **5 / 10 / 20** | **7 / 15 / 30** | **25 / 50 / 100** | — | — |
+| language | cyclomatic | cognitive | functions | projects |
+|---|---|---|---|---|
+| java | 2 / 4 / 13 | 2 / 6 / 32 | 388,309 | 107 |
+| c-sharp | 2 / 4 / 14 | 2 / 6 / 34 | 284,780 | 120 |
+| javascript | 3 / 6 / 24 | 4 / 10 / 51 | 222,004 | 269 |
+| go | 3 / 5 / 18 | 3 / 8 / 45 | 208,607 | 128 |
+| python | 3 / 6 / 20 | 5 / 12 / 49 | 127,167 | 245 |
+| typescript | 3 / 5 / 17 | 2 / 8 / 39 | 121,072 | 146 |
+| rust | 1 / 4 / 15 | 0 / 6 / 38 | 120,481 | 135 |
+| php | 2 / 5 / 16 | 2 / 8 / 36 | 47,465 | 121 |
+| tsx | 2 / 4 / 12 | 2 / 5 / 21 | 42,054 | 54 |
+| ruby | 2 / 3 / 10 | 1 / 2 / 9 | 38,460 | 126 |
+| cpp | 3 / 7 / 28 | 4 / 14 / 88 | 17,955 | 67 |
+| bash | 2 / 4 / 12 | 2 / 6 / 20 | 2,451 | 131 |
+| **previously asserted** | **5 / 10 / 20** | **7 / 15 / 30** | — | — |
 
 **The asserted thresholds were roughly twice as lenient as real code.**
-`good = 5` sits above every measured language's p75 and `warn = 10` above every
-measured `warn`. A function the tool called acceptable was, in most languages,
-already worse than three quarters of real code. McCabe's limit of 10 is
-defensible for the 1976 FORTRAN and C it was derived from, and simply wrong for
-modern JavaScript, TypeScript and Python.
+`good = 5` sits above every measured language's p75, and `warn = 10` above every
+measured `warn` — which now falls between **3 and 7** in all twelve. A function
+the tool called acceptable was, in most languages, already worse than three
+quarters of real code. McCabe's limit of 10 is defensible for the 1976 FORTRAN
+and C it was derived from, and simply wrong for anything here.
+
+That twelve independently-sampled ecosystems, drawn from different registries
+and maintained by different communities, converge on a `warn` band of 3–7 is
+itself corroborating. Noise does not converge.
 
 **Per-language thresholds were necessary.** Cyclomatic 9 sits near the p90 of
 JavaScript but past the p99 of TypeScript; one number cannot serve both.
@@ -42,21 +54,36 @@ JavaScript but past the p99 of TypeScript; one number cannot serve both.
 ### Effect on this repository
 
 Applying the measured thresholds moved gitcodebase's own score from **83.8 (B)
-to 70.1 (C)** — complexity 73.5 → 52.5, size 96.3 → 60.9. Verified as a correct
-verdict rather than a scoring bug: JavaScript p90 cyclomatic here is 7 against a
-measured warn of 6, and the worst functions are real and nameable
-(`exportedNames` 21, `App` 21, `StructurePanel` 21).
+to 74.7 (C)**. Verified as a correct verdict rather than a scoring bug:
+JavaScript p90 cyclomatic here is 7 against a measured warn of 6, and the worst
+functions are real and nameable (`exportedNames` 21, `App` 21,
+`StructurePanel` 21).
 
-### Languages excluded, and why
+### What the expansion cost, and what it caught
 
-- `c-sharp` (3 projects), `php` (2), `ruby` (4) — below the 5-project minimum.
-  One project measures a team's house style, not a distribution.
-- `go`, `css` — function-level metrics only; too few projects contributed
-  functions even though file counts looked adequate.
-- `bash`, `cpp` params — parameter extraction is unsupported for those grammars,
-  producing an all-zero distribution. That is a measurement failure, not a
-  measurement, and emitting `good=warn=bad=0` would fail every function on a
-  metric never actually taken.
+Extending from 2 registries to 8 was undertaken for coverage, but its more
+valuable output was defects. Sampling RubyGems directly exposed that **Ruby had
+been extracting zero functions** — its grammar names function nodes `method` and
+`singleton_method`, neither of which was recognised. An audit of all ten
+languages then found C/C++ returning `(anonymous)` with zero parameters, and Go
+undercounting grouped parameters.
+
+Ruby's *first* corrected run then produced thresholds of **1/1/3 cyclomatic**,
+implying no Ruby method ever branches. Ruby names its branch constructs bare
+(`if`, `unless`, `when`) where PHP and C# use suffixed forms and emit the bare
+keyword as an anonymous token; only the suffixed spellings were listed. Fixing
+it moved Ruby to **2/3/10**, PHP and C# up by two decisions each, and required
+a third full re-collection.
+
+None of these were caught by reasoning about the code. All were caught by
+running it against ecosystems it had never seen.
+
+### Excluded, and why
+
+- `css` — no functions to measure; file-level metrics only.
+- `bash`, `cpp` **params** — the grammars do not expose a parameter list, giving
+  an all-zero distribution. That is a measurement failure, not a measurement:
+  emitting `good=warn=bad=0` would fail every function on a metric never taken.
 
 ## Stage B — does any of it predict defects?
 

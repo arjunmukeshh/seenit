@@ -193,17 +193,26 @@ falsifiable: *worse than 90% of comparable real-world code.*
 
 | language | cyclomatic | cognitive | functions | projects |
 |---|---|---|---|---|
-| python | 3 / 6 / 19 | 5 / 12 / 48 | 119,690 | 204 |
-| typescript | 3 / 5 / 19 | 3 / 9 / 44 | 111,332 | 120 |
-| javascript | 3 / 6 / 24 | 3 / 10 / 53 | 84,813 | 173 |
-| tsx | 2 / 4 / 13 | 2 / 5 / 24 | 36,869 | 45 |
+| java | 2 / 4 / 13 | 2 / 6 / 32 | 388,309 | 107 |
+| c-sharp | 2 / 4 / 14 | 2 / 6 / 34 | 284,780 | 120 |
+| javascript | 3 / 6 / 24 | 4 / 10 / 51 | 222,004 | 269 |
+| go | 3 / 5 / 18 | 3 / 8 / 45 | 208,607 | 128 |
+| python | 3 / 6 / 20 | 5 / 12 / 49 | 127,167 | 245 |
+| typescript | 3 / 5 / 17 | 2 / 8 / 39 | 121,072 | 146 |
+| rust | 1 / 4 / 15 | 0 / 6 / 38 | 120,481 | 135 |
+| ruby | 2 / 3 / 10 | 1 / 2 / 9 | 38,460 | 126 |
 | **previously asserted** | **5 / 10 / 20** | **7 / 15 / 30** | — | — |
 
+<sub>12 languages calibrated · 8 registries · 1,090 projects · 1,620,805 functions · all 335 verification checks passing</sub>
+
 **The old thresholds were ~2× too lenient.** `good=5` sat above every measured
-language's p75. A function the tool called acceptable was, in most languages,
-already worse than three quarters of real code. McCabe's limit of 10 is
-defensible for the 1976 FORTRAN it came from — and simply wrong for modern
-JS/TS/Python.
+language's p75, and `warn=10` above every measured `warn` — which lands between
+**3 and 7** in all twelve. A function the tool called acceptable was, in most
+languages, already worse than three quarters of real code.
+
+That twelve independently-sampled ecosystems, from different registries and
+different maintainer communities, converge on the same narrow band is itself
+corroborating. **Noise does not converge.**
 
 ### Only size predicts defects
 
