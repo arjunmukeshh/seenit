@@ -225,14 +225,31 @@ async function main() {
 
   await mkdir(DATA, { recursive: true })
 
-  // Resume: skip repos already present in the output.
+  // Resume: skip repos already dealt with, whether they produced rows or were
+  // deliberately skipped. A skipped repo is a decided outcome, not unfinished
+  // work, so re-cloning it on every resume would waste the whole point.
   const done = new Set()
+  let priorSkipped = []
+  let priorHistory = {}
   if (existsSync(statePath)) {
     const state = JSON.parse(await readFile(statePath, 'utf8'))
     for (const p of state.completed ?? []) done.add(p)
+    priorSkipped = state.skipped ?? []
+    priorHistory = state.historyStats ?? {}
+    for (const s of priorSkipped) done.add(s.repo)
   }
 
-  const summary = { completed: [...done], failed: [], skipped: [], historyStats: {} }
+  // Carry prior skips and history forward. They were previously reinitialised to
+  // empty on resume, so the state file silently lost every skip reason the
+  // moment a run was resumed — and the reasons are the only record of WHY a
+  // repository is absent from the dataset.
+  // `failed` is deliberately NOT carried forward: a failure is worth retrying.
+  const summary = {
+    completed: [...done].filter((p) => !priorSkipped.some((s) => s.repo === p)),
+    failed: [],
+    skipped: priorSkipped,
+    historyStats: priorHistory,
+  }
   let rowCount = 0
 
   const pending = repos.filter((r) => !done.has(r.repository))
@@ -276,19 +293,25 @@ async function main() {
         const started = Date.now()
         try {
           const { rows, functionRows, skipped, historyStats } = await collectRepo(repo, { stage, maxFiles })
+          // A skipped repo goes in `skipped` ONLY. It previously went into both
+          // lists, so completed + skipped + failed reported 1,137 against a
+          // 1,114-repo corpus — progress that looked like a data bug and was
+          // only an accounting one.
           if (skipped) {
             summary.skipped.push({ repo: repo.repository, reason: skipped })
-          } else {
-            await append(outPath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
-            if (functionRows.length) {
-              await append(fnPath, functionRows.map((r) => JSON.stringify(r)).join('\n') + '\n')
-            }
-            rowCount += rows.length
-            if (historyStats) summary.historyStats[repo.repository] = historyStats
+            process.stderr.write(`[${++finished}/${pending.length}] ${label} — skipped (${skipped})\n`)
+            await writeFile(statePath, JSON.stringify(summary, null, 2))
+            continue
           }
+          await append(outPath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+          if (functionRows.length) {
+            await append(fnPath, functionRows.map((r) => JSON.stringify(r)).join('\n') + '\n')
+          }
+          rowCount += rows.length
+          if (historyStats) summary.historyStats[repo.repository] = historyStats
           summary.completed.push(repo.repository)
           process.stderr.write(
-            `[${++finished}/${pending.length}] ${label} — ${skipped ? `skipped (${skipped})` : `${rows.length} files`}` +
+            `[${++finished}/${pending.length}] ${label} — ${rows.length} files` +
               ` in ${((Date.now() - started) / 1000).toFixed(1)}s\n`,
           )
         } catch (err) {
