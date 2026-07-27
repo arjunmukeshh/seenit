@@ -1,11 +1,11 @@
-# gitcodebase
+# seenit
 
 **A code observatory.** It measures the health of a repository and stores every
 measurement **as real git objects** — so the history of your codebase's health is
 itself version-controlled, diffable, blameable and bisectable.
 
 ```bash
-npx gitcodebase
+npx seenit
 ```
 
 No install. No config. No signup. Nothing written to your working tree.
@@ -15,10 +15,10 @@ No install. No config. No signup. Nothing written to your working tree.
 ## The one thing that makes this different
 
 Every other tool stores your code health in *their* database and hands you a
-dashboard. gitcodebase stores it in **yours**, in git:
+dashboard. seenit stores it in **yours**, in git:
 
 ```console
-$ git --git-dir=.git/gitcodebase/ledger.git diff HEAD~1 HEAD
+$ git --git-dir=.git/seenit/ledger.git diff HEAD~1 HEAD
 ```
 ```diff
    "complexity": {
@@ -54,7 +54,7 @@ flowchart LR
     A[your repo] -->|read blobs<br/>never the worktree| B[tree-sitter<br/>17 languages]
     B --> C[metrics<br/>7 dimensions]
     C --> D[canonical JSON<br/>sorted · stable]
-    D --> E[(sidecar ledger<br/>.git/gitcodebase)]
+    D --> E[(sidecar ledger<br/>.git/seenit)]
     E -->|git diff| F[health diff]
     E -->|git blame| G[when did it regress]
     E -->|git log| H[health over time]
@@ -62,11 +62,11 @@ flowchart LR
     style A fill:#238636,color:#fff
 ```
 
-**The ledger is a bare sidecar repo** at `.git/gitcodebase/ledger.git` — a real
+**The ledger is a bare sidecar repo** at `.git/seenit/ledger.git` — a real
 git repo, so the full toolchain works on it, but invisible to yours. `git status`
 and `git log --all` stay clean.
 
-> Custom refs under `refs/gitcodebase/*` were the obvious alternative and are the
+> Custom refs under `refs/seenit/*` were the obvious alternative and are the
 > wrong answer: `git log --all` includes them, so the ledger would visibly
 > pollute history in lazygit, GitKraken and tig.
 
@@ -261,22 +261,22 @@ what is scored, not what is shown.**
 ## Usage
 
 ```bash
-gitcodebase                 # health now, including uncommitted work
-gitcodebase scan            # snapshot HEAD into the ledger
-gitcodebase backfill        # build health history from past commits
-gitcodebase log             # health over time, as a git-style rail
-gitcodebase diff            # what changed about the codebase's health
-gitcodebase watch           # continuously review changes in the background
-gitcodebase serve           # open the observatory UI
-gitcodebase mcp             # run as an MCP server for coding agents
+seenit                 # health now, including uncommitted work
+seenit scan            # snapshot HEAD into the ledger
+seenit backfill        # build health history from past commits
+seenit log             # health over time, as a git-style rail
+seenit diff            # what changed about the codebase's health
+seenit watch           # continuously review changes in the background
+seenit serve           # open the observatory UI
+seenit mcp             # run as an MCP server for coding agents
 ```
 
-`gitcodebase check --fail-under 70` exits non-zero — a CI gate or a git hook.
+`seenit check --fail-under 70` exits non-zero — a CI gate or a git hook.
 
 ### For coding agents (MCP)
 
 ```json
-{ "mcpServers": { "gitcodebase": { "command": "npx", "args": ["gitcodebase", "mcp"] } } }
+{ "mcpServers": { "seenit": { "command": "npx", "args": ["seenit", "mcp"] } } }
 ```
 
 Five tools: `check_health`, `find_existing`, `check_duplication`,
@@ -291,7 +291,7 @@ turns duplication detection from a diagnosis into prevention.
 ### After every agent turn
 
 ```json
-{ "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "npx gitcodebase hook --quiet" }] }] } }
+{ "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "npx seenit hook --quiet" }] }] } }
 ```
 
 ```console
@@ -310,7 +310,7 @@ that's all you need, use them.
 
 What they structurally cannot do:
 
-| | ESLint | gitcodebase |
+| | ESLint | seenit |
 |---|---|---|
 | state right now | ✅ | ✅ |
 | **complexity went 12 → 31, in which commit** | ❌ no memory | ✅ |
@@ -344,7 +344,7 @@ observatory UI · watch mode · Claude Code hook · **calibrated thresholds**
 
 ```bash
 npm install && npm test
-node bin/gitcodebase.mjs
+node bin/seenit.mjs
 ```
 
 Node 22+ and git. Grammars come from `@vscode/tree-sitter-wasm` — **not**

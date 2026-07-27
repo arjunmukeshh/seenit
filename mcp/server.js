@@ -1,4 +1,4 @@
-// The MCP server — gitcodebase's most important surface.
+// The MCP server — seenit's most important surface.
 //
 // A dashboard only helps someone who remembers to open it. The user this is for
 // is vibecoding: generating code far faster than they can read it, with the
@@ -122,7 +122,7 @@ const handlers = {
 
     const out = [formatHealth(result.health, result.dimensions, previous)]
     if (previous === null) {
-      out.push('\n(no previous snapshot — run `gitcodebase scan` to start tracking history)')
+      out.push('\n(no previous snapshot — run `seenit scan` to start tracking history)')
     }
 
     if (detail === 'full') {
@@ -257,7 +257,7 @@ const handlers = {
 
 export async function startServer() {
   const server = new Server(
-    { name: 'gitcodebase', version: '0.1.0' },
+    { name: 'seenit', version: '0.1.0' },
     { capabilities: { tools: {} } },
   )
 
@@ -274,7 +274,7 @@ export async function startServer() {
     } catch (err) {
       // Never crash the server on one bad call — the agent should see the error
       // and be able to continue.
-      return { content: [{ type: 'text', text: `gitcodebase error: ${err.message}` }], isError: true }
+      return { content: [{ type: 'text', text: `seenit error: ${err.message}` }], isError: true }
     }
   })
 

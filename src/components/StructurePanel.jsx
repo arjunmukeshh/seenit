@@ -71,7 +71,7 @@ export function StructurePanel({ snapshotRef, live, dimensions, dag: liveDag }) 
         ) : (
           <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
             {snapshotRef
-              ? 'This snapshot predates the stored dependency graph. Re-run gitcodebase backfill to add it.'
+              ? 'This snapshot predates the stored dependency graph. Re-run seenit backfill to add it.'
               : 'Loading…'}
           </p>
         )}

@@ -53,7 +53,7 @@ JavaScript but past the p99 of TypeScript; one number cannot serve both.
 
 ### Effect on this repository
 
-Applying the measured thresholds moved gitcodebase's own score from **83.8 (B)
+Applying the measured thresholds moved seenit's own score from **83.8 (B)
 to 74.7 (C)**. Verified as a correct verdict rather than a scoring bug:
 JavaScript p90 cyclomatic here is 7 against a measured warn of 6, and the worst
 functions are real and nameable (`exportedNames` 21, `App` 21,

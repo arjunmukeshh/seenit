@@ -1,4 +1,4 @@
-# Pre-registration: do gitcodebase's metrics predict defects?
+# Pre-registration: do seenit's metrics predict defects?
 
 **Status: committed before any data was collected.** The git commit timestamp on
 this file precedes the first commit containing `calibration/data/`. That ordering
@@ -13,7 +13,7 @@ to the text above it.
 
 ## 1. Motivation
 
-gitcodebase scores repositories on seven dimensions. Its raw metrics are
+seenit scores repositories on seven dimensions. Its raw metrics are
 verified (cyclomatic complexity agrees 8/8 with ESLint 9), but its **thresholds
 are literature-derived defaults and its weights are asserted**. A score built on
 unjustified numbers is an opinion wearing the costume of a measurement.
@@ -40,7 +40,7 @@ What is genuinely untested is whether this holds for **these specific metrics**,
 on **modern JS/TS and Python**, outside the Apache ecosystem. That is the
 contribution claimed here, and it is a modest one.
 
-RQ1 is original: no public dataset provides distributions for gitcodebase's
+RQ1 is original: no public dataset provides distributions for seenit's
 metrics on these languages.
 
 ## 3. Hypotheses

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// gitcodebase CLI.
+// seenit CLI.
 //
-// Designed so the first command a user runs is `npx gitcodebase` with no
+// Designed so the first command a user runs is `npx seenit` with no
 // install, no config and no signup. Nothing is written to the working tree —
 // the ledger lives inside .git/ — so trying it costs nothing and leaves nothing
 // behind to clean up.
@@ -16,7 +16,7 @@ import { formatHealth, formatSnapshotRow, colorsFor } from '../lib/format.js'
 const args = process.argv.slice(2)
 
 // Only the first token can be the command. Scanning for "the first argument
-// without a dash" instead made `gitcodebase --port 4300` read 4300 as the
+// without a dash" instead made `seenit --port 4300` read 4300 as the
 // command and silently fall through to help.
 const command = args[0] && !args[0].startsWith('-') ? args[0] : 'check'
 
@@ -46,7 +46,7 @@ function validateFlags(name) {
   const unknown = passed.filter((f) => !allowed.has(f) && f !== 'help')
   if (!unknown.length) return
 
-  console.error(`${C.red}gitcodebase ${name}:${C.reset} unknown flag ${unknown.map((f) => `--${f}`).join(', ')}`)
+  console.error(`${C.red}seenit ${name}:${C.reset} unknown flag ${unknown.map((f) => `--${f}`).join(', ')}`)
   console.error(allowed.size ? `Accepts: ${[...allowed].map((f) => `--${f}`).join(', ')}` : 'This command takes no flags.')
   process.exit(1)
 }
@@ -56,7 +56,7 @@ const C = colorsFor(process.stdout.isTTY)
 async function open() {
   const cwd = process.cwd()
   if (!(await isRepo(cwd))) {
-    console.error(`${C.red}Not a git repository.${C.reset} gitcodebase stores analysis in git, so it needs one.`)
+    console.error(`${C.red}Not a git repository.${C.reset} seenit stores analysis in git, so it needs one.`)
     console.error(`Run ${C.bold}git init${C.reset} first.`)
     process.exit(1)
   }
@@ -87,7 +87,7 @@ const commands = {
       result.testFiles > 0
         ? `${result.fileCount} files analyzed · ${result.productFiles} scored, ${result.testFiles} tests excluded`
         : `${result.fileCount} files analyzed`
-    console.log(`\n${C.dim}${scored}${previous ? '' : ' · no history yet, run `gitcodebase scan`'}${C.reset}`)
+    console.log(`\n${C.dim}${scored}${previous ? '' : ' · no history yet, run `seenit scan`'}${C.reset}`)
 
     // Exit non-zero on regression so this works as a CI gate or git hook.
     const threshold = Number(flag('fail-under', 0))
@@ -181,7 +181,7 @@ const commands = {
   async log() {
     const { ledger } = await open()
     const snaps = await listSnapshots(ledger, { limit: Number(flag('limit', 20)) })
-    if (!snaps.length) return console.log('No snapshots yet. Run `gitcodebase scan` or `gitcodebase backfill`.')
+    if (!snaps.length) return console.log('No snapshots yet. Run `seenit scan` or `seenit backfill`.')
     console.log()
     let prev = null
     for (const s of [...snaps].reverse()) {
@@ -257,7 +257,7 @@ const commands = {
     const { startServer } = await import('../server/index.js')
     const port = Number(flag('port', 4300))
     const { url, root } = await startServer({ port })
-    console.log(`${C.bold}gitcodebase${C.reset} observatory for ${C.dim}${root}${C.reset}`)
+    console.log(`${C.bold}seenit${C.reset} observatory for ${C.dim}${root}${C.reset}`)
     console.log(`  ${url}\n`)
     if (flag('open', true) !== 'false') {
       const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
@@ -268,19 +268,19 @@ const commands = {
 
   help() {
     console.log(`
-${C.bold}gitcodebase${C.reset} — a git-native code observatory
+${C.bold}seenit${C.reset} — a git-native code observatory
 
-  ${C.bold}gitcodebase${C.reset}                 measure health now, including uncommitted work
-  ${C.bold}gitcodebase scan${C.reset}            snapshot HEAD into the ledger
-  ${C.bold}gitcodebase backfill${C.reset}        build health history from past commits  ${C.dim}[--limit 50]${C.reset}
-  ${C.bold}gitcodebase log${C.reset}             health over time, as a git-like rail
-  ${C.bold}gitcodebase diff${C.reset}            what changed about the codebase's health
-  ${C.bold}gitcodebase watch${C.reset}           continuously review changes in the background
-  ${C.bold}gitcodebase serve${C.reset}           open the observatory UI  ${C.dim}[--port 4300]${C.reset}
-  ${C.bold}gitcodebase mcp${C.reset}             run as an MCP server for coding agents
-  ${C.bold}gitcodebase hook${C.reset}            one-line verdict, for a Claude Code Stop hook
+  ${C.bold}seenit${C.reset}                 measure health now, including uncommitted work
+  ${C.bold}seenit scan${C.reset}            snapshot HEAD into the ledger
+  ${C.bold}seenit backfill${C.reset}        build health history from past commits  ${C.dim}[--limit 50]${C.reset}
+  ${C.bold}seenit log${C.reset}             health over time, as a git-like rail
+  ${C.bold}seenit diff${C.reset}            what changed about the codebase's health
+  ${C.bold}seenit watch${C.reset}           continuously review changes in the background
+  ${C.bold}seenit serve${C.reset}           open the observatory UI  ${C.dim}[--port 4300]${C.reset}
+  ${C.bold}seenit mcp${C.reset}             run as an MCP server for coding agents
+  ${C.bold}seenit hook${C.reset}            one-line verdict, for a Claude Code Stop hook
 
-${C.dim}Analysis is stored in .git/gitcodebase/ledger.git — a real git repo, so you can
+${C.dim}Analysis is stored in .git/seenit/ledger.git — a real git repo, so you can
 run log, diff, blame and bisect against your codebase's health directly.
 Nothing is written to your working tree.${C.reset}
 `)
@@ -288,7 +288,7 @@ Nothing is written to your working tree.${C.reset}
 }
 
 if (!commands[command]) {
-  console.error(`${C.red}gitcodebase:${C.reset} unknown command "${command}"`)
+  console.error(`${C.red}seenit:${C.reset} unknown command "${command}"`)
   commands.help()
   process.exit(1)
 }
@@ -297,6 +297,6 @@ const run = args.includes('--help') || args.includes('-h') ? commands.help : com
 if (run !== commands.help) validateFlags(command)
 
 run().catch((err) => {
-  console.error(`${C.red}gitcodebase:${C.reset} ${err.message}`)
+  console.error(`${C.red}seenit:${C.reset} ${err.message}`)
   process.exit(1)
 })

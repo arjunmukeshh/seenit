@@ -27,7 +27,7 @@ export function CommitRail({ snapshots, selected, compareWith, onSelect, onCompa
       <div className="p-6 text-center" style={{ color: 'var(--ink-2)' }}>
         <p className="mb-2">No snapshots yet.</p>
         <p className="mono text-xs" style={{ color: 'var(--ink-4)' }}>
-          gitcodebase backfill
+          seenit backfill
         </p>
       </div>
     )

@@ -1,4 +1,4 @@
-// Architectural guards, enforced with gitcodebase's own analysis.
+// Architectural guards, enforced with seenit's own analysis.
 //
 // The tool reports dependency cycles; shipping that is worth nothing if its
 // findings about its own codebase go unactioned. This suite closes the loop by

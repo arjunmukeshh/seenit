@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 // recognisable stamp of a generated interface, and it cannot express the third
 // state anyway. This cycles through a labelled control instead.
 
-const KEY = 'gitcodebase:theme'
+const KEY = 'seenit:theme'
 export const MODES = ['system', 'light', 'dark']
 
 function read() {

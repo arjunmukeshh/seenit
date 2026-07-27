@@ -88,7 +88,7 @@ function shuffle(items, random) {
 async function fetchJson(url, { retries = 3 } = {}) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(url, { headers: { 'user-agent': 'gitcodebase-calibration' } })
+      const res = await fetch(url, { headers: { 'user-agent': 'seenit-calibration' } })
       if (res.status === 429) {
         // Public API with no key — back off rather than hammer it.
         await sleep(2000 * (attempt + 1))

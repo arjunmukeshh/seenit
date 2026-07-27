@@ -73,7 +73,7 @@ code. It answers "is this unusual?", not "is this bad?".
 
 Descriptive percentiles establish distribution. They do not establish that the
 metric *matters*. Method B tests that directly, and it is the approach a linter
-structurally cannot take — it requires history, which gitcodebase already mines.
+structurally cannot take — it requires history, which seenit already mines.
 
 **Outcome signal.** For each file, derive from git history:
 - *fix density* — share of commits touching the file whose subject matches

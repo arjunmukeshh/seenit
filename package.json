@@ -1,16 +1,16 @@
 {
-  "name": "gitcodebase",
+  "name": "seenit",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "A git-native code observatory. Repository health, version-controlled by the git engine itself.",
   "bin": {
-    "gitcodebase": "./bin/gitcodebase.mjs"
+    "seenit": "./bin/seenit.mjs"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "node bin/gitcodebase.mjs serve",
+    "serve": "node bin/seenit.mjs serve",
     "test": "node --test 'test/*.test.js'"
   },
   "dependencies": {

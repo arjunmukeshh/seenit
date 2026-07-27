@@ -189,7 +189,7 @@ function Header({ repo, workspace, theme }) {
       className="flex items-center gap-3 px-8 py-3.5 shrink-0"
       style={{ borderBottom: '1px solid var(--rule)', background: 'var(--surface)' }}
     >
-      <span className="text-[13.5px] font-semibold tracking-tight">gitcodebase</span>
+      <span className="text-[13.5px] font-semibold tracking-tight">seenit</span>
       <span className="num text-[12px]" style={{ color: 'var(--ink-3)' }}>
         {repo.name}
       </span>
@@ -287,7 +287,7 @@ function ApiError({ message }) {
         <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
           The observatory reads from a local server. Start it with{' '}
           <code className="num" style={{ color: 'var(--ink-2)' }}>
-            gitcodebase serve
+            seenit serve
           </code>
           .
         </p>

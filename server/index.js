@@ -81,7 +81,7 @@ function fileRow(f) {
 
 // One handler per endpoint, keyed by pathname.
 //
-// This was a single switch. Splitting it is not cosmetic: gitcodebase scored
+// This was a single switch. Splitting it is not cosmetic: seenit scored
 // the combined function at cyclomatic 19 against a measured JavaScript warn of
 // 6, and a health tool that ignores its own reading about itself is not worth
 // much. Each handler now sits in the low single digits and the dispatcher is
@@ -175,9 +175,9 @@ async function serveStatic(res, pathname) {
   if (!existsSync(DIST)) {
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
     res.end(
-      `<!doctype html><meta charset=utf-8><title>gitcodebase</title>
+      `<!doctype html><meta charset=utf-8><title>seenit</title>
        <body style="font-family:system-ui;max-width:40rem;margin:4rem auto;line-height:1.6">
-       <h1>gitcodebase</h1>
+       <h1>seenit</h1>
        <p>The UI has not been built yet. Run:</p>
        <pre style="background:#f4f4f5;padding:1rem;border-radius:6px">npm run build</pre>
        <p>The API is live — try <a href="/api/workspace">/api/workspace</a>.</p>`,

@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "gitcodebase-api", "runtimeExecutable": "node", "runtimeArgs": ["bin/gitcodebase.mjs", "serve", "--open", "false"], "port": 4300 },
-    { "name": "gitcodebase-ui", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 4302 }
+    { "name": "seenit-api", "runtimeExecutable": "node", "runtimeArgs": ["bin/seenit.mjs", "serve", "--open", "false"], "port": 4300 },
+    { "name": "seenit-ui", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 4302 }
   ]
 }
