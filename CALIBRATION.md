@@ -121,7 +121,27 @@ pre-registered effect floor, with comment density and cryptic-identifier ratio
 null as predicted. The full run raises project count roughly twentyfold, which
 is what determines whether those intervals are usable.
 
-Still outstanding: broader ecosystem coverage. Rust, Java, C++ and Go currently
-appear only as incidental files inside npm and PyPI packages, so their samples
-are thin and several fall below the five-project minimum. Sampling crates.io,
-Maven and the Go module proxy directly is the next step.
+## Known limitations, stated rather than resolved
+
+**Readability is still judged by assertion.** `scoreComplexity` and `scoreSize`
+use measured per-language thresholds; `scoreReadability` still uses the global
+literature-derived values for nesting, line length and comment ratio.
+
+This is deliberately **not** fixed, and the reasoning is worth recording so it
+isn't mistaken for an oversight. A complete fix needs `lineLength` and
+`commentRatio` distributions, which the collection schema does not currently
+carry — so it costs a full re-run of 1,100+ repositories. Meanwhile readability
+carries a weight of 0.05, and Stage B found two of its four components
+(`commentRatio`, `crypticIdentifierRatio`) to be null predictors. Re-running the
+entire corpus to refine the internals of a 5%-weighted dimension whose
+components are already known not to predict anything is tidiness, not value.
+
+Recorded as a `KNOWN INCONSISTENCY` at the definition in `score.js`.
+
+**Ruby, C++ and bash rest on narrower evidence** than TypeScript or Python.
+`params` is unavailable for bash and C++ where the grammar does not expose it —
+excluded rather than reported as zero.
+
+**Fix detection remains a subject-line heuristic** with a measured 46.7%
+false-positive rate. Full SZZ (tracing fix commits back to the changes that
+introduced them) is the standard improvement and is out of scope here.
