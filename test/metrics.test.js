@@ -388,3 +388,44 @@ test('per-language: an uncalibrated language reports null, not a free 100', asyn
   assert.equal(result.score, null)
   assert.match(result.reason, /no calibrated thresholds/)
 })
+
+// ------------------------------------------------- cross-language extraction
+
+// Every case here was found by calibration, not by inspection. Ruby recorded
+// ZERO functions across 120 sampled RubyGems repositories before this was
+// caught — a whole language silently producing no function-level data.
+const LANGUAGE_FIXTURES = [
+  ['t.rb', 'class W\n def render(o)\n  if o then 1 else 2 end\n end\nend\ndef top(a,b)\n a>b ? a : b\nend', 2, 2],
+  ['t.go', 'package m\nfunc Add(a, b int) int { if a>b { return a }; return b }', 1, 2],
+  ['t.cpp', 'int add(int a,int b){ if(a>b) return a; return b; }', 1, 2],
+  ['t.java', 'class W { int add(int a,int b){ if(a>b) return a; return b; } }', 1, 2],
+  ['t.py', 'def add(a,b):\n    if a>b: return a\n    return b', 1, 2],
+  ['t.ts', 'function add(a:number,b:number){ if(a>b) return a; return b }', 1, 2],
+  ['t.rs', 'fn add(a:i32,b:i32)->i32{ if a>b {a} else {b} }', 1, 2],
+]
+
+for (const [path, source, minFunctions, expectedParams] of LANGUAGE_FIXTURES) {
+  test(`extraction: ${path.split('.')[1]} yields functions and parameters`, async () => {
+    const f = await facts(path, source)
+    assert.ok(
+      f.functions.length >= minFunctions,
+      `expected >=${minFunctions} functions, got ${f.functions.length} — the language is silently unsupported`,
+    )
+    assert.equal(
+      Math.max(0, ...f.functions.map((fn) => fn.params)),
+      expectedParams,
+      'parameter extraction must work for this grammar',
+    )
+    assert.ok(
+      f.functions.every((fn) => fn.name !== '(anonymous)'),
+      'named functions must resolve their names, not fall back to (anonymous)',
+    )
+  })
+}
+
+test('extraction: Go groups parameters sharing a type', async () => {
+  // `func f(a, b int)` is ONE parameter_declaration naming two parameters.
+  // Counting the node rather than the names undercounts by the group size.
+  const f = await facts('t.go', 'package m\nfunc f(a, b, c int, d string) int { return 0 }')
+  assert.equal(f.functions[0].params, 4)
+})
