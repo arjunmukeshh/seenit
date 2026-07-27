@@ -60,59 +60,93 @@ measured warn of 6, and the worst functions are real and nameable
 
 ## Stage B — does any of it predict defects?
 
-**Results below are from the 20-repository pilot and are superseded once the
-full run completes.** The full corpus increases project count roughly twentyfold,
-and since standard errors are clustered by project, that is what determines
-whether these intervals are usable or merely suggestive.
-
 Poisson GLM, cluster-robust standard errors by project, `log(LOC)` covariate,
-`offset(log(commits))`. n = 3,004 files across 19 projects; 29,947 file-commits
-of which 4,892 matched the fix pattern. Dispersion 0.98, so Poisson held and no
-negative-binomial switch was triggered. All VIFs 1.0–1.35, so coefficients are
-interpretable.
+`offset(log(commits))`. **n = 39,028 files across 386 projects.** Dispersion
+1.36, below the pre-registered 1.5 switch, so Poisson was retained. All VIFs
+1.00–1.18, so coefficients are interpretable.
 
 | metric | IRR / SD | 95% CI | q | stratified ρ | pre-registered action |
 |---|---|---|---|---|---|
-| **maxNesting** | **1.133** | [1.07, 1.20] | 4.2e-5 | 0.069 | **keep** |
-| maxParams | 1.085 | [1.04, 1.13] | 2.4e-4 | −0.016 | halve, advisory |
-| maxCyclomatic | 1.080 | [1.04, 1.12] | 7.7e-5 | 0.113 | halve, advisory |
-| p90FunctionLines | 1.076 | [1.03, 1.13] | 3.2e-3 | 0.143 | halve, advisory |
-| maxCognitive | 1.050 | [1.02, 1.08] | 1.8e-3 | 0.106 | halve, advisory |
-| commentRatio | 1.065 | [0.96, 1.19] | 0.30 | 0.055 | diagnostic only |
-| crypticIdentifierRatio | 1.016 | [0.99, 1.05] | 0.31 | 0.156 | diagnostic only |
+| maxNesting | 1.097 | [1.02, 1.17] | 0.053 | 0.140 | diagnostic weight |
+| maxParams | 1.050 | [0.98, 1.12] | 0.26 | 0.041 | **remove from scoring** |
+| p90FunctionLines | 1.033 | [1.00, 1.07] | 0.15 | 0.104 | diagnostic weight |
+| maxCyclomatic | 1.020 | [0.99, 1.05] | 0.26 | 0.123 | diagnostic weight |
+| maxCognitive | 1.020 | [1.00, 1.05] | 0.26 | 0.125 | diagnostic weight |
+| commentRatio | 1.010 | [0.96, 1.06] | 0.68 | 0.026 | **remove from scoring** |
+| crypticIdentifierRatio | 1.013 | [0.97, 1.06] | 0.68 | 0.034 | **remove from scoring** |
+
+### The pilot was wrong, and why that matters
+
+The 19-project pilot reported cyclomatic complexity as significant at
+q = 7.7e-5. At 386 projects it is q = 0.26.
+
+| metric | pilot q (19 proj) | full q (386 proj) |
+|---|---|---|
+| maxCyclomatic | 7.7e-5 | 0.26 |
+| maxCognitive | 1.8e-3 | 0.26 |
+| maxNesting | 4.2e-5 | 0.053 |
+| p90FunctionLines | 3.2e-3 | 0.15 |
+
+This is not noise, it is a known failure mode: **cluster-robust standard errors
+are anti-conservative when clusters are few.** With 19 projects the estimator
+understates uncertainty and manufactures significance; the usual guidance is
+that roughly 40+ clusters are needed before it can be trusted. Every "finding"
+the pilot produced about complexity was an artefact of cluster count, and the
+pilot's own conclusion that nesting "beats" complexity does not survive.
+
+Worth stating plainly because the pilot results were reported as findings before
+this run existed. A study that can correct itself is the point of running it at
+scale.
 
 ### Against the hypotheses
 
-**H1 — size predicts fixes. SUPPORTED.** `log(LOC)` coefficient 0.172,
-p = 4.1e-6. This was the positive control: a pipeline that could not recover the
-best-replicated finding in the field would not be trustworthy when reporting a
-null. It recovered it.
+**H1 — size predicts fixes. SUPPORTED**, and strengthened: `log(LOC)`
+coefficient 0.166, p = 2.5e-8 (pilot: 4.1e-6). The positive control holds, so a
+pipeline capable of finding an effect is the one reporting the nulls below.
 
-**H2 — complexity has no partial effect. REJECTED statistically, SUPPORTED
-practically.** Cyclomatic (IRR 1.080) and cognitive (1.050) both survive the
-size control with clear significance. But both fall below the pre-registered
-practical floor of 1.10, so by the rule fixed in advance they are halved and
-marked advisory. This is a more interesting outcome than a clean null: the
-effect is real but small, which is consistent with Herraiz & Hassan's claim that
-complexity adds little *beyond* size without requiring it to add nothing.
+**H2 — complexity has no partial effect after controlling for size. SUPPORTED.**
+Cyclomatic q = 0.26, cognitive q = 0.26. This is the clean null the
+pre-registration expected, and it reproduces Herraiz & Hassan on modern
+JavaScript, TypeScript and Python rather than 2000s-era Java.
 
-**H3 — nesting/duplication/params have no effect. REJECTED for nesting.**
-`maxNesting` is the **only** metric clearing both significance and the effect
-floor (IRR 1.133). Nesting depth outperforms both cyclomatic and cognitive
-complexity as a defect predictor. That was not expected, and it is the most
-actionable finding here.
+**H3 — nesting and parameters have no effect. SUPPORTED.** Nesting q = 0.053
+just misses; parameters q = 0.26 with a stratified ρ of 0.041, failing both
+tests and removed from scoring outright.
 
 **H4 — comment density and cryptic identifiers have no effect. SUPPORTED.**
-Both non-significant (q = 0.30, 0.31). Both were named in the pre-registration
-as the components most likely to fail, precisely so that cutting them would be a
-pre-committed consequence rather than a post-hoc rationalisation. They failed.
+q = 0.68 for both. Named in advance as most likely to fail, so removing them is
+a pre-committed consequence rather than a post-hoc rationalisation.
 
-### The awkward consequence, registered in advance
+### The awkward consequence, registered in advance and now applied
 
 The pre-registration stated that if complexity showed no meaningful partial
-effect, then weighting `complexity: 0.22` above `size: 0.12` is backwards. That
-condition is met — complexity is below the practical floor while size is the
-strongest single predictor. **Size should take the larger share.**
+effect, weighting `complexity: 0.22` above `size: 0.12` is backwards and size
+takes the larger share. That condition is met. Applied:
+
+| dimension | before | after | basis |
+|---|---|---|---|
+| size | 0.12 | **0.37** | measured — the one robust predictor |
+| extensibility | 0.17 | 0.17 | untested |
+| coverage | 0.15 | 0.15 | untested |
+| duplication | 0.13 | 0.13 | untested |
+| standards | 0.08 | 0.08 | untested |
+| complexity | 0.22 | **0.05** | measured — null after size control |
+| readability | 0.13 | **0.05** | measured — components null |
+
+**What this does not mean.** Not that complexity is meaningless — only that it
+does not predict *this* outcome, measured *this* way, beyond size. The fix
+signal carries a measured 46.7% false-positive rate; being non-differential, it
+biases every estimate toward the null, so these results are conservative.
+Complexity stays fully measured and displayed. The rule governs what is
+**scored**, not what is **shown**, and a metric that fails to predict defects
+can still tell you something true about code you have to read.
+
+**Four dimensions were never tested.** duplication, standards, extensibility and
+coverage had no file-level outcome model fitted against them. Their weights are
+unchanged and rest on judgement, retained on *no evidence either way* rather
+than *evidence of value*. `WEIGHT_PROVENANCE` in `score.js` marks which is
+which, so the distinction survives into the product rather than living only
+here.
 
 ## Fix-detection error rate
 
