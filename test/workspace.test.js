@@ -1,11 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, writeFile, mkdir } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile, mkdir, readdir, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { git, repoRoot, gitDir } from '../lib/git.js'
 import { workingChanges, workspaceFiles, hashWorkingFiles } from '../lib/workspace.js'
-import { AnalysisCache } from '../lib/cache.js'
+import { AnalysisCache, cacheKey } from '../lib/cache.js'
 
 async function makeRepo() {
   const dir = await mkdtemp(join(tmpdir(), 'gcb-ws-'))
@@ -106,4 +106,104 @@ test('cache: entries survive a round trip and drop the path', async (t) => {
   const got = await reloaded.get('b'.repeat(40))
   assert.equal(got.loc, 10)
   assert.ok(!('path' in got), 'path must not be cached — it varies per location')
+})
+
+test('cache: a one-entry change rewrites one shard, not the whole cache', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'gcb-shard-'))
+  t.after(() => rm(dir, { recursive: true, force: true }))
+
+  // Populate entries spread across many shards.
+  const cache = new AnalysisCache(dir)
+  const shas = []
+  for (let i = 0; i < 400; i++) {
+    const sha = i.toString(16).padStart(2, '0').slice(0, 2) + 'f'.repeat(38)
+    shas.push(sha)
+    await cache.set(sha, { loc: i, functions: [] })
+  }
+  await cache.flush()
+
+  const versionDir = join(dir, (await readdir(dir)).find((d) => d.startsWith('v')))
+  const before = new Map()
+  for (const name of await readdir(versionDir)) {
+    before.set(name, (await stat(join(versionDir, name))).mtimeMs)
+  }
+  assert.ok(before.size > 1, 'entries must spread across multiple shards')
+
+  // Change exactly one entry. This is the incremental case: an agent edits one
+  // file and the cost of recording it must not scale with repository size.
+  await new Promise((r) => setTimeout(r, 12)) // mtime granularity
+  const fresh = new AnalysisCache(dir)
+  await fresh.set(shas[0], { loc: 9999, functions: [] })
+  await fresh.flush()
+
+  const rewritten = []
+  for (const name of await readdir(versionDir)) {
+    if (before.get(name) !== (await stat(join(versionDir, name))).mtimeMs) rewritten.push(name)
+  }
+  assert.deepEqual(rewritten, [`${shas[0].slice(0, 2)}.json`], 'exactly one shard may be rewritten')
+
+  // And the untouched entries must still be readable.
+  const reader = new AnalysisCache(dir)
+  assert.equal((await reader.get(shas[0])).loc, 9999)
+  assert.equal((await reader.get(shas[399])).loc, 399)
+})
+
+test('stat index: returns the same SHAs as hashing, and notices edits', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'gcb-stat-'))
+  t.after(() => rm(dir, { recursive: true, force: true }))
+  await git(dir, ['init', '-q'])
+  await writeFile(join(dir, 'a.js'), 'export const a = 1\n')
+  await writeFile(join(dir, 'b.js'), 'export const b = 2\n')
+
+  const root = await repoRoot(dir)
+  const paths = await workspaceFiles(root)
+  assert.deepEqual(paths, ['a.js', 'b.js'])
+
+  const truth = await hashWorkingFiles(root, paths) // no index: hashes everything
+  const cache = new AnalysisCache(join(dir, 'cache'))
+
+  // First pass populates the index; second pass must be served from it.
+  const first = await hashWorkingFiles(root, paths, { statIndex: cache.statIndex })
+  assert.deepEqual([...first].sort(), [...truth].sort(), 'indexed hashing must agree with direct hashing')
+  await cache.flush()
+
+  const reopened = new AnalysisCache(join(dir, 'cache'))
+  const second = await hashWorkingFiles(root, paths, { statIndex: reopened.statIndex })
+  assert.deepEqual([...second].sort(), [...truth].sort(), 'a cached SHA must equal the real one')
+
+  // An edit must produce a different SHA — a stale hit here would attribute the
+  // wrong analysis to the file, which is worse than being slow.
+  await new Promise((r) => setTimeout(r, 2100)) // clear the racily-clean window
+  await writeFile(join(dir, 'a.js'), 'export const a = 999\n')
+  const after = await hashWorkingFiles(root, paths, { statIndex: reopened.statIndex })
+  assert.notEqual(after.get('a.js'), truth.get('a.js'), 'edited file must re-hash')
+  assert.equal(after.get('b.js'), truth.get('b.js'), 'untouched file keeps its SHA')
+
+  const direct = await hashWorkingFiles(root, paths)
+  assert.equal(after.get('a.js'), direct.get('a.js'), 'the re-hash must be correct, not merely different')
+})
+
+test('cache key: identical content in different languages must not collide', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'gcb-key-'))
+  t.after(() => rm(dir, { recursive: true, force: true }))
+
+  // Byte-identical content at two extensions hashes to ONE git blob, but the
+  // grammar comes from the extension, so the analyses are not interchangeable.
+  // Keying on the SHA alone let whichever file was analyzed first win, and the
+  // other silently inherited its facts.
+  const source = 'export const a = 1\n'
+  const sha = 'c'.repeat(40)
+  assert.notEqual(cacheKey(sha, 'util.ts'), cacheKey(sha, 'util.js'), 'ts and js must key differently')
+  assert.equal(cacheKey(sha, 'a/util.ts'), cacheKey(sha, 'b/util.ts'), 'same language, same content: one entry')
+
+  const cache = new AnalysisCache(dir)
+  await cache.set(cacheKey(sha, 'util.ts'), { language: 'typescript', loc: 1 })
+  await cache.set(cacheKey(sha, 'util.js'), { language: 'javascript', loc: 1 })
+
+  assert.equal((await cache.get(cacheKey(sha, 'util.ts'))).language, 'typescript')
+  assert.equal((await cache.get(cacheKey(sha, 'util.js'))).language, 'javascript')
+
+  // And the shard prefix must still be the SHA, or the buckets stop being even.
+  assert.ok(cacheKey(sha, 'util.ts').startsWith(sha.slice(0, 2)))
+  assert.equal(source.length, 19) // guard against the fixture drifting
 })
