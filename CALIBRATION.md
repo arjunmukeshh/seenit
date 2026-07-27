@@ -107,7 +107,21 @@ A calibration nobody can rerun is a better-dressed assertion. Any run must ship:
 
 ## Status
 
-Not started. This is the largest outstanding item on metric credibility, and it
-is deliberately recorded as unfinished rather than approximated — the derived
-scores are honest as *relative* signals today, and claiming more than that
-would be the fastest way to lose a user's trust.
+**Method A complete.** 396 repositories, 60,343 files, 392,954 functions across
+391 projects, sampled as specified above and pinned to commit SHAs. Per-language
+thresholds are measured and in use; see [RESULTS.md](calibration/RESULTS.md).
+
+The headline: the previous literature-derived defaults were roughly twice as
+lenient as real code, and per-language tables were necessary — cyclomatic 9 sits
+near the p90 of JavaScript but past the p99 of TypeScript.
+
+**Method B in progress.** The pilot (19 projects) found size to be the strongest
+predictor and nesting depth the only metric clearing both significance and the
+pre-registered effect floor, with comment density and cryptic-identifier ratio
+null as predicted. The full run raises project count roughly twentyfold, which
+is what determines whether those intervals are usable.
+
+Still outstanding: broader ecosystem coverage. Rust, Java, C++ and Go currently
+appear only as incidental files inside npm and PyPI packages, so their samples
+are thin and several fall below the five-project minimum. Sampling crates.io,
+Maven and the Go module proxy directly is the next step.

@@ -1,40 +1,69 @@
-# Calibration results — pilot
+# Calibration results
 
-**Pilot scale. Not the final calibration.** 40 repositories for Stage A, 20 for
-Stage B, against the 200–500 per language specified in
-[CALIBRATION.md](../CALIBRATION.md). Directionally informative; the confidence
-intervals are wide and the language coverage is thin. Everything below is
-reported against [PREREGISTRATION.md](PREREGISTRATION.md), written and committed
+Reported against [PREREGISTRATION.md](PREREGISTRATION.md), written and committed
 before any data was collected.
 
-## Stage A — distributions
+## Stage A — distributions (complete)
 
-8,482 files and **102,548 functions** across 40 independently sampled projects,
-selected by dependents floor plus stratified random draw (median dependents:
-38 npm / 22 PyPI — ordinary packages, not megaprojects).
+**60,343 files and 392,954 functions across 391 projects**, 13 languages, zero
+collection failures. Repositories selected by a dependents floor plus stratified
+random draw over the entire eligible population (npm's floor of 10 dependents is
+not reached until roughly package #85,000), pinned to commit SHAs and
+reproducible from a seed. Median dependents 26 — ordinary packages, not
+megaprojects.
 
 Thresholds are `good` = p75, `warn` = p90, `bad` = p99 of observed code, so a
 score means something falsifiable: *worse than 90% of comparable real code*.
 
-### Cyclomatic complexity, per language
+### Measured thresholds (good / warn / bad)
 
-| | good | warn | bad | n (functions) |
-|---|---|---|---|---|
-| **current, asserted** | 5 | 10 | 20 | — |
-| javascript | 4 | 9 | 28 | 63,757 |
-| python | 3 | 6 | 22 | 14,740 |
-| tsx | 2 | 4 | 15 | 7,863 |
-| typescript | 2 | 4 | 13 | 15,240 |
+| language | cyclomatic | cognitive | fn lines | functions | projects |
+|---|---|---|---|---|---|
+| python | 3 / 6 / 19 | 5 / 12 / 48 | 21 / 45 / 143 | 119,690 | 204 |
+| typescript | 3 / 5 / 19 | 3 / 9 / 44 | 15 / 33 / 128 | 111,332 | 120 |
+| javascript | 3 / 6 / 24 | 3 / 10 / 53 | 5 / 18 / 123 | 84,813 | 173 |
+| tsx | 2 / 4 / 13 | 2 / 5 / 24 | 16 / 40 / 211 | 36,869 | 45 |
+| rust | 3 / 5 / 16 | 4 / 9 / 41 | 17 / 35 / 121 | 18,838 | 12 |
+| cpp | 3 / 7 / 25 | 5 / 14 / 74 | 20 / 47 / 160 | 9,172 | 30 |
+| java | 2 / 4 / 14 | 2 / 7 / 36 | 9 / 21 / 65 | 7,116 | 11 |
+| bash | 3 / 4 / 17 | 4 / 6 / 33 | 20 / 38 / 236 | 558 | 43 |
+| **previous, asserted** | **5 / 10 / 20** | **7 / 15 / 30** | **25 / 50 / 100** | — | — |
 
-**Per-language thresholds were necessary.** A single global set is wrong for
-every language at once. A TypeScript function at cyclomatic 9 currently scores
-as merely approaching "warn" when it is in fact worse than 99% of real
-TypeScript.
+**The asserted thresholds were roughly twice as lenient as real code.**
+`good = 5` sits above every measured language's p75 and `warn = 10` above every
+measured `warn`. A function the tool called acceptable was, in most languages,
+already worse than three quarters of real code. McCabe's limit of 10 is
+defensible for the 1976 FORTRAN and C it was derived from, and simply wrong for
+modern JavaScript, TypeScript and Python.
 
-`cpp` (4 projects) and `php` (1 project) produced no thresholds: fewer than 5
-independent projects is one team's house style, not a distribution.
+**Per-language thresholds were necessary.** Cyclomatic 9 sits near the p90 of
+JavaScript but past the p99 of TypeScript; one number cannot serve both.
+
+### Effect on this repository
+
+Applying the measured thresholds moved gitcodebase's own score from **83.8 (B)
+to 70.1 (C)** — complexity 73.5 → 52.5, size 96.3 → 60.9. Verified as a correct
+verdict rather than a scoring bug: JavaScript p90 cyclomatic here is 7 against a
+measured warn of 6, and the worst functions are real and nameable
+(`exportedNames` 21, `App` 21, `StructurePanel` 21).
+
+### Languages excluded, and why
+
+- `c-sharp` (3 projects), `php` (2), `ruby` (4) — below the 5-project minimum.
+  One project measures a team's house style, not a distribution.
+- `go`, `css` — function-level metrics only; too few projects contributed
+  functions even though file counts looked adequate.
+- `bash`, `cpp` params — parameter extraction is unsupported for those grammars,
+  producing an all-zero distribution. That is a measurement failure, not a
+  measurement, and emitting `good=warn=bad=0` would fail every function on a
+  metric never actually taken.
 
 ## Stage B — does any of it predict defects?
+
+**Results below are from the 20-repository pilot and are superseded once the
+full run completes.** The full corpus increases project count roughly twentyfold,
+and since standard errors are clustered by project, that is what determines
+whether these intervals are usable or merely suggestive.
 
 Poisson GLM, cluster-robust standard errors by project, `log(LOC)` covariate,
 `offset(log(commits))`. n = 3,004 files across 19 projects; 29,947 file-commits
@@ -112,8 +141,11 @@ of this measurement.
 
 ## Limitations
 
-- **Pilot scale.** 19–20 projects for inference. Confidence intervals are wide.
-- **Two ecosystems.** npm and PyPI only; no Go, Rust, Java, Ruby.
+- **Stage B inference is still pilot-scale** (19 projects) pending the full run.
+  Stage A is complete at 391 projects.
+- **Two ecosystems sampled.** npm and PyPI. Rust, Java, C++ and Go appear only
+  as incidental files inside those repositories, which is why their project
+  counts are low and several fall below the threshold minimum.
 - **Survivorship.** Only surviving, depended-upon packages are sampled. Code bad
   enough to be abandoned is absent, which likely attenuates effects further.
 - **Association, not causation.** Nothing here supports "reducing nesting will
