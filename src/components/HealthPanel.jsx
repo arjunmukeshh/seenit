@@ -75,9 +75,14 @@ export function HealthPanel({ health, dimensions, previous, weights }) {
             )}
           </div>
         </div>
-        <p className="text-xs ml-auto max-w-xs hidden xl:block" style={{ color: 'var(--dim)' }}>
-          A weighted composite. The raw metrics beside each dimension are the facts; this number is a
-          judgement built on thresholds that are not yet calibrated.
+        {/* This caption previously read "thresholds that are not yet
+            calibrated", which stopped being true once the study landed. A stale
+            disclaimer is its own kind of inaccuracy. */}
+        <p className="text-xs ml-auto max-w-sm hidden xl:block" style={{ color: 'var(--dim)' }}>
+          A weighted composite. The raw metrics beside each dimension are facts; this number is a
+          judgement built on them. Thresholds are measured per language from 1M+ functions across
+          1,100 repositories — <span style={{ color: 'var(--muted)' }}>good = p75, warn = p90</span> of
+          real code. Weights are partly measured, partly judgement.
         </p>
       </div>
 
