@@ -500,3 +500,27 @@ test('grades mean what they say: p75/p90/p99 score 100/70/0', () => {
   assert.equal(grade(70), 'C', 'a typical repository must grade C')
   assert.equal(grade(69.9), 'D')
 })
+
+// Deeply nested input must not overflow the stack.
+//
+// Found by running the analyzer over TypeScript's own repository, where
+// tests/baselines/reference/binderBinaryExpressionStress.js — a file written
+// to nest binary expressions as deeply as a parser will accept — threw
+// RangeError from the recursive AST walk. That did not merely skip the file:
+// it aborted the entire 38,000-file scan. Both walks in extract.js are now
+// iterative, for the same reason findCycles is.
+test('extract: deep nesting does not overflow the stack', async () => {
+  const deepExpression = `const x = ${'('.repeat(6000)}1${')'.repeat(6000)}`
+  const chained = `const y = ${Array.from({ length: 8000 }, (_, i) => i).join(' + ')}`
+  const nestedBlocks = 'function f(){' + 'if(a){'.repeat(2000) + 'b()' + '}'.repeat(2000) + '}'
+
+  for (const [label, source] of [
+    ['parenthesized', deepExpression],
+    ['chained binary', chained],
+    ['nested blocks', nestedBlocks],
+  ]) {
+    const f = await facts('deep.js', source)
+    assert.ok(f, `${label}: expected facts, got null`)
+    assert.equal(typeof f.loc, 'number', `${label}: analysis must complete`)
+  }
+})

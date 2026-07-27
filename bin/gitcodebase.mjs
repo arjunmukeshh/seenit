@@ -80,7 +80,14 @@ const commands = {
     const [result, previous] = await Promise.all([analyzeWorkspace(root, { cache }), previousHealth(ledger)])
     await cache.flush()
     printHealth(result.health, result.dimensions, previous)
-    console.log(`\n${C.dim}${result.fileCount} files analyzed${previous ? '' : ' · no history yet, run `gitcodebase scan`'}${C.reset}`)
+    // Say what the score is actually based on. Tests are analyzed but excluded
+    // from scoring, and on repositories that are mostly fixtures the difference
+    // is the whole story.
+    const scored =
+      result.testFiles > 0
+        ? `${result.fileCount} files analyzed · ${result.productFiles} scored, ${result.testFiles} tests excluded`
+        : `${result.fileCount} files analyzed`
+    console.log(`\n${C.dim}${scored}${previous ? '' : ' · no history yet, run `gitcodebase scan`'}${C.reset}`)
 
     // Exit non-zero on regression so this works as a CI gate or git hook.
     const threshold = Number(flag('fail-under', 0))
