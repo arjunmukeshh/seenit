@@ -429,3 +429,41 @@ test('extraction: Go groups parameters sharing a type', async () => {
   const f = await facts('t.go', 'package m\nfunc f(a, b, c int, d string) int { return 0 }')
   assert.equal(f.functions[0].params, 4)
 })
+
+// --------------------------------------------- cross-language branch counting
+
+// Grammars spell the same construct differently and the disagreement is not
+// cosmetic. Ruby names its constructs bare ('if', 'when', 'while'); PHP and C#
+// use suffixed forms and emit the bare keyword as an ANONYMOUS token. Listing
+// only suffixed forms made Ruby match almost nothing: 38,460 Ruby methods
+// calibrated to thresholds of 1/1/3 cyclomatic, implying no Ruby method ever
+// branches. Caught only because the calibration corpus grew to include Ruby.
+const BRANCH_FIXTURES = [
+  ['t.rb', 'def f(a,b)\n if a && b\n  x=1\n end\n while a\n  break\n end\n case a\n when 1 then 1\n end\n begin\n  g()\n rescue\n  nil\n end\nend'],
+  ['t.py', 'def f(a,b):\n    if a and b:\n        pass\n    while a:\n        break\n    try:\n        g()\n    except:\n        pass'],
+  ['t.go', 'package m\nfunc f(a bool,b bool){ if a&&b {} ; for {} ; switch a { case true: } }'],
+  ['t.rs', 'fn f(a:bool,b:bool){ if a&&b {} while a {} match a { true=>{}, _=>{} } }'],
+  ['t.java', 'class W{void f(boolean a,boolean b){ if(a&&b){} while(a){} switch(1){case 1:break;} try{g();}catch(Exception e){} }}'],
+  ['t.ts', 'function f(a,b){ if(a&&b){} while(a){} switch(a){case 1:break;} try{g()}catch(e){} }'],
+  ['t.php', '<?php function f($a,$b){ if($a&&$b){} while($a){} switch($a){case 1:break;} try{g();}catch(Exception $e){} }'],
+  ['t.cs', 'class W{void f(bool a,bool b){ if(a&&b){} while(a){} switch(1){case 1:break;} try{g();}catch(Exception e){} }}'],
+]
+
+for (const [path, source] of BRANCH_FIXTURES) {
+  test(`branches: ${path.split('.')[1]} detects conditionals, loops and handlers`, async () => {
+    const f = await facts(path, source)
+    const cc = f.functions[0]?.cyclomatic ?? 0
+    // Equivalent logic across languages should land in the same band. A value
+    // at or below 2 means the grammar's branch nodes are not being recognised
+    // at all, which is the failure this guards.
+    assert.ok(cc >= 5, `expected >=5 for 5 decision points, got ${cc} — branch nodes unrecognised`)
+    assert.ok(cc <= 8, `expected <=8, got ${cc} — branches likely double-counted`)
+  })
+}
+
+test('branches: anonymous keyword tokens are not double-counted', async () => {
+  // PHP emits a bare 'if' token inside if_statement. Counting unnamed nodes
+  // would score this 3 instead of 2.
+  const php = await facts('t.php', '<?php function f($a){ if($a){ return 1; } return 2; }')
+  assert.equal(php.functions[0].cyclomatic, 2)
+})
