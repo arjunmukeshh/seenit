@@ -23,11 +23,22 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const API = 'https://packages.ecosyste.ms/api/v1'
 
 // Registries mapped to the analyzer's language names (lib/analyze/parser.js).
+//
+// The first corpus sampled only npm and PyPI, which left Rust, Java, C++, Go,
+// Ruby, C# and PHP represented solely by whatever incidental files happened to
+// sit inside JavaScript and Python packages. Those samples were thin — 11
+// projects for Java, 12 for Rust — and several fell below the five-project
+// minimum and produced no thresholds at all. A language is only properly
+// calibrated by sampling its own ecosystem.
 export const REGISTRIES = {
   npm: { registry: 'npmjs.org', languages: ['javascript', 'typescript', 'tsx'] },
   pypi: { registry: 'pypi.org', languages: ['python'] },
   cargo: { registry: 'crates.io', languages: ['rust'] },
   go: { registry: 'proxy.golang.org', languages: ['go'] },
+  maven: { registry: 'repo1.maven.org', languages: ['java'] },
+  nuget: { registry: 'nuget.org', languages: ['c-sharp'] },
+  packagist: { registry: 'packagist.org', languages: ['php'] },
+  rubygems: { registry: 'rubygems.org', languages: ['ruby'] },
 }
 
 export const CRITERIA = {
