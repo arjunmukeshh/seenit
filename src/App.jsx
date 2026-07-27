@@ -169,7 +169,7 @@ function TabBody({ tab, viewing, previous, selected, workspace, snapshots, compa
           </div>
           <Treemap files={workspace.files} />
         </section>
-        <StructurePanel live dimensions={workspace.dimensions} />
+        <StructurePanel live dimensions={workspace.dimensions} dag={workspace.dag} />
       </div>
     )
   }

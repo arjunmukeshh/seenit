@@ -1,25 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { api } from '../lib/api'
+import { DependencyGraph, FOLD_ABOVE } from './DependencyGraph'
+import { foldToDirectories } from '../../lib/analyze/dag.js'
 
 // Architecture findings: cycles, hubs, and modules far from the main sequence.
 //
 // These are the extensibility signals a per-file linter cannot produce, because
 // each one is a property of the graph rather than of any single file.
 
-export function StructurePanel({ snapshotRef, live, dimensions }) {
+export function StructurePanel({ snapshotRef, live, dimensions, dag: liveDag }) {
   const [modules, setModules] = useState(null)
   const [coupling, setCoupling] = useState(null)
+  const [snapshotDag, setSnapshotDag] = useState(null)
+  const [fold, setFold] = useState(null) // null = decide from size
 
   useEffect(() => {
     if (!snapshotRef) return
+    setSnapshotDag(null)
     api.snapshotFile(snapshotRef, 'graph/modules.json').then(setModules).catch(() => setModules(null))
     api.snapshotFile(snapshotRef, 'coupling.json').then(setCoupling).catch(() => setCoupling(null))
+    // Snapshots taken before the DAG was stored simply don't have this file;
+    // the graph section says so rather than rendering an empty box.
+    api.snapshotFile(snapshotRef, 'graph/dag.json').then(setSnapshotDag).catch(() => setSnapshotDag(null))
   }, [snapshotRef])
 
   const ext = live ? dimensions?.extensibility : null
   const cycles = ext?.worstCycles ?? modules?.cycles ?? []
   const hubs = ext?.hubModules ?? []
   const offMainSeq = ext?.offMainSequence ?? []
+
+  const baseDag = live ? liveDag : snapshotDag
+  // Fold automatically when a file-level graph would be unreadable, but let the
+  // choice be overridden — the auto default is a guess about screen space, not
+  // about what the reader wants.
+  const folded = fold ?? (baseDag ? baseDag.nodes.length > FOLD_ABOVE : false)
+  const shownDag = useMemo(
+    () => (baseDag && folded ? foldToDirectories(baseDag) : baseDag),
+    [baseDag, folded],
+  )
 
   return (
     <div className="space-y-10">
@@ -31,6 +49,32 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
           <Stat label="hub modules" value={hubs.length} bad={hubs.length > 0} />
           <Stat label="mean main-seq distance" value={ext?.meanMainSequenceDistance ?? '—'} />
         </dl>
+      </section>
+
+      <section>
+        <h2 className="text-[13.5px] mb-1" style={{ color: 'var(--ink)' }}>
+          Module DAG
+        </h2>
+        <p className="text-[12px] mb-3 max-w-[68ch] text-pretty" style={{ color: 'var(--ink-3)' }}>
+          Every strongly-connected component is collapsed into one node, which makes the graph
+          provably acyclic and therefore layerable. Layers read upward from foundations: layer 0
+          depends on nothing internal, so depth is the build order of the codebase. A cycle is drawn
+          as a single box because that is what it is to maintain — you cannot extract one member
+          without the rest.
+        </p>
+        {shownDag ? (
+          <DependencyGraph
+            dag={shownDag}
+            folded={folded}
+            onToggleFold={() => setFold(!folded)}
+          />
+        ) : (
+          <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+            {snapshotRef
+              ? 'This snapshot predates the stored dependency graph. Re-run gitcodebase backfill to add it.'
+              : 'Loading…'}
+          </p>
+        )}
       </section>
 
       <Section

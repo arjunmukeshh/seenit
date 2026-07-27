@@ -113,6 +113,7 @@ const ROUTES = {
       health: result.health,
       dimensions: result.dimensions,
       weights: result.weights,
+      dag: result.dag,
       fileCount: result.fileCount,
       productFiles: result.productFiles,
       testFiles: result.testFiles,
