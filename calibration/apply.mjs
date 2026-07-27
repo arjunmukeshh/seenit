@@ -11,6 +11,7 @@
 //   node calibration/apply.mjs --dry-run  # print it
 
 import { readFile, writeFile } from 'node:fs/promises'
+import { existsSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -46,6 +47,30 @@ function format(value) {
 
 async function main() {
   const results = JSON.parse(await readFile(RESULTS, 'utf8'))
+
+  // Refuse to generate from results older than the data they claim to describe.
+  //
+  // A chained run once cleared the dataset, watched analyze.py correctly refuse
+  // to run on it, and then generated thresholds anyway from the PREVIOUS run's
+  // results — publishing known-broken Ruby values (1/1/3 cyclomatic) as
+  // measured evidence. A generator that silently falls back to stale input is
+  // worse than one that crashes, because its output looks authoritative.
+  const dataPath = join(HERE, 'data', 'files-stageA.jsonl')
+  if (!existsSync(dataPath)) {
+    throw new Error(
+      `no dataset at ${dataPath}. Refusing to generate thresholds from results ` +
+        `that cannot be checked against their source — run collect.mjs and analyze.py first.`,
+    )
+  }
+  const [dataStat, resultStat] = [statSync(dataPath), statSync(RESULTS)]
+  if (resultStat.mtimeMs < dataStat.mtimeMs) {
+    throw new Error(
+      `results/stageA.json is older than the dataset it should summarize ` +
+        `(${new Date(resultStat.mtimeMs).toISOString()} < ${new Date(dataStat.mtimeMs).toISOString()}). ` +
+        `Re-run analyze.py before applying.`,
+    )
+  }
+
   const measured = { ...results.proposedThresholds }
   delete measured._excluded
 
