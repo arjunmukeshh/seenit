@@ -6,6 +6,7 @@ import { Treemap } from './components/Treemap'
 import { DriftView } from './components/DriftView'
 import { StructurePanel } from './components/StructurePanel'
 import { useElementWidth } from './lib/useElementWidth'
+import { useTheme } from './lib/useTheme'
 
 const TABS = ['health', 'structure', 'drift']
 
@@ -21,6 +22,7 @@ export default function App() {
   const [compareWith, setCompareWith] = useState(null)
   const [snapshotHealth, setSnapshotHealth] = useState(null)
   const [error, setError] = useState(null)
+  const theme = useTheme()
 
   useEffect(() => {
     Promise.all([api.repo(), api.snapshots(200), api.workspace()])
@@ -39,28 +41,19 @@ export default function App() {
     api.snapshotFile(selected, 'health.json').then(setSnapshotHealth).catch(() => setSnapshotHealth(null))
   }, [selected])
 
-  if (error) {
-    return (
-      <Centered>
-        <div className="panel p-6 max-w-md">
-          <div className="mb-2" style={{ color: 'var(--h-bad)' }}>Could not reach the API</div>
-          <div className="mono text-xs" style={{ color: 'var(--muted)' }}>{error}</div>
-        </div>
-      </Centered>
-    )
-  }
-  if (!repo || !workspace) return <Centered><span style={{ color: 'var(--dim)' }}>Loading…</span></Centered>
+  if (error) return <ApiError message={error} />
+  if (!repo || !workspace) return <BootSkeleton />
 
   const viewing = selected ? snapshotHealth : workspace
-  const previous = selected
-    ? null
-    : snapshots.length
-      ? { overall: snapshots[0].health, dimensions: {} }
-      : null
+  // /api/workspace already returns the previous snapshot's full health.json.
+  // This used to rebuild a stub from the rail — `{ overall, dimensions: {} }` —
+  // which meant per-dimension deltas could never render even though the data
+  // was already on the wire.
+  const previous = selected ? null : (workspace.previous ?? null)
 
   return (
-    <div className="h-full flex flex-col">
-      <Header repo={repo} workspace={workspace} />
+    <div className="h-full flex flex-col" style={{ background: 'var(--paper)' }}>
+      <Header repo={repo} workspace={workspace} theme={theme} />
 
       <div className="flex-1 flex min-h-0">
         <Rail
@@ -74,20 +67,28 @@ export default function App() {
           onCompare={setCompareWith}
         />
 
-        <main className="flex-1 overflow-y-auto min-w-0">
+        {/* The tab bar sits outside the scroll container rather than sticking
+            to the top of it. Sticky worked, but content scrolling underneath
+            showed through the gap above it — and a bar that never moves needs
+            no stacking context at all. */}
+        <div className="flex-1 flex flex-col min-w-0">
           <TabBar tab={tab} onTab={setTab} selected={selected} />
-          <div className="px-5 pb-8">
-            <TabBody
-              tab={tab}
-              viewing={viewing}
-              previous={previous}
-              selected={selected}
-              workspace={workspace}
-              snapshots={snapshots}
-              compareWith={compareWith}
-            />
-          </div>
-        </main>
+          <main className="flex-1 overflow-y-auto">
+            {/* A max-width so measurements don't stretch across an ultrawide
+                display, where a 200-character row is unreadable. */}
+            <div className="px-8 pb-20 max-w-[1180px]">
+              <TabBody
+                tab={tab}
+                viewing={viewing}
+                previous={previous}
+                selected={selected}
+                workspace={workspace}
+                snapshots={snapshots}
+                compareWith={compareWith}
+              />
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   )
@@ -99,11 +100,14 @@ function Rail({ ref, width, workspace, snapshots, selected, compareWith, onSelec
   return (
     <aside
       ref={ref}
-      className="w-[248px] lg:w-[330px] 2xl:w-[430px] shrink-0 border-r overflow-y-auto"
-      style={{ borderColor: 'var(--border)', background: 'var(--panel)' }}
+      className="w-[236px] lg:w-[310px] 2xl:w-[400px] shrink-0 overflow-y-auto"
+      style={{ borderRight: '1px solid var(--rule)', background: 'var(--sunken)' }}
     >
       <WorkingTreeRow workspace={workspace} active={selected === null} onClick={() => onSelect(null)} />
-      <div className="label px-4 py-2" style={{ borderTop: '1px solid var(--border)' }}>
+      <div
+        className="label px-5 pt-4 pb-2"
+        style={{ borderTop: '1px solid var(--rule)' }}
+      >
         History · {snapshots.length} snapshots
       </div>
       <CommitRail
@@ -120,32 +124,28 @@ function Rail({ ref, width, workspace, snapshots, selected, compareWith, onSelec
 
 function TabBar({ tab, onTab, selected }) {
   return (
-    <nav className="flex gap-1 px-5 pt-4 pb-3 sticky top-0 z-10" style={{ background: 'var(--bg)' }}>
+    <nav
+      className="flex items-center gap-6 px-8 pt-4 shrink-0"
+      style={{ background: 'var(--paper)', borderBottom: '1px solid var(--rule)' }}
+    >
       {TABS.map((t) => (
-        <button
-          key={t}
-          onClick={() => onTab(t)}
-          className="px-3 py-1.5 rounded text-xs capitalize transition-colors"
-          style={{
-            background: tab === t ? 'var(--panel-2)' : 'transparent',
-            color: tab === t ? 'var(--text)' : 'var(--dim)',
-          }}
-        >
+        <button key={t} onClick={() => onTab(t)} className="tab capitalize" data-active={tab === t}>
           {t}
         </button>
       ))}
-      <div className="ml-auto mono text-[11px] self-center" style={{ color: 'var(--dim)' }}>
+      <span className="num ml-auto text-[11px] pb-2" style={{ color: 'var(--ink-4)' }}>
         {selected ? `snapshot ${selected.slice(0, 7)}` : 'working tree'}
-      </div>
+      </span>
     </nav>
   )
 }
 
 // One body per tab. Kept out of App so that adding a tab does not push a single
-// render function further past the complexity threshold the tool itself reports.
+// render function further past the complexity threshold the tool itself
+// reports.
 function TabBody({ tab, viewing, previous, selected, workspace, snapshots, compareWith }) {
   if (tab === 'health') {
-    if (!viewing) return <Loading />
+    if (!viewing) return <PanelSkeleton />
     return (
       <HealthPanel
         health={viewing.overall ?? viewing.health}
@@ -159,53 +159,82 @@ function TabBody({ tab, viewing, previous, selected, workspace, snapshots, compa
   if (tab === 'structure') {
     if (selected) return <StructurePanel snapshotRef={selected} />
     return (
-      <div className="space-y-3">
-        <div className="panel p-3">
-          <div className="label mb-2">
-            {workspace.files.length} files · area is lines of code, colour is a per-file complexity proxy
+      <div className="pt-6 space-y-10">
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="label">Composition</h2>
+            <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
+              {workspace.files.length} files · area is lines of code, colour is complexity
+            </span>
           </div>
           <Treemap files={workspace.files} />
-        </div>
+        </section>
         <StructurePanel live dimensions={workspace.dimensions} />
       </div>
     )
   }
 
-  return <DriftView from={compareWith ?? snapshots[1]?.sha} to={selected ?? snapshots[0]?.sha} />
+  return (
+    <div className="pt-6">
+      <DriftView from={compareWith ?? snapshots[1]?.sha} to={selected ?? snapshots[0]?.sha} />
+    </div>
+  )
 }
 
-function Header({ repo, workspace }) {
+function Header({ repo, workspace, theme }) {
   const dirty = dirtyCount(workspace)
 
   return (
     <header
-      className="flex items-center gap-4 px-5 py-3 border-b shrink-0"
-      style={{ borderColor: 'var(--border)', background: 'var(--panel)' }}
+      className="flex items-center gap-3 px-8 py-3.5 shrink-0"
+      style={{ borderBottom: '1px solid var(--rule)', background: 'var(--surface)' }}
     >
-      <div className="flex items-baseline gap-2">
-        <span className="font-semibold">gitcodebase</span>
-        <span className="mono text-xs" style={{ color: 'var(--dim)' }}>
-          {repo.name}
-        </span>
-      </div>
-
-      <span className="mono text-[11px] px-2 py-0.5 rounded" style={{ background: 'var(--panel-2)', color: 'var(--muted)' }}>
+      <span className="text-[13.5px] font-semibold tracking-tight">gitcodebase</span>
+      <span className="num text-[12px]" style={{ color: 'var(--ink-3)' }}>
+        {repo.name}
+      </span>
+      <span
+        className="num text-[11px] px-1.5 py-0.5 rounded"
+        style={{ background: 'var(--wash)', color: 'var(--ink-2)' }}
+      >
         {repo.branch}
       </span>
 
       {dirty > 0 && (
-        <span className="mono text-[11px]" style={{ color: 'var(--h-ok)' }}>
+        <span className="num text-[11px]" style={{ color: 'var(--h-poor)' }}>
           {dirty} uncommitted
         </span>
       )}
 
-      <div className="ml-auto flex items-baseline gap-2">
-        <span className="label">health</span>
-        <span className="mono text-xl font-semibold" style={{ color: healthColor(workspace.health) }}>
-          {fmt(workspace.health)}
-        </span>
+      <div className="ml-auto flex items-center gap-5">
+        <ThemeControl theme={theme} />
+        <div className="flex items-baseline gap-2">
+          <span className="label">Health</span>
+          <span
+            className="readout text-[19px]"
+            style={{ color: healthColor(workspace.health) }}
+          >
+            {fmt(workspace.health)}
+          </span>
+        </div>
       </div>
     </header>
+  )
+}
+
+// Deliberately not a sun/moon switch. That control is the most recognisable
+// stamp of a generated interface, and it cannot express "follow the system"
+// anyway — which is a real preference, not the absence of one.
+function ThemeControl({ theme }) {
+  return (
+    <button
+      onClick={theme.cycle}
+      className="btn-quiet px-2 py-1 text-[11px] capitalize"
+      title="Switch between system, light and dark"
+      aria-label={`Theme: ${theme.mode}. Click to change.`}
+    >
+      {theme.mode}
+    </button>
   )
 }
 
@@ -216,31 +245,100 @@ function WorkingTreeRow({ workspace, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
-      style={{ background: active ? 'rgba(110,168,254,0.10)' : 'transparent' }}
+      className="w-full text-left px-5 py-4 flex items-center gap-3 transition-colors"
+      style={{ background: active ? 'var(--surface)' : 'transparent' }}
     >
       <span
-        className="w-2.5 h-2.5 rounded-full shrink-0"
+        className="w-2 h-2 rounded-full shrink-0"
         style={{
           background: healthColor(workspace.health),
-          outline: dirty ? '2px dashed var(--h-ok)' : 'none',
-          outlineOffset: '2px',
+          outline: dirty ? '1px dashed var(--ink-4)' : 'none',
+          outlineOffset: '2.5px',
         }}
       />
-      <div className="min-w-0">
-        <div className="text-xs">Working tree</div>
-        <div className="mono text-[10px]" style={{ color: 'var(--dim)' }}>
+      <span className="min-w-0">
+        <span className="block text-[12.5px]" style={{ color: 'var(--ink)' }}>
+          Working tree
+        </span>
+        <span className="block num text-[10.5px]" style={{ color: 'var(--ink-4)' }}>
           {dirty ? `${dirty} uncommitted change${dirty === 1 ? '' : 's'}` : 'clean'}
-        </div>
-      </div>
-      <span className="mono ml-auto font-semibold" style={{ color: healthColor(workspace.health) }}>
+        </span>
+      </span>
+      <span
+        className="readout ml-auto text-[15px]"
+        style={{ color: healthColor(workspace.health) }}
+      >
         {fmt(workspace.health)}
       </span>
     </button>
   )
 }
 
+function ApiError({ message }) {
+  return (
+    <Centered>
+      <div className="panel p-6 max-w-md">
+        <p className="mb-2" style={{ color: 'var(--h-bad)' }}>
+          Could not reach the API
+        </p>
+        <p className="num text-[12px] mb-4" style={{ color: 'var(--ink-3)' }}>
+          {message}
+        </p>
+        <p className="text-[12px]" style={{ color: 'var(--ink-3)' }}>
+          The observatory reads from a local server. Start it with{' '}
+          <code className="num" style={{ color: 'var(--ink-2)' }}>
+            gitcodebase serve
+          </code>
+          .
+        </p>
+      </div>
+    </Centered>
+  )
+}
+
+// Skeletons in the shape of the thing that is coming, rather than a spinner
+// that tells you nothing about what to expect.
+function BootSkeleton() {
+  return (
+    <div className="h-full flex flex-col" style={{ background: 'var(--paper)' }}>
+      <div className="h-[50px] shrink-0" style={{ borderBottom: '1px solid var(--rule)' }} />
+      <div className="flex-1 flex min-h-0">
+        <div
+          className="w-[236px] lg:w-[310px] 2xl:w-[400px] shrink-0 p-5 space-y-3"
+          style={{ borderRight: '1px solid var(--rule)', background: 'var(--sunken)' }}
+        >
+          {Array.from({ length: 9 }, (_, i) => (
+            <div key={i} className="skeleton h-4" style={{ width: `${88 - i * 4}%` }} />
+          ))}
+        </div>
+        <div className="flex-1 px-8 pt-10">
+          <PanelSkeleton />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PanelSkeleton() {
+  return (
+    <div className="pt-4">
+      <div className="skeleton h-3 w-24" />
+      <div className="skeleton h-16 w-56 mt-4" />
+      <div className="mt-10 space-y-6">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="flex gap-5 items-center">
+            <div className="skeleton h-3 w-28 shrink-0" />
+            <div className="skeleton h-[2px] flex-1" />
+            <div className="skeleton h-6 w-14 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const Centered = ({ children }) => (
-  <div className="h-full flex items-center justify-center">{children}</div>
+  <div className="h-full flex items-center justify-center" style={{ background: 'var(--paper)' }}>
+    {children}
+  </div>
 )
-const Loading = () => <div className="panel p-8 text-center text-xs" style={{ color: 'var(--dim)' }}>Loading…</div>

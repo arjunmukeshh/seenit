@@ -1,12 +1,20 @@
-import { healthColor, grade, fmt } from '../lib/api'
+import { healthColor, grade, gradeMeaning, fmt, TYPICAL } from '../lib/api'
 
-// The health scorecard.
+// The health readout.
 //
-// Every derived score is shown next to the raw metrics that produced it. This
-// is deliberate: a composite score is a judgement built on thresholds and
-// weights, and one you cannot trace is one nobody should trust. The raw numbers
-// are facts; the score is an opinion; the UI should make that distinction
-// visible rather than presenting a single confident number.
+// Every derived score sits next to the raw metrics that produced it. A
+// composite is a judgement built on thresholds and weights, and one you cannot
+// trace is one nobody should trust: the raw numbers are facts, the score is an
+// opinion, and the interface should keep that distinction visible rather than
+// presenting a single confident figure.
+//
+// This replaced a stack of eight identical cards. The cards were wrong twice
+// over. Visually they were the most generic thing in the product — rounded box,
+// title left, number right, progress bar, 2x2 stat grid, repeated. And
+// informationally they lied: `size` counts for 0.30 of the score and
+// `readability` for 0.06, yet both got the same box, the same type size and the
+// same share of the eye. Here the rows are ordered by weight and their figures
+// are sized by it, so what dominates the score dominates the page.
 
 const DIMENSION_DETAIL = {
   complexity: (d) => [
@@ -23,12 +31,12 @@ const DIMENSION_DETAIL = {
   ],
   duplication: (d) => [
     ['clone pairs', d.clonePairs],
-    ['duplicated', d.duplicatedRatio != null ? `${(d.duplicatedRatio * 100).toFixed(1)}%` : '—'],
+    ['duplicated', pct(d.duplicatedRatio)],
     ['files involved', d.filesInvolved],
   ],
   readability: (d) => [
     ['p90 nesting', d.p90Nesting],
-    ['comment ratio', d.commentRatio != null ? `${(d.commentRatio * 100).toFixed(1)}%` : '—'],
+    ['comment ratio', pct(d.commentRatio)],
     ['p90 line length', d.p90LineLength],
   ],
   standards: (d) => [
@@ -49,134 +57,198 @@ const DIMENSION_DETAIL = {
   ],
 }
 
+const pct = (v) => (v != null ? `${(v * 100).toFixed(1)}%` : '—')
+
 export function HealthPanel({ health, dimensions, previous, weights }) {
   const delta = previous?.overall != null && health != null ? health - previous.overall : null
 
+  // Heaviest first. The order is the argument: it tells you what actually
+  // moves this number before you read a single figure.
+  const rows = Object.entries(dimensions ?? {}).sort(
+    ([a], [b]) => (weights?.[b] ?? 0) - (weights?.[a] ?? 0),
+  )
+  const maxWeight = Math.max(...rows.map(([name]) => weights?.[name] ?? 0), 0.01)
+
   return (
-    <div className="space-y-3">
-      <div className="panel p-4 flex items-baseline gap-4">
-        <div>
-          <div className="label mb-1">Overall health</div>
-          <div className="flex items-baseline gap-2">
-            <span className="mono text-4xl font-semibold" style={{ color: healthColor(health) }}>
-              {fmt(health)}
-            </span>
-            <span className="mono text-lg" style={{ color: 'var(--dim)' }}>
-              {grade(health)}
-            </span>
-            {delta !== null && Math.abs(delta) >= 0.05 && (
-              <span
-                className="mono text-sm"
-                style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}
-              >
-                {delta > 0 ? '▲ +' : '▼ '}
-                {Math.abs(delta).toFixed(1)}
-              </span>
-            )}
-          </div>
+    <div>
+      <Overall health={health} delta={delta} />
+
+      <div className="mt-9">
+        <div className="flex items-baseline justify-between mb-1">
+          <h2 className="label">Dimensions</h2>
+          <span className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
+            ordered by weight · scale marks {TYPICAL}
+          </span>
         </div>
-        {/* This caption previously read "thresholds that are not yet
-            calibrated", which stopped being true once the study landed. A stale
-            disclaimer is its own kind of inaccuracy. */}
-        <p className="text-xs ml-auto max-w-sm hidden xl:block" style={{ color: 'var(--dim)' }}>
-          A weighted composite. The raw metrics beside each dimension are facts; this number is a
-          judgement built on them. Thresholds are measured per language from 1M+ functions across
-          1,100 repositories — <span style={{ color: 'var(--muted)' }}>good = p75, warn = p90</span> of
-          real code. Weights are partly measured, partly judgement.
+
+        <div style={{ borderTop: '1px solid var(--rule)' }}>
+          {rows.map(([name, dimension]) => (
+            <DimensionRow
+              key={name}
+              name={name}
+              dimension={dimension}
+              previous={previous?.dimensions?.[name]?.score}
+              weight={weights?.[name]}
+              maxWeight={maxWeight}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// The headline figure, given room to be the headline.
+function Overall({ health, delta }) {
+  return (
+    <section className="pt-2">
+      <h2 className="label">Overall health</h2>
+
+      <div className="flex flex-wrap items-end gap-x-5 gap-y-3 mt-3">
+        <div className="flex items-end gap-3">
+          <span
+            className="readout"
+            style={{ fontSize: 'clamp(3.5rem, 8vw, 5.25rem)', color: healthColor(health) }}
+          >
+            {fmt(health)}
+          </span>
+          <span className="readout pb-1.5" style={{ fontSize: '1.5rem', color: 'var(--ink-3)' }}>
+            {grade(health)}
+          </span>
+        </div>
+
+        <div className="pb-2">
+          <div className="text-[13px]" style={{ color: 'var(--ink-2)' }}>
+            {gradeMeaning(health)}
+          </div>
+          {delta !== null && Math.abs(delta) >= 0.05 && (
+            <div
+              className="num text-[12px] mt-0.5"
+              style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}
+            >
+              {delta > 0 ? '↑' : '↓'} {Math.abs(delta).toFixed(1)} since last snapshot
+            </div>
+          )}
+        </div>
+
+        {/* The provenance note. Not a boxed "info card" — running text at the
+            end of the line, where a caption belongs. */}
+        <p
+          className="text-[12px] leading-relaxed ml-auto max-w-[38ch] pb-1 hidden lg:block text-pretty"
+          style={{ color: 'var(--ink-3)' }}
+        >
+          A weighted composite. Thresholds are measured per language from 1.6M functions across
+          1,100 repositories, at{' '}
+          <span style={{ color: 'var(--ink-2)' }}>good = p75, warn = p90</span> of real code — so 70
+          is where an ordinary repository lands.
         </p>
       </div>
-
-      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
-        {Object.entries(dimensions ?? {}).map(([name, d]) => (
-          <DimensionCard
-            key={name}
-            name={name}
-            dimension={d}
-            previous={previous?.dimensions?.[name]?.score}
-            weight={weights?.[name]}
-          />
-        ))}
-      </div>
-    </div>
+    </section>
   )
 }
 
-function DimensionCard({ name, dimension, previous, weight }) {
+function DimensionRow({ name, dimension, previous, weight, maxWeight }) {
   const measured = dimension.score !== null && dimension.score !== undefined
   const delta = measured && previous != null ? dimension.score - previous : null
+  const detail = measured ? (DIMENSION_DETAIL[name]?.(dimension) ?? []) : []
+
+  // Weight drives type size as well as order. The range is narrow on purpose:
+  // enough that the eye ranks them without the lightest dimension becoming
+  // unreadable.
+  const emphasis = (weight ?? 0) / maxWeight
+  const scoreSize = 1.375 + emphasis * 0.5 // rem
 
   return (
-    <div className="panel p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-medium capitalize">{name}</span>
+    <article
+      className="grid gap-x-5 gap-y-2 py-4 items-baseline grid-cols-[minmax(0,1fr)] md:grid-cols-[8.5rem_minmax(0,1fr)_5.5rem]"
+      style={{ borderBottom: '1px solid var(--rule)' }}
+    >
+      <div className="flex items-baseline gap-2 md:block">
+        <h3 className="text-[13.5px] capitalize" style={{ color: 'var(--ink)' }}>
+          {name}
+        </h3>
         {weight != null && (
-          <span className="mono text-[10px]" style={{ color: 'var(--dim)' }}>
-            w={weight}
+          <div className="num text-[11px] md:mt-0.5" style={{ color: 'var(--ink-4)' }}>
+            weight {weight.toFixed(2)}
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0">
+        {measured ? (
+          <>
+            <Scale score={dimension.score} />
+            <dl className="flex flex-wrap gap-x-5 gap-y-1 mt-2.5">
+              {detail.map(([k, v]) => (
+                <div key={k} className="flex items-baseline gap-1.5">
+                  <dt className="text-[11.5px]" style={{ color: 'var(--ink-4)' }}>
+                    {k}
+                  </dt>
+                  <dd className="num text-[11.5px]" style={{ color: 'var(--ink-2)' }}>
+                    {v ?? '—'}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        ) : (
+          // Unmeasured says why, rather than rendering a red zero. "No report
+          // found" and "nothing is covered" are different facts, and only one
+          // of them is the codebase's problem.
+          <p className="text-[12px] py-1" style={{ color: 'var(--ink-3)' }}>
+            {dimension.reason ?? 'no data'}
+          </p>
+        )}
+      </div>
+
+      <div className="md:text-right">
+        {measured ? (
+          <>
+            <span
+              className="readout"
+              style={{ fontSize: `${scoreSize}rem`, color: healthColor(dimension.score) }}
+            >
+              {fmt(dimension.score)}
+            </span>
+            {delta !== null && Math.abs(delta) >= 0.05 && (
+              <div
+                className="num text-[11px] mt-1"
+                style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}
+              >
+                {delta > 0 ? '+' : ''}
+                {delta.toFixed(1)}
+              </div>
+            )}
+          </>
+        ) : (
+          <span className="text-[12px]" style={{ color: 'var(--ink-4)' }}>
+            not measured
           </span>
         )}
-        <span className="ml-auto flex items-baseline gap-1.5">
-          <CardScore score={dimension.score} delta={delta} measured={measured} />
-        </span>
       </div>
+    </article>
+  )
+}
 
-      {/* Unmeasured dimensions show why, rather than rendering a red zero —
-          "no report found" and "nothing covered" are different facts. */}
-      {measured ? (
-        <CardDetail name={name} dimension={dimension} />
-      ) : (
-        <div className="text-[11px]" style={{ color: 'var(--dim)' }}>
-          {dimension.reason ?? 'no data'}
-        </div>
-      )}
+// A measured scale rather than a progress bar.
+//
+// A bare bar answers "how full is it?", which is the wrong question — nobody
+// knows what full means here. The tick at 70 turns it into a comparison: this
+// is where an ordinary repository sits, and you can see at a glance which side
+// of ordinary you are on.
+function Scale({ score }) {
+  return (
+    <div className="relative h-[7px]" aria-hidden="true">
+      <div className="absolute inset-x-0 top-[2.5px] h-[2px]" style={{ background: 'var(--rule)' }} />
+      <div
+        className="absolute left-0 top-[2.5px] h-[2px]"
+        style={{ width: `${Math.max(0, Math.min(100, score))}%`, background: healthColor(score) }}
+      />
+      <div
+        className="absolute top-0 h-[7px] w-[1px]"
+        style={{ left: `${TYPICAL}%`, background: 'var(--ink-4)' }}
+        title={`${TYPICAL} — typical of real code`}
+      />
     </div>
-  )
-}
-
-function CardScore({ score, delta, measured }) {
-  if (!measured) {
-    return (
-      <span className="mono text-xs" style={{ color: 'var(--dim)' }}>
-        not measured
-      </span>
-    )
-  }
-  return (
-    <>
-      <span className="mono text-lg font-semibold" style={{ color: healthColor(score) }}>
-        {fmt(score)}
-      </span>
-      {delta !== null && Math.abs(delta) >= 0.05 && (
-        <span className="mono text-[10px]" style={{ color: delta > 0 ? 'var(--h-good)' : 'var(--h-bad)' }}>
-          {delta > 0 ? '+' : ''}
-          {delta.toFixed(1)}
-        </span>
-      )}
-    </>
-  )
-}
-
-function CardDetail({ name, dimension }) {
-  const detail = DIMENSION_DETAIL[name]?.(dimension) ?? []
-  return (
-    <>
-      <div className="h-1 rounded-full mb-2.5 overflow-hidden" style={{ background: 'var(--panel-2)' }}>
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${dimension.score}%`, background: healthColor(dimension.score) }}
-        />
-      </div>
-      {/* Single column until there is genuinely room for two — at narrow widths
-          the label and value collided into each other. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-        {detail.map(([k, v]) => (
-          <div key={k} className="flex justify-between gap-2 text-[11px]">
-            <span className="truncate" style={{ color: 'var(--dim)' }}>{k}</span>
-            <span className="mono shrink-0" style={{ color: 'var(--muted)' }}>
-              {v ?? '—'}
-            </span>
-          </div>
-        ))}
-      </div>
-    </>
   )
 }

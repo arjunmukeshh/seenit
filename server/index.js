@@ -112,7 +112,10 @@ const ROUTES = {
     const value = {
       health: result.health,
       dimensions: result.dimensions,
+      weights: result.weights,
       fileCount: result.fileCount,
+      productFiles: result.productFiles,
+      testFiles: result.testFiles,
       previous,
       changes,
       files: result.facts.map(fileRow),

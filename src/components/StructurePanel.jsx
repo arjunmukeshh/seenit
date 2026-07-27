@@ -22,13 +22,16 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
   const offMainSeq = ext?.offMainSequence ?? []
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Stat label="modules" value={ext?.modules ?? modules?.modules?.length ?? '—'} />
-        <Stat label="cycles" value={cycles.length} bad={cycles.length > 0} />
-        <Stat label="hub modules" value={hubs.length} bad={hubs.length > 0} />
-        <Stat label="main-seq distance" value={ext?.meanMainSequenceDistance ?? '—'} />
-      </div>
+    <div className="space-y-10">
+      <section>
+        <h2 className="label mb-3">Architecture</h2>
+        <dl className="flex flex-wrap gap-x-10 gap-y-4">
+          <Stat label="modules" value={ext?.modules ?? modules?.modules?.length ?? '—'} />
+          <Stat label="cycles" value={cycles.length} bad={cycles.length > 0} />
+          <Stat label="hub modules" value={hubs.length} bad={hubs.length > 0} />
+          <Stat label="mean main-seq distance" value={ext?.meanMainSequenceDistance ?? '—'} />
+        </dl>
+      </section>
 
       <Section
         title="Dependency cycles"
@@ -36,10 +39,10 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
         empty="No cycles — modules form a clean DAG."
         items={cycles}
         render={(c, i) => (
-          <div key={i} className="mono text-[11px] py-1">
+          <div key={i} className="mono text-[11.5px] py-1.5" style={{ borderBottom: '1px solid var(--rule)' }}>
             <span style={{ color: 'var(--h-bad)' }}>◍ </span>
             {c.members.join(' → ')}
-            <span style={{ color: 'var(--dim)' }}> → ↺</span>
+            <span style={{ color: 'var(--ink-4)' }}> → ↺</span>
           </div>
         )}
       />
@@ -50,9 +53,9 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
         empty="No hubs."
         items={hubs}
         render={(h) => (
-          <div key={h.path} className="flex justify-between mono text-[11px] py-1">
+          <div key={h.path} className="flex justify-between gap-4 mono text-[11.5px] py-1.5" style={{ borderBottom: '1px solid var(--rule)' }}>
             <span>{h.path}</span>
-            <span style={{ color: 'var(--dim)' }}>
+            <span style={{ color: 'var(--ink-4)' }}>
               in {h.fanIn} · out {h.fanOut}
             </span>
           </div>
@@ -65,9 +68,9 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
         empty="—"
         items={offMainSeq.slice(0, 8)}
         render={(m) => (
-          <div key={m.path} className="flex justify-between mono text-[11px] py-1">
+          <div key={m.path} className="flex justify-between gap-4 mono text-[11.5px] py-1.5" style={{ borderBottom: '1px solid var(--rule)' }}>
             <span>{m.path}</span>
-            <span style={{ color: 'var(--dim)' }}>
+            <span style={{ color: 'var(--ink-4)' }}>
               I={m.instability} A={m.abstractness} D={m.distance}
             </span>
           </div>
@@ -81,9 +84,9 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
           empty=""
           items={coupling.hidden.slice(0, 8)}
           render={(h, i) => (
-            <div key={i} className="flex justify-between mono text-[11px] py-1">
+            <div key={i} className="flex justify-between gap-4 mono text-[11.5px] py-1.5" style={{ borderBottom: '1px solid var(--rule)' }}>
               <span>
-                {h.a} <span style={{ color: 'var(--dim)' }}>↔</span> {h.b}
+                {h.a} <span style={{ color: 'var(--ink-4)' }}>↔</span> {h.b}
               </span>
               <span style={{ color: 'var(--h-ok)' }}>{(h.strength * 100).toFixed(0)}%</span>
             </div>
@@ -94,29 +97,41 @@ export function StructurePanel({ snapshotRef, live, dimensions }) {
   )
 }
 
+// A figure and its label, not a card.
+//
+// These were four equal boxes in a row — the single most generic layout in any
+// generated dashboard, and unjustified here: "cycles: 0" and "modules: 40" are
+// two words and two digits, and wrapping each in a bordered panel gave them the
+// visual weight of a section heading.
 const Stat = ({ label, value, bad }) => (
-  <div className="panel p-3">
-    <div className="label mb-1">{label}</div>
-    <div className="mono text-xl" style={{ color: bad ? 'var(--h-bad)' : 'var(--text)' }}>
+  <div>
+    <dt className="label mb-1.5">{label}</dt>
+    <dd className="readout text-[26px]" style={{ color: bad ? 'var(--h-bad)' : 'var(--ink)' }}>
       {value}
-    </div>
+    </dd>
   </div>
 )
 
 function Section({ title, note, empty, items, render }) {
   return (
-    <div className="panel p-4">
-      <div className="label mb-1">{title}</div>
-      <p className="text-[11px] mb-3" style={{ color: 'var(--dim)' }}>
+    <section>
+      <h2 className="text-[13.5px] mb-1" style={{ color: 'var(--ink)' }}>
+        {title}
+      </h2>
+      <p className="text-[12px] mb-3 max-w-[68ch] text-pretty" style={{ color: 'var(--ink-3)' }}>
         {note}
       </p>
       {items?.length ? (
-        <div style={{ color: 'var(--muted)' }}>{items.map(render)}</div>
-      ) : (
-        <div className="text-[11px]" style={{ color: 'var(--h-good)' }}>
-          {empty}
+        <div style={{ color: 'var(--ink-2)', borderTop: '1px solid var(--rule)' }}>
+          {items.map(render)}
         </div>
+      ) : (
+        // A clean result is a finding, not an absence. Saying so in plain words
+        // beats an empty region that reads as "failed to load".
+        <p className="text-[12px]" style={{ color: 'var(--h-good)' }}>
+          {empty}
+        </p>
       )}
-    </div>
+    </section>
   )
 }

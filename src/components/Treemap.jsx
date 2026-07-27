@@ -93,7 +93,7 @@ export function Treemap({ files, height = 460, onSelect }) {
     return squarify(items, 0, 0, width, height)
   }, [files, width, height])
 
-  if (!files?.length) return <div className="p-8 text-center" style={{ color: 'var(--dim)' }}>No files.</div>
+  if (!files?.length) return <div className="p-8 text-center" style={{ color: 'var(--ink-4)' }}>No files.</div>
 
   return (
     <div className="relative" ref={ref}>
@@ -109,27 +109,38 @@ export function Treemap({ files, height = 460, onSelect }) {
               onClick={() => onSelect?.(f.path)}
               style={{ cursor: 'pointer' }}
             >
+              {/* Tinted fill with a saturated edge, rather than a solid block
+                  of colour at 72% opacity.
+                  Solid fills made the map read as a muddy patchwork of olive
+                  and brick, and forced the labels onto a hardcoded black that
+                  disappeared in dark mode. Mixing the health colour into the
+                  surface keeps every cell legible in both schemes, lets the
+                  label sit in plain ink, and still ranks the cells by hue. */}
               <rect
                 x={x}
                 y={y}
                 width={Math.max(0, w - 1)}
                 height={Math.max(0, h - 1)}
-                fill={healthColor(item.score)}
-                opacity={isHovered ? 0.95 : f.isTest ? 0.35 : 0.72}
-                stroke={isHovered ? 'var(--text)' : 'var(--bg)'}
-                strokeWidth={isHovered ? 1.5 : 1}
+                style={{
+                  fill: `color-mix(in srgb, ${healthColor(item.score)} ${
+                    isHovered ? 46 : f.isTest ? 11 : 28
+                  }%, var(--surface))`,
+                  stroke: isHovered ? 'var(--ink)' : healthColor(item.score),
+                  strokeWidth: isHovered ? 1.5 : 0.75,
+                  strokeOpacity: isHovered ? 1 : 0.5,
+                  transition: 'fill 140ms ease',
+                }}
               />
               {/* Only label cells with room; unreadable text is worse than none */}
               {w > 54 && h > 20 && (
                 <text
-                  x={x + 5}
+                  x={x + 6}
                   y={y + 14}
                   fontSize="9.5"
-                  fill="rgba(0,0,0,0.75)"
                   className="mono"
-                  style={{ pointerEvents: 'none' }}
+                  style={{ pointerEvents: 'none', fill: isHovered ? 'var(--ink)' : 'var(--ink-2)' }}
                 >
-                  {basename(f.path, Math.floor((w - 10) / 5.6))}
+                  {basename(f.path, Math.floor((w - 12) / 5.6))}
                 </text>
               )}
             </g>
@@ -145,7 +156,10 @@ export function Treemap({ files, height = 460, onSelect }) {
 function Tooltip({ file }) {
   if (!file) return null
   return (
-    <div className="panel absolute top-2 right-2 p-2.5 pointer-events-none" style={{ background: 'var(--panel-2)' }}>
+    <div
+      className="panel absolute top-3 right-3 p-3 pointer-events-none"
+      style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-sm)' }}
+    >
       <div className="mono text-[11px] mb-1.5">{file.path}</div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px]">
         <Stat label="lines" value={file.loc} />
@@ -161,8 +175,8 @@ function Tooltip({ file }) {
 
 const Stat = ({ label, value }) => (
   <div className="flex justify-between gap-3">
-    <span style={{ color: 'var(--dim)' }}>{label}</span>
-    <span className="mono" style={{ color: 'var(--muted)' }}>{value}</span>
+    <span style={{ color: 'var(--ink-4)' }}>{label}</span>
+    <span className="mono" style={{ color: 'var(--ink-2)' }}>{value}</span>
   </div>
 )
 

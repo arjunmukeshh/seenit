@@ -13,20 +13,20 @@ import { healthColor, fmt } from '../lib/api'
 // and worse happened here".
 
 const ROW = 34
-const RAIL_X = 26
+const RAIL_X = 24
 
 // Column offsets from the rail. The subject column is dropped entirely when
 // there isn't room for it — SVG text does not reflow, so a narrow pane would
 // otherwise render commit messages overlapping the scores.
-const COL = { sha: 18, health: 78, delta: 118, subject: 166 }
+const COL = { sha: 16, health: 76, delta: 116, subject: 162 }
 const SUBJECT_MIN_WIDTH = 300
 
 export function CommitRail({ snapshots, selected, compareWith, onSelect, onCompare, width = 430 }) {
   if (!snapshots?.length) {
     return (
-      <div className="p-6 text-center" style={{ color: 'var(--muted)' }}>
+      <div className="p-6 text-center" style={{ color: 'var(--ink-2)' }}>
         <p className="mb-2">No snapshots yet.</p>
-        <p className="mono text-xs" style={{ color: 'var(--dim)' }}>
+        <p className="mono text-xs" style={{ color: 'var(--ink-4)' }}>
           gitcodebase backfill
         </p>
       </div>
@@ -41,7 +41,7 @@ export function CommitRail({ snapshots, selected, compareWith, onSelect, onCompa
   // Node radius scales with churn (files changed), clamped so a huge commit
   // cannot swallow the rail.
   const maxFiles = Math.max(...rows.map((s) => s.files ?? 0), 1)
-  const radiusFor = (s) => 3.5 + 3 * Math.sqrt((s.files ?? 0) / maxFiles)
+  const radiusFor = (s) => 3 + 2.6 * Math.sqrt((s.files ?? 0) / maxFiles)
 
   const showSubject = width >= SUBJECT_MIN_WIDTH
   // ~5.6px per character at this font size; leave a small right margin.
@@ -55,8 +55,8 @@ export function CommitRail({ snapshots, selected, compareWith, onSelect, onCompa
         y1={12}
         x2={RAIL_X}
         y2={rows.length * ROW - ROW / 2 + 4}
-        stroke="var(--border)"
-        strokeWidth="2"
+        stroke="var(--rule-strong)"
+        strokeWidth="1"
       />
 
       {rows.map((s, i) => (
@@ -98,7 +98,7 @@ function RailRow({ snapshot: s, y, previous, radius, isSelected, isCompare, show
         <circle cx={RAIL_X} cy={y} r={radius + 4} fill="none" stroke={color} strokeWidth="1.5" opacity="0.6" />
       )}
 
-      <text x={RAIL_X + COL.sha} y={y + 4} className="mono" fontSize="11" fill="var(--dim)">
+      <text x={RAIL_X + COL.sha} y={y + 4} className="mono" fontSize="11" fill="var(--ink-4)">
         {sha}
       </text>
 
@@ -109,7 +109,7 @@ function RailRow({ snapshot: s, y, previous, radius, isSelected, isCompare, show
       <DeltaTick x={RAIL_X + COL.delta} y={y + 4} delta={delta} />
 
       {showSubject && (
-        <text x={RAIL_X + COL.subject} y={y + 4} fontSize="11.5" fill="var(--muted)">
+        <text x={RAIL_X + COL.subject} y={y + 4} fontSize="11.5" fill="var(--ink-2)">
           {truncate(s.subject?.replace(/^snapshot: \w+ /, '') ?? '', subjectChars)}
         </text>
       )}
@@ -122,13 +122,18 @@ function RailRow({ snapshot: s, y, previous, radius, isSelected, isCompare, show
 }
 
 // Hit area and selection highlight, spanning the full row.
+//
+// Selection lifts the row to the page surface rather than tinting it blue. The
+// old hardcoded rgba(110,168,254) was both untheme-able — it did not move
+// between light and dark — and a decorative hue in an interface where colour is
+// supposed to mean measurement.
 function RowBackground({ y, isSelected, isCompare }) {
-  const fill = isSelected ? 'rgba(110,168,254,0.10)' : isCompare ? 'rgba(110,168,254,0.05)' : 'transparent'
+  const fill = isSelected ? 'var(--surface)' : isCompare ? 'var(--wash)' : 'transparent'
   return (
     <>
       <rect x={0} y={y - ROW / 2} width="100%" height={ROW} fill={fill} />
       {(isSelected || isCompare) && (
-        <rect x={0} y={y - ROW / 2} width={2} height={ROW} fill="var(--accent)" opacity={isSelected ? 1 : 0.5} />
+        <rect x={0} y={y - ROW / 2} width={2} height={ROW} fill="var(--ink)" opacity={isSelected ? 1 : 0.35} />
       )}
     </>
   )
