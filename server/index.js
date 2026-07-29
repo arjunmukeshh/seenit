@@ -17,6 +17,8 @@ import { dirname } from 'node:path'
 
 import { repoRoot, gitDir, currentBranch, commitMeta } from '../lib/git.js'
 import { openLedger, listSnapshots, readSnapshotFile, listSnapshotFiles, diffSnapshots, MAIN_REF } from '../lib/ledger.js'
+import { ANALYZER_VERSION } from '../lib/ledger.js'
+import { normalizeStoredHealth } from '../lib/analyze/metrics/score.js'
 import { openCache } from '../lib/cache.js'
 import { analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
@@ -132,7 +134,9 @@ const ROUTES = {
     if (!file) return { files: await listSnapshotFiles(ledger, ref) }
     const content = await readSnapshotFile(ledger, ref, file)
     if (content === null) throw httpError(`not in snapshot: ${file}`, 404)
-    return content
+    // Stored health from an older analyzer carries a withdrawn duplication
+    // score; neutralise it before it reaches a screen.
+    return file === 'health.json' ? normalizeStoredHealth(content, ANALYZER_VERSION) : content
   },
 
   // The drift view: what changed about the codebase between two snapshots.
@@ -149,7 +153,12 @@ const ROUTES = {
       const [status, path] = line.split('\t')
       return { status, path }
     })
-    return { changed, patch, from: fromHealth, to: toHealth }
+    return {
+      changed,
+      patch,
+      from: normalizeStoredHealth(rawFrom, ANALYZER_VERSION),
+      to: normalizeStoredHealth(rawTo, ANALYZER_VERSION),
+    }
   },
 
   // Health of one file across the whole ledger — the metric-blame view.

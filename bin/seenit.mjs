@@ -12,6 +12,8 @@ import { openCache } from '../lib/cache.js'
 import { analyzeCommit, analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
 import { formatHealth, formatSnapshotRow, colorsFor } from '../lib/format.js'
+import { normalizeStoredHealth } from '../lib/analyze/metrics/score.js'
+import { ANALYZER_VERSION } from '../lib/ledger.js'
 
 const args = process.argv.slice(2)
 
@@ -72,7 +74,8 @@ const printHealth = (health, dimensions, previous) =>
 
 async function previousHealth(ledger) {
   const snaps = await listSnapshots(ledger, { limit: 1 })
-  return snaps.length ? readSnapshotFile(ledger, snaps[0].sha, 'health.json') : null
+  if (!snaps.length) return null
+  return normalizeStoredHealth(await readSnapshotFile(ledger, snaps[0].sha, 'health.json'), ANALYZER_VERSION)
 }
 
 const commands = {

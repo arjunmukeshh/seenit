@@ -1,0 +1,72 @@
+{
+  "measuredAt": "2026-07-27",
+  "method": "A substantial function is lifted from each repository, transformed, and planted back as a new file. Ground truth is known by construction. Recall is the share of plants the tool links to anything.",
+  "repos": 11,
+  "recallByTransformation": {
+    "verbatim": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "rename": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "rename+literals": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "+reformat": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "+comments": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "+reorder": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    },
+    "+extract": {
+      "found": 9,
+      "of": 11,
+      "recall": 0.818
+    }
+  },
+  "misses": {
+    "verbatim": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "rename": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "rename+literals": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "+reformat": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "+comments": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "+reorder": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ],
+    "+extract": [
+      "https://github.com/lelylan/simple-oauth2",
+      "https://github.com/reactiverse/es4x"
+    ]
+  }
+}

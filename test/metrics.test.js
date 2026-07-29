@@ -32,7 +32,7 @@ import { extract } from '../lib/analyze/extract.js'
 import { scoreDuplication, findClones } from '../lib/analyze/metrics/duplication.js'
 import { scoreStandards } from '../lib/analyze/metrics/standards.js'
 import { buildGraph, findCycles, scoreExtensibility } from '../lib/analyze/graph.js'
-import { percentile, scoreAgainst, rollup, grade, scoreComplexity } from '../lib/analyze/metrics/score.js'
+import { percentile, scoreAgainst, rollup, grade, scoreComplexity, normalizeStoredHealth } from '../lib/analyze/metrics/score.js'
 import { thresholdsFor } from '../lib/analyze/metrics/thresholds.js'
 
 async function facts(path, source) {
@@ -589,4 +589,30 @@ test('extract: deep nesting does not overflow the stack', async () => {
     assert.ok(f, `${label}: expected facts, got null`)
     assert.equal(typeof f.loc, 'number', `${label}: analysis must complete`)
   }
+})
+
+test('a withdrawn score is neutralised in stored snapshots, not just live output', async () => {
+  // Demoting duplication in the live path did not reach history. Every snapshot
+  // written before analyzer version 2 stored `duplication: { score: 100 }` from
+  // a scale since withdrawn, so `seenit log`, `seenit diff` and the snapshot
+  // view all kept showing a perfect duplication score for a repository the
+  // front page said had 34 duplicate pairs.
+  const stored = {
+    overall: 76.4,
+    dimensions: {
+      duplication: { score: 100, clonePairs: 27 },
+      size: { score: 70 },
+    },
+  }
+
+  const fixed = normalizeStoredHealth(stored, 2)
+  assert.equal(fixed.dimensions.duplication.score, null, 'the withdrawn score must not survive')
+  assert.match(fixed.dimensions.duplication.reason, /older analyzer/)
+  assert.equal(fixed.dimensions.duplication.clonePairs, 27, 'the measurement stays')
+  assert.equal(fixed.dimensions.size.score, 70, 'other dimensions are untouched')
+  assert.equal(fixed.stale, true, 'and the overall is flagged, since it was computed with it')
+
+  // Current-version health passes through untouched.
+  const current = { analyzerVersion: 2, dimensions: { duplication: { score: null, clonePairs: 3 } } }
+  assert.equal(normalizeStoredHealth(current, 2), current)
 })
