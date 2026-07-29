@@ -44,7 +44,8 @@ export function DuplicateList({ duplication }) {
         Identifiers, literals and comments are normalised away before matching, so a renamed and
         reformatted copy still registers. Ranked by longest aligned run — the number of matches
         that hold a constant offset between the two files, which is what separates a real copy from
-        two files that merely share a shape. Roughly 7 in 8 are real; it is weakest on view code.
+        two files that merely share a shape. It is weakest on view code, where unrelated components
+        share a lot of shape.
       </p>
 
       <div style={{ borderTop: '1px solid var(--rule)' }}>

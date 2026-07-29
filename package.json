@@ -1,24 +1,55 @@
 {
   "name": "seenit",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "A git-native code observatory. Repository health, version-controlled by the git engine itself.",
+  "description": "Has this already been written? Finds near-duplicate code, including renamed and reformatted copies. Local, zero-config, and speaks MCP.",
+  "keywords": [
+    "duplicate-code",
+    "copy-paste-detection",
+    "clone-detection",
+    "code-analysis",
+    "tree-sitter",
+    "mcp",
+    "mcp-server",
+    "claude-code",
+    "static-analysis",
+    "code-quality"
+  ],
+  "license": "MIT",
+  "author": "Arjun Mukesh",
+  "homepage": "https://github.com/arjunmukeshh/seenit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arjunmukeshh/seenit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arjunmukeshh/seenit/issues"
+  },
   "bin": {
     "seenit": "./bin/seenit.mjs"
   },
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "mcp/",
+    "server/",
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "serve": "node bin/seenit.mjs serve",
-    "test": "node --test 'test/*.test.js'"
+    "test": "node --test 'test/*.test.js'",
+    "prepublishOnly": "npm test && npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@vscode/tree-sitter-wasm": "0.3.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "recharts": "^3.10.1",
     "web-tree-sitter": "0.26.11"
   },
   "devDependencies": {
@@ -27,6 +58,9 @@
     "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.23",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "recharts": "^3.10.1",
     "tailwindcss": "^3.4.19",
     "vite": "^8.1.5"
   }

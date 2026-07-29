@@ -11,19 +11,20 @@ npx seenit
 ```
   Closest matches
 
-  lib/analyze/metrics/score.js:295
+  calibration/alignment.mjs:36
+  calibration/recall.mjs:42
+    and 5 more files sharing this shape
+
+  lib/git.js:82
+  lib/ledger.js:174
+
+  lib/analyze/metrics/score.js:324
   src/lib/api.js:30
 
-  calibration/corpus.mjs:71
-  calibration/history.mjs:136
-
-  bin/seenit.mjs:132
-  mcp/server.js:221
-
-  31 more pairs, 24 of 42 files involved.
+  1 more, 13 of 46 files involved.
 ```
 
-Those are real findings in this repository: the same score-threshold ladder written twice, a PRNG copy-pasted between two scripts, and the CLI and MCP server both reimplementing analyse-then-compare.
+Those are real findings in this repository, printed by running it on itself: an argument parser copy-pasted across seven scripts, two `git log --format` record parsers built the same way under different constant names, and the same score-threshold ladder encoded once in the analyzer and once in the UI.
 
 No install, no config, no signup. Nothing is written to your working tree.
 
@@ -31,29 +32,29 @@ No install, no config, no signup. Nothing is written to your working tree.
 
 Because the third copy never looks like the first. seenit parses with tree-sitter and normalises identifiers, literals and comments away before matching, so a renamed, reformatted, re-commented copy still registers.
 
-Take one function, rename every identifier, change every literal, add comments, reformat it. `grep` finds zero hits on `calculateOrderTotal`, `taxRate` or `item.price`, and no line is byte-identical. seenit matches 10 of 14 fingerprints.
+Take one function, rename every identifier, change every literal, add comments, reformat it. `grep` finds zero hits on `calculateOrderTotal`, `taxRate` or `item.price`, and not one line is byte-identical. seenit's fingerprints for the two are identical — all 21 of them. (That exact pair is a test, so the claim stays true: [test/metrics.test.js](https://github.com/arjunmukeshh/seenit/blob/main/test/metrics.test.js).)
 
 What it does **not** catch: a copy that behaves the same but is built differently. A `for` loop rewritten as `reduce` shares **zero** fingerprints. seenit finds copies, not reimplementations.
 
 ## How often is it right?
 
-**Recall 0.83** on 63 npm repositories — held out, and the number that matters, because a miss is silent. Measured by injection: lift a real function, transform it the way an agent would, plant it elsewhere, check whether seenit finds it. Ground truth is known by construction, so no hand-labelling is involved.
+**Recall is the number that matters, because a miss is silent.** Measured by injection on 63 npm repositories: lift a real function, transform it the way an agent would, plant it elsewhere, check whether seenit finds it. Ground truth is known by construction, so no hand-labelling is involved — and the threshold was chosen on one half of the repositories and reported on the other.
 
-| what was done to the copy | found |
-|---|---|
-| pasted unchanged | 0.91 |
-| every identifier renamed | 0.91 |
-| + every literal changed | 0.86 |
-| + reformatted, comments churned | 0.83 |
-| + statements reordered, a variable extracted | 0.83 |
+| what was done to the copy | `npx seenit` | `find_existing` |
+|---|---|---|
+| pasted unchanged | 0.91 | 0.91 |
+| every identifier renamed | 0.91 | 0.91 |
+| + every literal changed | 0.86 | 0.89 |
+| + reformatted, comments churned | 0.83 | 0.89 |
+| + statements reordered, a variable extracted | **0.80** | **0.89** |
 
 Renaming, reformatting and reordering cost almost nothing — which is the claim in the section above, measured rather than asserted.
 
+The two columns are two thresholds, deliberately. A person reads three findings and one bad one makes the tool feel noisy, so the CLI trades recall for quiet. `find_existing` hands candidates to a model that reads both snippets and discards what does not apply — a false positive costs tokens, a false negative costs the whole point — so it runs wider.
+
 **Precision for the shipped ranking is not yet measured.** The honest state: 60% was measured on the *previous* ranking, and the 88% figure came from choosing the cutoff and scoring it on the same 30 cases — fitting, not evidence. A held-out precision study is the next thing.
 
-The two surfaces run at different bars, deliberately. A person reads three findings and one bad one makes the tool feel noisy, so the CLI trades recall for quiet. `find_existing` hands candidates to a model that reads both snippets and discards what does not apply — a false positive costs tokens, a false negative costs the whole point — so it runs wider.
-
-Full method, corpus percentiles and known gaps: **[calibration/](calibration/)**.
+Full method, corpus percentiles and known gaps: **[calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration)**.
 
 ## For coding agents
 
@@ -83,6 +84,6 @@ health 83.8  ▼ -0.9  3 files changed  dup: score.js ↔ api.js
 
 ## Also in here
 
-Repository health over time, version-controlled inside `.git/` as a real git repo you can `log`, `diff` and `bisect` — [docs/observatory.md](docs/observatory.md), or `seenit help --all`. Thresholds come from a pre-registered study of 1.6M functions across 1,100 repositories: [calibration/](calibration/).
+Repository health over time, version-controlled inside `.git/` as a real git repo you can `log`, `diff` and `bisect` — [docs/observatory.md](https://github.com/arjunmukeshh/seenit/blob/main/docs/observatory.md), or `seenit help --all`. Thresholds come from a pre-registered study of 1.6M functions across 1,100 repositories: [calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration).
 
 MIT.

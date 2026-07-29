@@ -616,3 +616,56 @@ test('a withdrawn score is neutralised in stored snapshots, not just live output
   const current = { analyzerVersion: 2, dimensions: { duplication: { score: null, clonePairs: 3 } } }
   assert.equal(normalizeStoredHealth(current, 2), current)
 })
+
+// The README's grep comparison, pinned.
+//
+// "Rename every identifier, change every literal, add comments, reformat it —
+// grep finds nothing and seenit still matches" is the front-page claim, and a
+// claim on a front page should fail a test when it stops being true rather than
+// quietly become a lie. These are the two snippets the README describes.
+test('a renamed, re-littered, re-commented, reformatted copy keeps every fingerprint', async () => {
+  const original = `
+function calculateOrderTotal(items, taxRate) {
+  let subtotal = 0
+  for (const item of items) {
+    subtotal += item.price * item.quantity
+  }
+  const discount = subtotal > 100 ? subtotal * 0.1 : 0
+  const taxed = (subtotal - discount) * (1 + taxRate)
+  return Math.round(taxed * 100) / 100
+}
+`
+  const copy = `
+// Work out what the basket costs once everything is applied.
+function computeBasketSum(lines, vatFraction) {
+
+  let running = 0
+
+  for (const line of lines) {
+    // price times count
+    running += line.cost * line.count
+  }
+
+  const rebate = running > 250 ? running * 0.2 : 0
+  const withVat = (running - rebate) * (1 + vatFraction)
+
+  return Math.round(withVat * 1000) / 1000
+}
+`
+  // Not one identifier, literal or line survives — this is what grep is given.
+  for (const token of ['calculateOrderTotal', 'taxRate', 'item.price', 'subtotal']) {
+    assert.ok(!copy.includes(token), `${token} must not appear in the copy`)
+  }
+  const lines = (s) => new Set(s.split('\n').map((l) => l.trim()).filter((l) => l && l !== '}'))
+  const shared = [...lines(original)].filter((l) => lines(copy).has(l))
+  assert.deepEqual(shared, [], 'no non-trivial line may be byte-identical')
+
+  const fingerprints = async (src) =>
+    new Set(((await facts('f.js', src)).fingerprints ?? []).map(([h]) => h))
+  const a = await fingerprints(original)
+  const b = await fingerprints(copy)
+  const overlap = [...a].filter((h) => b.has(h))
+
+  assert.equal(a.size, 21, 'the original fingerprints to 21 windows')
+  assert.equal(overlap.length, a.size, 'and the copy shares every one of them')
+})

@@ -121,15 +121,20 @@ const commands = {
         `  ${C.dim}${dup.groupCount - shown.length} more, ` +
           `${dup.filesInvolved} of ${result.productFiles} files involved.${C.reset}`,
       )
+      console.log()
     }
 
     // Identifiers are normalized before fingerprinting, so this is not a text
     // search — say so, because "why didn't grep find this" is the first
     // question anyone asks.
+    //
+    // No hit rate is quoted here. It used to say "~7 in 8 are real", which was
+    // the 88% figure from choosing a cutoff and scoring it on the same thirty
+    // cases. The README retracted that number; a claim retracted in one place
+    // and printed in another is worse than never having made it.
     console.log(
       `  ${C.dim}Identifiers and literals are normalized before matching, so renamed\n` +
-        `  copies count and grep would not find these. Ranked by longest aligned\n` +
-        `  run; ~7 in 8 are real. See calibration/duplication-labels.json.${C.reset}`,
+        `  copies count and grep would not find these. Ranked by longest aligned run.${C.reset}`,
     )
     console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
   },
