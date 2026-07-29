@@ -37,13 +37,23 @@ What it does **not** catch: a copy that behaves the same but is built differentl
 
 ## How often is it right?
 
-**Precision 60% on 30 hand-labelled findings** under the original ranking — 18 real, 12 not. Measured, not asserted: [calibration/duplication-labels.json](calibration/duplication-labels.json).
+**Recall 0.83** on 63 npm repositories — held out, and the number that matters, because a miss is silent. Measured by injection: lift a real function, transform it the way an agent would, plant it elsewhere, check whether seenit finds it. Ground truth is known by construction, so no hand-labelling is involved.
 
-Findings are ranked by *longest aligned run*: the number of matches holding a constant offset between the two files. Copy-paste preserves that offset; coincidental matches scatter. On the labelled set real duplication scored 10–27 aligned and idiomatic noise 3–8, with no overlap — so ranking on it lifted precision to 7 of 8 on this repo, where raw overlap had put a run of `useState` declarations above a threshold ladder written twice.
+| what was done to the copy | found |
+|---|---|
+| pasted unchanged | 0.91 |
+| every identifier renamed | 0.91 |
+| + every literal changed | 0.86 |
+| + reformatted, comments churned | 0.83 |
+| + statements reordered, a variable extracted | 0.83 |
 
-The bar is **relative to your codebase** — its own p90, floored. A fixed number cannot serve both ends: across 34 corpus repositories the 99th percentile of coincidental overlap has a median of 46 and reaches 349, while this repo's is 27. A flat cutoff either floods a large repo or silences a small one.
+Renaming, reformatting and reordering cost almost nothing — which is the claim in the section above, measured rather than asserted.
 
-**Recall is unmeasured, and that is now the binding limitation.** The filter discards most candidates; nothing counts what it wrongly discards.
+**Precision for the shipped ranking is not yet measured.** The honest state: 60% was measured on the *previous* ranking, and the 88% figure came from choosing the cutoff and scoring it on the same 30 cases — fitting, not evidence. A held-out precision study is the next thing.
+
+The two surfaces run at different bars, deliberately. A person reads three findings and one bad one makes the tool feel noisy, so the CLI trades recall for quiet. `find_existing` hands candidates to a model that reads both snippets and discards what does not apply — a false positive costs tokens, a false negative costs the whole point — so it runs wider.
+
+Full method, corpus percentiles and known gaps: **[calibration/](calibration/)**.
 
 ## For coding agents
 

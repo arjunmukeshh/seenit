@@ -44,6 +44,28 @@ const flag = (n, d) => {
   return i === -1 ? d : args[i + 1]
 }
 const TARGET = Number(flag('repos', 25))
+// Repositories are split in two by a stable hash of their URL. The percentile
+// is chosen by looking ONLY at the tuning half; the reported recall comes from
+// the held-out half, which no choice has ever seen.
+//
+// Without this the study repeats the mistake it exists to catch: the original
+// alignment cutoff was picked from the gap in 30 labelled cases and then scored
+// on those same 30 cases. Choosing p75 by comparing recall on eleven repos and
+// then reporting recall at p75 on those eleven would be the same error wearing
+// a different hat.
+const splitOf = (url) => {
+  let h = 0
+  for (let i = 0; i < url.length; i++) h = (Math.imul(h, 31) + url.charCodeAt(i)) >>> 0
+  return h % 2 === 0 ? 'tune' : 'holdout'
+}
+const PERCENTILES = (flag('percentiles', '50,75,90')).split(',').map(Number)
+// The injection harness lifts a JavaScript function and plants it back, so a
+// Java or Go repository yields nothing and its "recall 0" is an artifact of the
+// filter rather than a fact about the language. Sampling is restricted to the
+// ecosystems where the measurement means something — which is also the honest
+// answer to "should this use all 1,114 repos": only the ~196 npm ones can
+// answer this particular question.
+const ECOSYSTEMS = new Set((flag('ecosystems', 'npm')).split(','))
 const CONCURRENCY = Number(flag('concurrency', 4))
 
 function mulberry32(a) {
@@ -161,7 +183,7 @@ async function measure(repo, dir, rng) {
       /* skip */
     }
   }
-  if (facts.length < 3) return null
+  if (facts.length < 12) return null // too little JS here for the result to mean anything
 
   // Donor: the first file yielding a substantial function.
   let donor = null
@@ -178,19 +200,31 @@ async function measure(repo, dir, rng) {
   }
   if (!donor) return null
 
+  // One result per (percentile, transformation). The percentile is read from
+  // the environment by duplication.js, so it is set per measurement.
   const found = {}
-  for (const [level, transform] of LEVELS) {
-    const planted = `${transform(donor.body, rng)}\n`
-    const injected = await analyzeSource('__planted__.js', Buffer.from(planted))
-    if (!injected) {
-      found[level] = false
-      continue
+  for (const pct of PERCENTILES) {
+    found[pct] = {}
+    for (const [level, transform] of LEVELS) {
+      const planted = `${transform(donor.body, rng)}\n`
+      const injected = await analyzeSource('__planted__.js', Buffer.from(planted))
+      if (!injected) {
+        found[pct][level] = false
+        continue
+      }
+      const clones = findClones([...facts, { ...injected, path: '__planted__.js' }], { percentile: pct })
+      // Did the planted copy get linked to anything at all?
+      found[pct][level] = clones.some((c) => c.a === '__planted__.js' || c.b === '__planted__.js')
     }
-    const clones = findClones([...facts, { ...injected, path: '__planted__.js' }])
-    // Did the planted copy get linked to anything at all?
-    found[level] = clones.some((c) => c.a === '__planted__.js' || c.b === '__planted__.js')
   }
-  return { repo: repo.repository, ecosystem: repo.ecosystem, donor: donor.path, files: facts.length, found }
+  return {
+    repo: repo.repository,
+    split: splitOf(repo.repository),
+    ecosystem: repo.ecosystem,
+    donor: donor.path,
+    files: facts.length,
+    found,
+  }
 }
 
 async function one(repo, rng) {
@@ -208,7 +242,7 @@ async function one(repo, rng) {
 const corpus = JSON.parse(await readFile(join(HERE, 'corpus.json'), 'utf8'))
 const repos = corpus.repos ?? corpus
 const rng = mulberry32(6060842)
-const shuffled = [...repos].sort(() => rng() - 0.5).slice(0, TARGET * 3)
+const shuffled = [...repos].filter((r) => ECOSYSTEMS.has(r.ecosystem)).sort(() => rng() - 0.5).slice(0, TARGET * 4)
 
 const results = []
 let done = 0
@@ -225,21 +259,60 @@ const queue = [...shuffled]
 await Promise.all(Array.from({ length: CONCURRENCY }, () => worker(queue)))
 process.stderr.write('\n')
 
+const recallFor = (rows, pct, level) => {
+  if (!rows.length) return null
+  const hits = rows.filter((r) => r.found[pct]?.[level]).length
+  return { found: hits, of: rows.length, recall: Number((hits / rows.length).toFixed(3)) }
+}
+
+// Wilson score interval — the normal approximation is badly wrong at these
+// sample sizes and near the extremes, which is exactly where these numbers sit.
+const wilson = (hits, n) => {
+  if (!n) return null
+  const z = 1.96
+  const p = hits / n
+  const d = 1 + (z * z) / n
+  const c = p + (z * z) / (2 * n)
+  const s = z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))
+  return [Number(((c - s) / d).toFixed(3)), Number(((c + s) / d).toFixed(3))]
+}
+
+const tune = results.filter((r) => r.split === 'tune')
+const holdout = results.filter((r) => r.split === 'holdout')
+
+// Chosen by looking only at the tuning half, at the hardest transformation.
+const hardest = LEVELS[LEVELS.length - 1][0]
+const chosen = PERCENTILES.map((pct) => ({ pct, r: recallFor(tune, pct, hardest)?.recall ?? 0 })).sort(
+  (a, b) => b.r - a.r || b.pct - a.pct,
+)[0]
+
 const summary = {
   measuredAt: new Date().toISOString().slice(0, 10),
   method:
-    'A substantial function is lifted from each repository, transformed, and planted back as a new file. Ground truth is known by construction. Recall is the share of plants the tool links to anything.',
-  repos: results.length,
-  recallByTransformation: Object.fromEntries(
-    LEVELS.map(([level]) => {
-      const hits = results.filter((r) => r.found[level]).length
-      return [level, { found: hits, of: results.length, recall: results.length ? Number((hits / results.length).toFixed(3)) : null }]
-    }),
+    'A substantial function is lifted from each repository, transformed, and planted back as a new file. Ground truth is known by construction, so no hand-labelling is involved. Repositories are split by a stable hash of their URL: the percentile is chosen on the tuning half only, and the headline recall is reported on the held-out half.',
+  repos: { total: results.length, tune: tune.length, holdout: holdout.length },
+  chosenOnTuningSplit: { percentile: chosen?.pct ?? null, recallAtHardest: chosen?.r ?? null },
+  heldOut: Object.fromEntries(
+    PERCENTILES.map((pct) => [
+      pct,
+      Object.fromEntries(
+        LEVELS.map(([level]) => {
+          const r = recallFor(holdout, pct, level)
+          return [level, r ? { ...r, ci95: wilson(r.found, r.of) } : null]
+        }),
+      ),
+    ]),
   ),
-  misses: Object.fromEntries(
-    LEVELS.map(([level]) => [level, results.filter((r) => !r.found[level]).map((r) => r.repo).slice(0, 6)]),
+  tuning: Object.fromEntries(
+    PERCENTILES.map((pct) => [pct, Object.fromEntries(LEVELS.map(([level]) => [level, recallFor(tune, pct, level)]))]),
+  ),
+  byEcosystem: Object.fromEntries(
+    [...new Set(results.map((r) => r.ecosystem))].map((eco) => {
+      const rows = results.filter((r) => r.ecosystem === eco)
+      return [eco, { repos: rows.length, recallAtChosen: recallFor(rows, chosen?.pct, hardest) }]
+    }),
   ),
 }
 
 await writeFile(join(HERE, 'results', 'recall.json'), JSON.stringify(summary, null, 2) + '\n')
-console.log(JSON.stringify(summary.recallByTransformation, null, 2))
+console.log(JSON.stringify({ chosen: summary.chosenOnTuningSplit, repos: summary.repos, heldOut: summary.heldOut[summary.chosenOnTuningSplit.percentile] }, null, 2))

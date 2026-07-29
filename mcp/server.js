@@ -21,7 +21,7 @@ import { openLedger, listSnapshots, readSnapshotFile, MAIN_REF } from '../lib/le
 import { openCache } from '../lib/cache.js'
 import { analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
-import { findClones } from '../lib/analyze/metrics/duplication.js'
+import { findClones, AGENT_PERCENTILE } from '../lib/analyze/metrics/duplication.js'
 // Shared with the CLI. Bars and colour are off here: this output lands in an
 // agent's context window, where glyphs and escape codes are wasted tokens.
 import { formatHealth as renderHealth } from '../lib/format.js'
@@ -185,7 +185,12 @@ const handlers = {
     const { root, cache } = await context()
     const { facts } = await analyzeWorkspace(root, { cache })
     await cache.flush()
-    const clones = findClones(facts.filter((f) => !f.path.match(/\.(test|spec)\./)))
+    // A wider net than the human-facing list: the model reads both snippets
+    // and discards what does not apply, so a false positive costs tokens while
+    // a false negative costs the whole point of the tool.
+    const clones = findClones(facts.filter((f) => !f.path.match(/\.(test|spec)\./)), {
+      percentile: AGENT_PERCENTILE,
+    })
     if (!clones.length) return 'No significant duplication detected.'
     const top = [...clones].sort((a, b) => b.shared - a.shared).slice(0, limit)
     return [
