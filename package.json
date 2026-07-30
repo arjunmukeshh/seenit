@@ -45,6 +45,7 @@
     "build": "vite build",
     "serve": "node bin/seenit.mjs serve",
     "test": "node --test 'test/*.test.js'",
+    "media": "node docs/media/build.mjs",
     "prepublishOnly": "npm test && npm run build"
   },
   "dependencies": {

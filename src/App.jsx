@@ -11,6 +11,14 @@ import { useTheme } from './lib/useTheme'
 
 const TABS = ['duplicates', 'health', 'structure', 'drift']
 
+// The open tab lives in the URL hash so a view can be linked to — "look at the
+// cycle in the structure graph" is a thing people send each other, and it also
+// makes the tabs addressable to a screenshot script that cannot click.
+const tabFromHash = () => {
+  const t = window.location.hash.slice(1)
+  return TABS.includes(t) ? t : TABS[0]
+}
+
 const dirtyCount = ({ changes }) => changes.added.length + changes.modified.length + changes.deleted.length
 
 export default function App() {
@@ -18,12 +26,19 @@ export default function App() {
   const [repo, setRepo] = useState(null)
   const [snapshots, setSnapshots] = useState([])
   const [workspace, setWorkspace] = useState(null)
-  const [tab, setTab] = useState('duplicates')
+  const [tab, setTab] = useState(tabFromHash)
   const [selected, setSelected] = useState(null) // null = working tree
   const [compareWith, setCompareWith] = useState(null)
   const [snapshotHealth, setSnapshotHealth] = useState(null)
   const [error, setError] = useState(null)
   const theme = useTheme()
+
+  // Back/forward and hand-edited hashes both move the tab.
+  useEffect(() => {
+    const onHash = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   useEffect(() => {
     Promise.all([api.repo(), api.snapshots(200), api.workspace()])
@@ -130,7 +145,17 @@ function TabBar({ tab, onTab, selected }) {
       style={{ background: 'var(--paper)', borderBottom: '1px solid var(--rule)' }}
     >
       {TABS.map((t) => (
-        <button key={t} onClick={() => onTab(t)} className="tab capitalize" data-active={tab === t}>
+        // Set both: the hash so the view is linkable, and the state directly so
+        // clicking the already-open tab is not a no-op that leaves them apart.
+        <button
+          key={t}
+          onClick={() => {
+            window.location.hash = t
+            onTab(t)
+          }}
+          className="tab capitalize"
+          data-active={tab === t}
+        >
           {t}
         </button>
       ))}
