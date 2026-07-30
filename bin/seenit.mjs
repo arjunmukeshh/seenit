@@ -7,13 +7,12 @@
 // behind to clean up.
 
 import { repoRoot, gitDir, isRepo, resolveRef, revList, commitMeta, currentBranch } from '../lib/git.js'
-import { openLedger, writeTree, commitSnapshot, updateRef, listSnapshots, analyzedCommits, readSnapshotFile, diffSnapshots, MAIN_REF } from '../lib/ledger.js'
+import { openLedger, writeTree, commitSnapshot, updateRef, listSnapshots, analyzedCommits, readSnapshotFile, diffSnapshots, MAIN_REF, ANALYZER_VERSION } from '../lib/ledger.js'
 import { openCache } from '../lib/cache.js'
 import { analyzeCommit, analyzeWorkspace } from '../lib/analyze/index.js'
 import { workingChanges } from '../lib/workspace.js'
 import { formatHealth, formatSnapshotRow, colorsFor } from '../lib/format.js'
 import { normalizeStoredHealth } from '../lib/analyze/metrics/score.js'
-import { ANALYZER_VERSION } from '../lib/ledger.js'
 
 const args = process.argv.slice(2)
 

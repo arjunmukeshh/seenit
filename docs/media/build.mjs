@@ -90,7 +90,10 @@ const freePort = () =>
 
 // ---------------------------------------------------------------- shared css
 
-const FONTS = join(ROOT, 'node_modules')
+// encodeURI, because a checkout under a path with a space ("~/My Projects")
+// would otherwise produce a broken url() and silently fall back to a system
+// font — the images would still build, just wrong.
+const FONTS = encodeURI(join(ROOT, 'node_modules'))
 const fontCss = `
 @font-face {
   font-family: 'Plex Mono';
@@ -373,7 +376,17 @@ async function observatory(chrome) {
   await rm(stage, { recursive: true, force: true })
   await mkdir(stage, { recursive: true })
   await execFile('git', ['clone', '--quiet', ROOT, clone])
-  await cp(join(ROOT, '.git', 'seenit'), join(clone, '.git', 'seenit'), { recursive: true })
+
+  // The ledger lives in .git/, which `git clone` does not carry. Copy it if
+  // this checkout has one so the history rail shows real history; build a short
+  // one otherwise, because a fresh clone has no ledger and `cp` on a missing
+  // directory would fail the whole media build for anyone but the author.
+  const ledger = join(ROOT, '.git', 'seenit')
+  if (existsSync(ledger)) {
+    await cp(ledger, join(clone, '.git', 'seenit'), { recursive: true })
+  } else {
+    await execFile('node', [join(ROOT, 'bin', 'seenit.mjs'), 'backfill', '--limit', '25'], { cwd: clone })
+  }
 
   const port = await freePort()
   const server = spawn('node', [join(ROOT, 'bin', 'seenit.mjs'), 'serve', '--port', String(port), '--open', 'false'], {
@@ -381,14 +394,20 @@ async function observatory(chrome) {
     stdio: 'ignore',
   })
   try {
-    for (let i = 0; i < 120; i++) {
+    // Throw rather than fall through on timeout. Falling through would hand
+    // Chrome a dead port, and Chrome screenshots its own error page happily —
+    // overwriting a good PNG with a white one and still exiting 0.
+    let up = false
+    for (let i = 0; i < 120 && !up; i++) {
       try {
-        if ((await fetch(`http://127.0.0.1:${port}/api/repo`)).ok) break
+        up = (await fetch(`http://127.0.0.1:${port}/api/repo`)).ok
       } catch {
-        // not up yet
+        // not listening yet
       }
-      await new Promise((r) => setTimeout(r, 250))
+      if (!up) await new Promise((r) => setTimeout(r, 250))
     }
+    if (!up) throw new Error(`server never came up on ${port} after 30s`)
+
     // Prime the analysis so the screenshot is not racing a cold parse.
     await fetch(`http://127.0.0.1:${port}/api/workspace`)
 
@@ -412,7 +431,23 @@ async function observatory(chrome) {
 
 // ----------------------------------------------------------------------------
 
+const steps = new Map([
+  ['cli', hero],
+  ['pipeline', pipeline],
+  ['recall', recall],
+  ['observatory', observatory],
+])
+
+// Reject typos instead of silently doing nothing, the same rule bin/seenit.mjs
+// applies to its flags: `build.mjs clii` exiting 0 having produced nothing looks
+// exactly like success.
 const only = process.argv.slice(2)
+const unknown = only.filter((n) => !steps.has(n))
+if (unknown.length) {
+  console.error(`unknown image: ${unknown.join(', ')}`)
+  console.error(`Available: ${[...steps.keys()].join(', ')}  (no arguments builds all of them)`)
+  process.exit(1)
+}
 const want = (n) => only.length === 0 || only.includes(n)
 
 const chrome = await findChrome()
@@ -421,12 +456,6 @@ await mkdir(OUT, { recursive: true })
 // The app shots must reflect the current source, not whatever dist/ held.
 if (want('observatory')) await execFile('npm', ['run', 'build'], { cwd: ROOT })
 
-const steps = [
-  ['cli', hero],
-  ['pipeline', pipeline],
-  ['recall', recall],
-  ['observatory', observatory],
-]
 for (const [name, fn] of steps) {
   if (!want(name)) continue
   process.stderr.write(`  ${name}… `)

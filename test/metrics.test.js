@@ -34,6 +34,7 @@ import { scoreStandards } from '../lib/analyze/metrics/standards.js'
 import { buildGraph, findCycles, scoreExtensibility } from '../lib/analyze/graph.js'
 import { percentile, scoreAgainst, rollup, grade, scoreComplexity, normalizeStoredHealth } from '../lib/analyze/metrics/score.js'
 import { thresholdsFor } from '../lib/analyze/metrics/thresholds.js'
+import { colorsFor, ANSI, PLAIN } from '../lib/format.js'
 
 async function facts(path, source) {
   const parsed = await parse(path, source)
@@ -668,4 +669,25 @@ function computeBasketSum(lines, vatFraction) {
 
   assert.equal(a.size, 21, 'the original fingerprints to 21 windows')
   assert.equal(overlap.length, a.size, 'and the copy shares every one of them')
+})
+
+// The CLI's colour contract.
+//
+// FORCE_COLOR was added so the screenshot pipeline could capture ANSI from a
+// pipe, which means a build artefact in the README now depends on this
+// behaviour. NO_COLOR is the other half of the convention and had no coverage
+// either.
+test('colour follows NO_COLOR, FORCE_COLOR, then the tty', () => {
+  assert.equal(colorsFor(true, {}), ANSI, 'a tty gets colour')
+  assert.equal(colorsFor(false, {}), PLAIN, 'a pipe does not')
+
+  assert.equal(colorsFor(false, { FORCE_COLOR: '1' }), ANSI, 'FORCE_COLOR overrides a pipe')
+  assert.equal(colorsFor(false, { FORCE_COLOR: '0' }), PLAIN, 'FORCE_COLOR=0 means off, not on')
+
+  assert.equal(colorsFor(true, { NO_COLOR: '1' }), PLAIN, 'NO_COLOR overrides a tty')
+  assert.equal(
+    colorsFor(true, { NO_COLOR: '1', FORCE_COLOR: '1' }),
+    PLAIN,
+    'NO_COLOR wins over FORCE_COLOR — the quieter option is the safer default',
+  )
 })
