@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import { languageFor, parse, isAnalyzable, isTestFile, LANGUAGES } from '../lib/analyze/parser.js'
+import { languageFor, parse, isAnalyzable, isTestFile, LANGUAGES } from '../lib/parser.js'
 
 const require = createRequire(import.meta.url)
 const WASM_DIR = join(dirname(require.resolve('@vscode/tree-sitter-wasm/package.json')), 'wasm')

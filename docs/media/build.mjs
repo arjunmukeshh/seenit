@@ -5,19 +5,17 @@
 // These are generated rather than hand-made for one reason: the README's sample
 // output has already gone stale once, and a stale screenshot is worse than a
 // stale paragraph because nobody thinks to doubt it. So the terminal shot is
-// rendered from the CLI's real bytes, the recall chart is drawn from
-// calibration/results/recall.json, and the observatory shots come from the built
-// app served over HTTP. Nothing here is drawn by hand except the diagram, which
-// depicts an algorithm rather than a measurement.
+// rendered from the CLI's real bytes and the recall chart is drawn from
+// calibration/results/recall.json. Nothing here is drawn by hand except the
+// diagram, which depicts an algorithm rather than a measurement.
 //
-// Needs a Chrome binary, because Firefox's --screenshot fires on the load event
-// and captures this app mid-skeleton; Chrome's --virtual-time-budget waits for
-// the fetches and the render. Point SEENIT_CHROME at one, or:
+// Needs a Chrome binary; Firefox's --screenshot fires on the load event and
+// captures pages before webfonts settle. Point SEENIT_CHROME at one, or:
 //
 //   npx @puppeteer/browsers install chrome@stable --path /tmp/browsers
 
-import { execFile as execFileCb, spawn } from 'node:child_process'
-import { mkdir, writeFile, rm, cp, readFile, readdir } from 'node:fs/promises'
+import { execFile as execFileCb } from 'node:child_process'
+import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
@@ -78,15 +76,6 @@ async function shoot(chrome, url, out, { width, height, scale = 2 }) {
     url,
   ])
 }
-
-const freePort = () =>
-  new Promise((resolve) => {
-    const s = createServer()
-    s.listen(0, '127.0.0.1', () => {
-      const { port } = s.address()
-      s.close(() => resolve(port))
-    })
-  })
 
 // ---------------------------------------------------------------- shared css
 
@@ -218,7 +207,7 @@ async function pipeline(chrome) {
          </div>
        </div>
 
-       <div class="arrow"><span>tree-sitter parses · identifiers, literals and comments normalised away</span></div>
+       <div class="arrow"><span>tree-sitter parses · identifiers, literals and comments normalised away — ours</span></div>
 
        <div class="row">
          <div class="col">
@@ -229,11 +218,11 @@ async function pipeline(chrome) {
          </div>
        </div>
 
-       <div class="arrow"><span>25-token windows, winnowed to a stable subset</span></div>
+       <div class="arrow"><span>jscpd matches the normalised stream · Rabin-Karp, in Rust</span></div>
 
        <div class="row">
          <div class="col">
-           <div class="cap">fingerprints line up on a constant offset — that is the signal</div>
+           <div class="cap">the shared region comes back with real line numbers</div>
            <div class="align">
              <div class="lane"><span class="lbl mono">A</span>${[0, 1, 2, 3, 4, 5]
                .map((i) => `<span class="fp${[1, 2, 3, 4].includes(i) ? ' on' : ''}"></span>`)
@@ -241,7 +230,7 @@ async function pipeline(chrome) {
              <div class="lane"><span class="lbl mono">B</span>${[0, 1, 2, 3, 4, 5]
                .map((i) => `<span class="fp${[2, 3, 4, 5].includes(i) ? ' on' : ''}"></span>`)
                .join('')}</div>
-             <div class="note mono">4 in a row, same offset &nbsp;·&nbsp; a copy</div>
+             <div class="note mono">contiguous block &nbsp;·&nbsp; orders.js:41-58</div>
            </div>
          </div>
        </div>
@@ -290,10 +279,13 @@ async function recall(chrome) {
     '+extract': 'variable\nextracted',
   }
   const levels = Object.keys(LABELS)
+  // One line per threshold. The interesting result is how FLAT they are: the bar
+  // is nearly irrelevant to recall until statements move, and only then do they
+  // separate. A single series would hide that.
   const SERIES = [
-    { p: '75', name: 'npx seenit', color: 'var(--warn)' },
-    { p: '50', name: 'find_existing', color: 'var(--good)' },
-    { p: '90', name: 'the old default', color: 'var(--bad)', faint: true },
+    { p: '30', name: 'shipped (k=30)', color: 'var(--warn)' },
+    { p: '20', name: 'wider (k=20)', color: 'var(--good)' },
+    { p: '75', name: 'stricter (k=75)', color: 'var(--bad)', faint: true },
   ]
 
   const W = 680
@@ -342,12 +334,12 @@ async function recall(chrome) {
     `<div class="card">
        <div class="head">
          <span class="t">Held-out recall</span>
-         <span class="s mono">${data.repos.holdout} repositories · threshold chosen on the other ${data.repos.tune}</span>
+         <span class="s mono">${data.repos.holdout} repositories · bar chosen on the other ${data.repos.tune}</span>
        </div>
        <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
          ${grid}${lines}${ticks}${legend}
        </svg>
-       <div class="foot">Each step keeps every earlier one. A copy is planted, then found or missed — ground truth by construction.</div>
+       <div class="foot">Each step keeps every earlier one. A copy is planted, then found or missed — ground truth by construction. The threshold barely matters until statements are reordered.</div>
      </div>`,
     `body { padding: 26px; width: 740px; }
      .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 9px; padding: 18px 20px 16px; }
@@ -361,7 +353,7 @@ async function recall(chrome) {
   )
   const f = join(tmpdir(), 'seenit-recall.html')
   await writeFile(f, html)
-  await shoot(chrome, `file://${f}`, join(OUT, 'recall.png'), { width: 740, height: 372 })
+  await shoot(chrome, `file://${f}`, join(OUT, 'recall.png'), { width: 740, height: 392 })
 }
 
 // ---------------------------------------------------------------- 4. the app
@@ -370,72 +362,12 @@ async function recall(chrome) {
 // shows the checkout's directory name and a screenshot captioned with the old
 // name of the project is its own small lie. The ledger is copied across so the
 // history rail is real history rather than an empty column.
-async function observatory(chrome) {
-  const stage = join(tmpdir(), 'seenit-shots')
-  const clone = join(stage, 'seenit')
-  await rm(stage, { recursive: true, force: true })
-  await mkdir(stage, { recursive: true })
-  await execFile('git', ['clone', '--quiet', ROOT, clone])
-
-  // The ledger lives in .git/, which `git clone` does not carry. Copy it if
-  // this checkout has one so the history rail shows real history; build a short
-  // one otherwise, because a fresh clone has no ledger and `cp` on a missing
-  // directory would fail the whole media build for anyone but the author.
-  const ledger = join(ROOT, '.git', 'seenit')
-  if (existsSync(ledger)) {
-    await cp(ledger, join(clone, '.git', 'seenit'), { recursive: true })
-  } else {
-    await execFile('node', [join(ROOT, 'bin', 'seenit.mjs'), 'backfill', '--limit', '25'], { cwd: clone })
-  }
-
-  const port = await freePort()
-  const server = spawn('node', [join(ROOT, 'bin', 'seenit.mjs'), 'serve', '--port', String(port), '--open', 'false'], {
-    cwd: clone,
-    stdio: 'ignore',
-  })
-  try {
-    // Throw rather than fall through on timeout. Falling through would hand
-    // Chrome a dead port, and Chrome screenshots its own error page happily —
-    // overwriting a good PNG with a white one and still exiting 0.
-    let up = false
-    for (let i = 0; i < 120 && !up; i++) {
-      try {
-        up = (await fetch(`http://127.0.0.1:${port}/api/repo`)).ok
-      } catch {
-        // not listening yet
-      }
-      if (!up) await new Promise((r) => setTimeout(r, 250))
-    }
-    if (!up) throw new Error(`server never came up on ${port} after 30s`)
-
-    // Prime the analysis so the screenshot is not racing a cold parse.
-    await fetch(`http://127.0.0.1:${port}/api/workspace`)
-
-    await shoot(chrome, `http://127.0.0.1:${port}/#duplicates`, join(OUT, 'observatory.png'), {
-      width: 1360,
-      height: 700,
-    })
-    // Tall, because the module DAG sits below the treemap and Chrome's
-    // --screenshot cannot scroll: the only way to include it is a window big
-    // enough that nothing is below the fold.
-    await shoot(chrome, `http://127.0.0.1:${port}/#structure`, join(OUT, 'structure.png'), {
-      width: 1360,
-      height: 2050,
-      scale: 1,
-    })
-  } finally {
-    server.kill()
-    await rm(stage, { recursive: true, force: true })
-  }
-}
-
 // ----------------------------------------------------------------------------
 
 const steps = new Map([
   ['cli', hero],
   ['pipeline', pipeline],
   ['recall', recall],
-  ['observatory', observatory],
 ])
 
 // Reject typos instead of silently doing nothing, the same rule bin/seenit.mjs
@@ -452,9 +384,6 @@ const want = (n) => only.length === 0 || only.includes(n)
 
 const chrome = await findChrome()
 await mkdir(OUT, { recursive: true })
-
-// The app shots must reflect the current source, not whatever dist/ held.
-if (want('observatory')) await execFile('npm', ['run', 'build'], { cwd: ROOT })
 
 for (const [name, fn] of steps) {
   if (!want(name)) continue

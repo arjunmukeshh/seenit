@@ -2,7 +2,7 @@
 
 **Has this already been written?**
 
-seenit finds code your project already contains — including copies that were renamed, reformatted and re-commented, which `grep` cannot see. It is a local, zero-config guardrail against the characteristic failure of agent-written code: the third near-identical implementation of a helper that already existed twice.
+Every copy/paste detector answers "what is duplicated in this repository?" — a report you read after the code exists. seenit answers the other question: you hand it code you are *about to* write, and it tells you where that already lives. It matches through renames and reformatting, so a copy sharing no identifier with the original still comes back.
 
 [![npm](https://img.shields.io/npm/v/seenit)](https://www.npmjs.com/package/seenit)
 [![node](https://img.shields.io/node/v/seenit)](https://nodejs.org)
@@ -10,54 +10,87 @@ seenit finds code your project already contains — including copies that were r
 
 ## Quick start
 
-Run it in any git repository. No install, no config, no signup.
+```bash
+cat draft.js | npx seenit check
+```
+
+```console
+  Already written
+
+  lib/cluster.js:15-54  40 lines shared
+```
+
+Exit code 1 when it finds something, 0 when it doesn't — so it drops into a pre-commit hook or a script unchanged.
+
+To see what is *already* duplicated, run it with no arguments:
 
 ```bash
 npx seenit
 ```
 
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/cli.png" alt="Terminal running npx seenit. Under the heading 'Closest matches' it lists three pairs of file paths with line numbers, then '2 more, 15 of 47 files involved.'" width="760">
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/cli.png" alt="Terminal running npx seenit. Under the heading 'Duplicated' it lists pairs of file paths with line ranges and the number of lines shared." width="760">
 
-Those are real findings in this repository, printed by running it on itself: an argument parser copy-pasted across seven scripts, two `git log --format` record parsers built the same way under different constant names, and the same score-threshold ladder encoded once in the analyzer and once in the UI.
-
-Nothing is written to your working tree. Analysis lives in `.git/seenit/`.
+No install, no config, no signup. Nothing is written to your working tree.
 
 ## Requirements
 
 - **Node.js 20.11 or newer**
-- **A git repository.** seenit stores its analysis in git, so it exits with an error outside one — run `git init` first.
-- macOS, Linux and Windows. No compiler or native build step: parsing is WebAssembly.
+- **A git repository** — seenit reads the tracked file list from git, and exits with an error outside one.
+- macOS, Linux and Windows. The detector ships as a prebuilt binary; there is no compile step.
 
 ## Install
 
-`npx` needs nothing installed and is the right way to try it. Install it properly once you want it on every repo:
+`npx` needs nothing installed. Install it properly once you want it everywhere:
 
 ```bash
 npm install -g seenit
 ```
 
-## Languages
+## How it works
 
-JavaScript, TypeScript, JSX/TSX, Python, Go, Rust, Java, C#, C, C++, Ruby, PHP, CSS and Bash.
+Clone detection has a standard taxonomy, and where a tool sits in it is the whole story:
 
-All are parsed with real grammars, not regex. Note the honest asymmetry: every language is *analysed*, but the accuracy study below was run on JavaScript and TypeScript only.
+| | differs from the original by | seenit |
+|---|---|---|
+| **Type-1** | whitespace, layout, comments | yes |
+| **Type-2** | + identifiers, literals, types | yes |
+| **Type-3** | + statements added or removed | partly |
+| **Type-4** | same behaviour, different code | no |
 
-## Commands
+**Detection is [jscpd](https://github.com/kucherenko/jscpd)** — a mature Rust implementation of Rabin-Karp matching across 223 formats. Reimplementing that would be reinventing a wheel that rolls perfectly well.
 
-| Command | What it does |
+**Normalisation is ours, and it is the reason this exists.** jscpd is Type-1: measured on one function with 66 identifiers renamed and nothing else touched, every jscpd mode returns zero. So seenit parses with tree-sitter first and rewrites every token as its class — identifiers to `ID`, literals to `STR` and `NUM` — one output line per source line, so the line numbers come back pointing at your real code.
+
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/pipeline.png" alt="Diagram: two dissimilar snippets, one named calculateOrderTotal and one named computeBasketSum, are parsed by tree-sitter into the same normalised token stream where every identifier becomes ID. jscpd then matches that stream and returns the shared region with real line numbers." width="720">
+
+Take one function, rename every identifier, change every literal, add comments, reformat it. `grep` finds zero hits and not one line is byte-identical. seenit returns the original's exact line range. [That pair is a test](https://github.com/arjunmukeshh/seenit/blob/main/test/duplication.test.js), so the claim fails CI when it stops being true.
+
+## How often is it right?
+
+**Recall is the number that matters, because a miss is silent.** Measured by injection on 66 npm repositories: lift a real function, transform it the way an agent would, plant it back, check whether seenit finds it. Ground truth is known by construction. The threshold was chosen on one half of the repositories and reported on the other.
+
+| what was done to the copy | found |
 |---|---|
-| `seenit` | Near-duplicate code, ranked. The default. |
-| `seenit mcp` | Run as an MCP server so your agent checks before it writes |
-| `seenit health` | Full health report `[--fail-under 70]` — exits non-zero as a CI gate |
-| `seenit serve` | Open the observatory UI `[--port 4300]` |
-| `seenit watch` | Review changes continuously in the background |
-| `seenit help --all` | Everything, including the ledger commands |
+| pasted unchanged | 0.86 |
+| every identifier renamed | 0.86 |
+| + every literal changed | 0.86 |
+| + reformatted | 0.86 |
+| + comments churned | 0.81 |
+| + statements reordered, a variable extracted | **0.78** |
+
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations. Three thresholds sit on top of each other at 0.86 until comments are churned, then separate: k=20 ends at 0.81, k=30 at 0.78, k=75 at 0.69." width="740">
+
+Held out, n=36, 95% CI [0.62, 0.88]. Renaming and reformatting cost nothing at all — that is the claim above, measured rather than asserted. What costs recall is *reordering*, which is the Type-3 boundary in the table above.
+
+**Precision is not measured.** A held-out precision study is the next thing, and until it exists that gap is the honest state rather than a number to quote.
+
+Method and raw results: **[calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration)**.
 
 ## For coding agents
 
-The point isn't better search. It's search that happens *without being asked* — before the agent writes, not after you notice.
+The point isn't better search. It's search that happens *before the writing*, without being asked.
 
-**Claude Code, Cursor, and anything else that speaks MCP.** Add this to your MCP config (`.mcp.json` in the project root for Claude Code, `.cursor/mcp.json` for Cursor):
+**Claude Code, Cursor, and anything else that speaks MCP.** Add this to your MCP config — `.mcp.json` in the project root for Claude Code, `.cursor/mcp.json` for Cursor:
 
 ```json
 {
@@ -67,70 +100,42 @@ The point isn't better search. It's search that happens *without being asked* �
 }
 ```
 
-That gives your agent `find_existing` — "does this already exist?", asked before writing — plus `check_duplication`, `check_health`, `check_structure` and `review_changes`.
+Two tools, deliberately:
 
-**Claude Code without MCP** — a Stop hook in `.claude/settings.json`, silent unless something moved:
+- **`find_existing`** — paste the code you are about to write; get back paths and line ranges, or "safe to write".
+- **`check_duplication`** — what is already duplicated, largest first.
 
-```json
-{ "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "npx seenit hook --quiet" }] }] } }
-```
+Tool definitions are permanent context, so this surface is kept small on purpose: **247 tokens**, and results are paths and line ranges with no prose. A `find_existing` call costs roughly 250 tokens against the 3,000–8,000 an agent spends grepping and reading files to answer the same question itself.
 
-```console
-health 83.8  ▼ -0.9  3 files changed  dup: score.js ↔ api.js
-```
+## Languages
 
-## Why not grep?
+Normalised — and therefore matched through renames — in **JavaScript, TypeScript, JSX/TSX, Python, Go, Rust, Java, C#, C, C++, Ruby, PHP, CSS and Bash**.
 
-Because the third copy never looks like the first. seenit parses with tree-sitter and normalises identifiers, literals and comments away before matching, so a renamed, reformatted, re-commented copy still registers.
-
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/pipeline.png" alt="Diagram: two dissimilar snippets, one named calculateOrderTotal and one named computeBasketSum, are parsed and normalised into the same token stream, where every identifier becomes ID. The stream is cut into 25-token windows, and the resulting fingerprints for the two files line up four in a row at a constant offset — the signal that says copy." width="720">
-
-Take one function, rename every identifier, change every literal, add comments, reformat it. `grep` finds zero hits on `calculateOrderTotal`, `taxRate` or `item.price`, and not one line is byte-identical. seenit's fingerprints for the two are identical — all 21 of them. That exact pair is a test, so the claim stays true: [test/metrics.test.js](https://github.com/arjunmukeshh/seenit/blob/main/test/metrics.test.js).
-
-## How often is it right?
-
-**Recall is the number that matters, because a miss is silent.** Measured by injection on 63 npm repositories: lift a real function, transform it the way an agent would, plant it elsewhere, check whether seenit finds it. Ground truth is known by construction, so no hand-labelling is involved — and the threshold was chosen on one half of the repositories and reported on the other.
-
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, from pasted unchanged to variable extracted. npx seenit falls from 0.91 to 0.80, find_existing from 0.91 to 0.89, and the tool's old default from 0.80 to 0.57." width="740">
-
-Renaming, reformatting and reordering cost almost nothing. That is the claim in the section above, measured rather than asserted — and the dashed line is the threshold this shipped with until the study was run, which lost more than four transformed copies in ten.
-
-The two solid lines are two thresholds, deliberately. A person reads three findings and one bad one makes the tool feel noisy, so the CLI trades recall for quiet. `find_existing` hands candidates to a model that reads both snippets and discards what does not apply — a false positive costs tokens, a false negative costs the whole point — so it runs wider.
-
-Full method, corpus percentiles and known gaps: **[calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration)**.
+Every other format jscpd knows (223 of them) still gets exact matching as a floor. Note the asymmetry honestly: the accuracy study above was run on JavaScript and TypeScript only.
 
 ## Limitations
 
-- **It finds copies, not reimplementations.** A `for` loop rewritten as `reduce` shares **zero** fingerprints. Different code that does the same thing is out of scope.
-- **Precision is not yet measured for the shipped ranking.** 60% was measured on the *previous* ranking, and the 88% figure that circulated came from choosing the cutoff and scoring it on the same 30 cases — fitting, not evidence. A held-out precision study is the next thing.
-- **Recall was measured on JavaScript and TypeScript only.** Nothing is known about the other eleven languages beyond that they parse.
-- **It is weakest on view code**, where unrelated components legitimately share a great deal of shape.
+- **It finds copies, not reimplementations.** A `for` loop rewritten as `reduce` shares nothing. Type-4 is out of scope.
+- **Gapped copies are hit and miss.** Insert statements in the middle and the match splits into fragments that may fall under the threshold. Recall drops from 0.86 to 0.78 across that boundary.
+- **Precision is unmeasured.**
+- **Recall was measured on JavaScript and TypeScript only.** Nothing is known about the other twelve normalised languages beyond that they parse.
+- **One verbatim copy in seven is still missed**, and the cause is not yet understood.
 - **Pre-1.0.** Output formats and thresholds may change.
-
-## Also in here
-
-Repository health over time, version-controlled inside `.git/` as a real git repo you can `log`, `diff` and `bisect`.
-
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/observatory.png" alt="The seenit observatory: a left rail of 25 health snapshots with scores and deltas, and a Duplicates tab listing four findings ranked by the length of their aligned run." width="1000">
-
-`seenit serve` opens it. Every snapshot in that rail is a commit in a real git repository inside `.git/`, so your codebase's history is something you can diff and bisect — see [docs/observatory.md](https://github.com/arjunmukeshh/seenit/blob/main/docs/observatory.md). Health thresholds come from a pre-registered study of 1.6M functions across 1,100 repositories: [calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration).
-
-Every image above is generated by [docs/media/build.mjs](https://github.com/arjunmukeshh/seenit/blob/main/docs/media/build.mjs) — the terminal from the CLI's real output, the chart from the measurement file, the screenshots from the running app. A stale screenshot is worse than a stale paragraph, because nobody thinks to doubt it.
 
 ## Contributing
 
-Issues and pull requests are welcome: [github.com/arjunmukeshh/seenit/issues](https://github.com/arjunmukeshh/seenit/issues).
+Issues and pull requests welcome: [github.com/arjunmukeshh/seenit/issues](https://github.com/arjunmukeshh/seenit/issues).
 
 ```bash
 git clone https://github.com/arjunmukeshh/seenit.git
 cd seenit
 npm install
-npm test          # 86 tests
-npm run build     # build the observatory UI
-npm run media     # regenerate the README images (needs Chrome)
+npm test              # 15 tests
+npm run recall        # re-run the accuracy study (clones 63 repos)
+npm run media         # regenerate the README images (needs Chrome)
 ```
 
-If a change touches a measured claim, re-run the study that backs it rather than editing the number — `calibration/` holds the harnesses, and `node calibration/verify.mjs` checks that the shipped thresholds still match the results on disk.
+If a change touches a measured claim, re-run the study that backs it rather than editing the number. Every image above is generated by [docs/media/build.mjs](https://github.com/arjunmukeshh/seenit/blob/main/docs/media/build.mjs) — the terminal from the CLI's real output, the chart from the measurement file.
 
 ## License
 

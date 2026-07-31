@@ -1,18 +1,18 @@
 {
   "name": "seenit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Has this already been written? Finds near-duplicate code, including renamed and reformatted copies. Local, zero-config, and speaks MCP.",
+  "description": "Has this already been written? Asks a copy/paste detector the question it does not answer — before you write, not after. Matches through renames and reformatting.",
   "keywords": [
     "duplicate-code",
     "copy-paste-detection",
     "clone-detection",
-    "code-analysis",
+    "jscpd",
     "tree-sitter",
     "mcp",
     "mcp-server",
     "claude-code",
-    "static-analysis",
+    "ai-agents",
     "code-quality"
   ],
   "license": "MIT",
@@ -35,18 +35,14 @@
     "bin/",
     "lib/",
     "mcp/",
-    "server/",
-    "dist/",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "node bin/seenit.mjs serve",
     "test": "node --test 'test/*.test.js'",
     "media": "node docs/media/build.mjs",
-    "prepublishOnly": "npm test && npm run build"
+    "recall": "node calibration/recall.mjs --repos 63 --concurrency 4",
+    "prepublishOnly": "npm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
@@ -56,14 +52,6 @@
   },
   "devDependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
-    "@fontsource/ibm-plex-mono": "^5.3.0",
-    "@vitejs/plugin-react": "^6.0.4",
-    "autoprefixer": "^10.5.4",
-    "postcss": "^8.5.23",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "recharts": "^3.10.1",
-    "tailwindcss": "^3.4.19",
-    "vite": "^8.1.5"
+    "@fontsource/ibm-plex-mono": "^5.3.0"
   }
 }
