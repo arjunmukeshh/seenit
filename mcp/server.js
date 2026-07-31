@@ -1,16 +1,7 @@
-// The MCP server — seenit's reason to exist.
+// MCP server: find_existing and check_duplication.
 //
-// jscpd ships its own MCP server, and it answers the question every copy/paste
-// detector answers: "what is duplicated in this repository?" That is a report,
-// read after the code is written. This server answers the other one —
-// "does this already exist?" — asked with a snippet, before the writing.
-//
-// TWO TOOLS, DELIBERATELY. Tool definitions are permanent context: the five this
-// server used to expose cost ~657 tokens on every request, and three of them
-// (check_health, check_structure, review_changes) served the health observatory
-// rather than the product. A tool nobody calls is a tax nobody agreed to pay.
-//
-// Output is paths and line ranges with no prose, for the same reason.
+// Tool definitions are permanent context, so the surface stays at two tools and
+// 247 tokens, and results are paths and line ranges with no prose.
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
@@ -61,8 +52,7 @@ const TOOLS = [
 let root = null
 const repo = async () => (root ??= await repoRoot(process.env.SEENIT_REPO || process.cwd()))
 
-// Compact by construction. A location an agent can act on is a path and a line
-// range; anything more is tokens spent on presentation.
+// A location an agent can act on: path plus line range.
 const at = (file, start, end) => `${file}:${start}-${end}`
 
 const handlers = {

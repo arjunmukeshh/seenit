@@ -1,10 +1,6 @@
-// The product, tested.
-//
-// seenit no longer owns a matching algorithm, so there is nothing left to
-// validate against McCabe or ESLint. What is left to get wrong is the seam:
-// whether normalisation actually erases names, whether jscpd's output survives
-// the trip back to real paths and real line numbers, and whether the front-page
-// claim still holds. All three have already been wrong once.
+// Tests for the seam: that normalisation erases names, that jscpd's output
+// survives the trip back to real paths and line numbers, and that a renamed copy
+// is still found. Each of these has been broken once.
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -80,9 +76,7 @@ test('a file in a language with no grammar normalises to null', async () => {
 
 // ------------------------------------------------------------------ the claim
 
-// The README's headline: rename everything, change every literal, add comments,
-// reformat — grep finds nothing and seenit still matches. A claim on a front
-// page should fail a test when it stops being true.
+// The README's headline claim, so it fails CI when it stops being true.
 test('a renamed, re-littered, re-commented, reformatted copy is still found', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'seenit-test-'))
   try {
@@ -122,11 +116,8 @@ test('unrelated code is not reported', async () => {
 // ------------------------------------------------------------------ the seam
 
 test('paths come back relative and real, through a symlinked tmpdir', async () => {
-  // os.tmpdir() is a symlink on macOS: /var/folders/... resolves to
-  // /private/var/folders/.... jscpd --absolute reports the resolved path, so
-  // without realpath on both sides every path came back as
-  // "../../../private/var/..." and nothing ever compared equal. The recall
-  // harness read that as jscpd having zero recall on verbatim copies.
+  // os.tmpdir() is a symlink on macOS and jscpd --absolute reports the resolved
+  // path, so without realpath on both sides nothing compares equal.
   const dir = await mkdtemp(join(tmpdir(), 'seenit-test-'))
   try {
     await mkdir(join(dir, 'nested'), { recursive: true })

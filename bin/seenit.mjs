@@ -1,11 +1,5 @@
 #!/usr/bin/env node
-// seenit CLI.
-//
-// One question, asked two ways. `seenit` reports what is already duplicated;
-// `seenit check` takes a snippet and asks whether it exists yet. The second is
-// the one that matters, and the one every other copy/paste detector leaves out.
-//
-// Detection is jscpd's. Normalisation, so a renamed copy still matches, is ours.
+// seenit CLI: `seenit` lists duplication, `seenit check` tests one snippet.
 // Nothing is written to the working tree.
 
 import { readFile } from 'node:fs/promises'
@@ -30,8 +24,7 @@ const FLAGS = {
   help: [],
 }
 
-// Silently ignoring `--json` and printing the default output looks like the flag
-// worked. Typos are worth reporting.
+// Silently ignoring an unknown flag looks like it worked.
 function validateFlags(name) {
   const allowed = new Set(FLAGS[name] ?? [])
   const unknown = args
@@ -44,9 +37,7 @@ function validateFlags(name) {
   process.exit(1)
 }
 
-// A tty gets colour; NO_COLOR and FORCE_COLOR override in the directions their
-// names imply. FORCE_COLOR is not decoration — the README's terminal image is
-// rendered from these exact bytes through a pipe.
+// A tty gets colour; NO_COLOR and FORCE_COLOR override it.
 const ANSI = { dim: '\x1b[2m', bold: '\x1b[1m', red: '\x1b[31m', green: '\x1b[32m', reset: '\x1b[0m' }
 const PLAIN = { dim: '', bold: '', red: '', green: '', reset: '' }
 const C = process.env.NO_COLOR
@@ -79,12 +70,11 @@ const commands = {
     console.log()
     if (!blocks.length) {
       console.log(`  ${C.green}Nothing duplicated.${C.reset} ${C.dim}${files.length} files checked.${C.reset}`)
-      console.log(`\n  ${C.dim}Check before writing, not after:  seenit check < file.js${C.reset}\n`)
+      console.log(`\n  ${C.dim}Check a snippet before writing it:  seenit check --file draft.js${C.reset}\n`)
       return
     }
 
-    // Findings, not pairs. One file copied into six places is fifteen pairs of
-    // the same fact, and a wall of those is what this tool exists not to be.
+    // Findings, not pairs: one file copied six times is fifteen pairs.
     const groups = clusterBlocks(blocks)
     const limit = Number(flag('limit', 3))
     console.log(`  ${C.bold}Duplicated${C.reset}\n`)
@@ -97,11 +87,7 @@ const commands = {
     if (groups.length > limit) {
       console.log(`  ${C.dim}${groups.length - limit} more.${C.reset}\n`)
     }
-    console.log(
-      `  ${C.dim}Identifiers and literals are normalised before matching, so renamed\n` +
-        `  copies count and grep would not find these.${C.reset}`,
-    )
-    console.log(`\n  ${C.dim}Check before writing, not after:  seenit mcp${C.reset}\n`)
+    console.log(`  ${C.dim}Check a snippet before writing it:  seenit check --file draft.js${C.reset}\n`)
   },
 
   // The pre-write query, from a file or stdin.
@@ -132,7 +118,7 @@ const commands = {
       console.log(`  ${C.bold}${h.file}${C.reset}${C.dim}:${h.startLine}-${h.endLine}${C.reset}  ${C.dim}${h.lines} lines shared${C.reset}`)
     }
     console.log()
-    // Non-zero so this works as a gate in a script or a pre-commit hook.
+    // Non-zero so this works as a gate in a hook or script.
     process.exit(1)
   },
 
@@ -149,11 +135,12 @@ ${C.bold}seenit${C.reset} — has this already been written?
   ${C.bold}seenit check --file f.js${C.reset}      does this code exist yet?  ${C.dim}(exits 1 if it does)${C.reset}
   ${C.bold}seenit mcp${C.reset}                    run as an MCP server, so your agent asks before writing
 
-${C.dim}Detection is jscpd. Identifiers and literals are normalised away first, so a
-renamed and reformatted copy still matches — which is the part jscpd cannot do
-alone. Nothing is written to your working tree.
+${C.dim}Matches renamed and reformatted copies, not just exact ones.
+Nothing is written to your working tree.
 
---min-tokens ${JSCPD_DEFAULT_MIN_TOKENS} is the bar for what counts as a duplicate.${C.reset}
+  --min-tokens ${JSCPD_DEFAULT_MIN_TOKENS}   how much shared code counts as a duplicate
+  --limit 3        findings to show
+  --file PATH      read the snippet from a file instead of stdin${C.reset}
 `)
   },
 }
@@ -174,8 +161,7 @@ if (!commands[command]) {
 const run = args.includes('--help') || args.includes('-h') ? commands.help : commands[command]
 if (run !== commands.help) validateFlags(command)
 
-// Promise.resolve, not run().catch: `help` is synchronous and returns undefined,
-// so calling .catch on its result crashed the CLI immediately after printing.
+// Promise.resolve, not run().catch — `help` is sync and returns undefined.
 Promise.resolve()
   .then(run)
   .catch((err) => {

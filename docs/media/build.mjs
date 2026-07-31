@@ -177,7 +177,7 @@ async function hero(chrome) {
   )
   const f = join(tmpdir(), 'seenit-hero.html')
   await writeFile(f, html)
-  await shoot(chrome, `file://${f}`, join(OUT, 'cli.png'), { width: 760, height: 545 })
+  await shoot(chrome, `file://${f}`, join(OUT, 'cli.png'), { width: 760, height: 470 })
 }
 
 // ---------------------------------------------------------------- 2. the diagram
