@@ -32,6 +32,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
 import { detect, isTest } from '../lib/jscpd.js'
+import { buildShadow, normalizeSource } from '../lib/normalize.js'
 
 const JSCPD_VERSION = JSON.parse(
   await readFile(new URL('../node_modules/jscpd/package.json', import.meta.url), 'utf8'),
@@ -172,12 +173,6 @@ function donorFunction(src) {
   return null
 }
 
-// Planted into the repository as a real file, because that is how the product
-// runs: jscpd scans a directory, not an in-memory list of parsed facts. The old
-// harness could append a synthetic fact to an array; measuring an external
-// engine means measuring it through the same interface the tool uses.
-const PLANTED = '__seenit_planted__.js'
-
 async function measure(repo, dir, rng) {
   const files = (await run('git', ['-C', dir, 'ls-files'], { maxBuffer: 1 << 28 })).stdout
     .split('\n')
@@ -199,23 +194,33 @@ async function measure(repo, dir, rng) {
   }
   if (!donor) return null
 
-  // One result per (min-tokens, transformation).
-  const plantedPath = join(dir, PLANTED)
+  // Plant with the DONOR's extension. jscpd treats .ts and .js as separate
+  // formats, so planting TypeScript into a .js file made the copy invisible for
+  // reasons that had nothing to do with how well it hid — the same artifact as
+  // the previous study's non-JS repositories scoring zero.
+  const ext = donor.path.slice(donor.path.lastIndexOf('.'))
+  const planted = `__seenit_planted__${ext}`
+
+  // Build the shadow ONCE. It depends only on the repository, not on the bar or
+  // the transformation, and normalizing every file 28 times over made tree-sitter
+  // the entire cost of the study.
+  const shadow = await mkdtemp(join(tmpdir(), 'seenit-recall-shadow-'))
   const found = {}
-  for (const bar of MIN_TOKENS) {
-    found[bar] = {}
-    for (const [level, transform] of LEVELS) {
-      await writeFile(plantedPath, `${transform(donor.body, rng)}\n`)
-      // --no-gitignore is not passed, so the planted file must not be ignored;
-      // it sits at the repository root with a name nothing globs.
-      const blocks = await detect([dir], { minTokens: bar, base: dir, includeTests: true })
-      // Did the planted copy get linked to anything other than itself?
-      found[bar][level] = blocks.some(
-        (b) => (b.a === PLANTED) !== (b.b === PLANTED),
-      )
+  try {
+    await buildShadow(dir, files, shadow)
+    for (const bar of MIN_TOKENS) {
+      found[bar] = {}
+      for (const [level, transform] of LEVELS) {
+        const text = await normalizeSource(planted, `${transform(donor.body, rng)}\n`)
+        await writeFile(join(shadow, planted), text ?? '')
+        const blocks = await detect([shadow], { minTokens: bar, base: shadow, includeTests: true })
+        // Did the planted copy get linked to anything other than itself?
+        found[bar][level] = blocks.some((b) => (b.a === planted) !== (b.b === planted))
+      }
     }
+  } finally {
+    await rm(shadow, { recursive: true, force: true })
   }
-  await rm(plantedPath, { force: true })
   return {
     repo: repo.repository,
     split: splitOf(repo.repository),
