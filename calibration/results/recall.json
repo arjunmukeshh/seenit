@@ -2,273 +2,273 @@
   "measuredAt": "2026-07-31",
   "method": "A substantial function is lifted from each repository, transformed, and planted back into the working tree as a real file, then jscpd is run over the directory exactly as the product runs it. Ground truth is known by construction, so no hand-labelling is involved. Repositories are split by a stable hash of their URL: the min-tokens bar is chosen on the tuning half only, and the headline recall is reported on the held-out half.",
   "repos": {
-    "total": 5,
-    "tune": 3,
-    "holdout": 2
+    "total": 66,
+    "tune": 30,
+    "holdout": 36
   },
   "engine": "jscpd 5.0.14",
   "chosenOnTuningSplit": {
-    "minTokens": 50,
-    "recallAtHardest": 1
+    "minTokens": 30,
+    "recallAtHardest": 0.8
   },
   "heldOut": {
     "20": {
       "verbatim": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename+literals": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+reformat": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+comments": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       },
       "+reorder": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       },
       "+extract": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       }
     },
     "30": {
       "verbatim": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename+literals": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+reformat": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+comments": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       },
       "+reorder": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 28,
+        "of": 36,
+        "recall": 0.778,
         "ci95": [
-          0.342,
-          1
+          0.619,
+          0.883
         ]
       },
       "+extract": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 28,
+        "of": 36,
+        "recall": 0.778,
         "ci95": [
-          0.342,
-          1
+          0.619,
+          0.883
         ]
       }
     },
     "50": {
       "verbatim": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename+literals": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+reformat": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+comments": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       },
       "+reorder": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 27,
+        "of": 36,
+        "recall": 0.75,
         "ci95": [
-          0.342,
-          1
+          0.589,
+          0.862
         ]
       },
       "+extract": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 27,
+        "of": 36,
+        "recall": 0.75,
         "ci95": [
-          0.342,
-          1
+          0.589,
+          0.862
         ]
       }
     },
     "75": {
       "verbatim": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "rename+literals": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+reformat": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 31,
+        "of": 36,
+        "recall": 0.861,
         "ci95": [
-          0.342,
-          1
+          0.713,
+          0.939
         ]
       },
       "+comments": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 29,
+        "of": 36,
+        "recall": 0.806,
         "ci95": [
-          0.342,
-          1
+          0.65,
+          0.902
         ]
       },
       "+reorder": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 25,
+        "of": 36,
+        "recall": 0.694,
         "ci95": [
-          0.342,
-          1
+          0.531,
+          0.82
         ]
       },
       "+extract": {
-        "found": 2,
-        "of": 2,
-        "recall": 1,
+        "found": 25,
+        "of": 36,
+        "recall": 0.694,
         "ci95": [
-          0.342,
-          1
+          0.531,
+          0.82
         ]
       }
     }
@@ -276,160 +276,160 @@
   "tuning": {
     "20": {
       "verbatim": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "rename": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "rename+literals": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "+reformat": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "+comments": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "+reorder": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 24,
+        "of": 30,
+        "recall": 0.8
       },
       "+extract": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 24,
+        "of": 30,
+        "recall": 0.8
       }
     },
     "30": {
       "verbatim": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "rename": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "rename+literals": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "+reformat": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 26,
+        "of": 30,
+        "recall": 0.867
       },
       "+comments": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "+reorder": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 24,
+        "of": 30,
+        "recall": 0.8
       },
       "+extract": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 24,
+        "of": 30,
+        "recall": 0.8
       }
     },
     "50": {
       "verbatim": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "rename": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "rename+literals": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "+reformat": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 25,
+        "of": 30,
+        "recall": 0.833
       },
       "+comments": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 24,
+        "of": 30,
+        "recall": 0.8
       },
       "+reorder": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 23,
+        "of": 30,
+        "recall": 0.767
       },
       "+extract": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 23,
+        "of": 30,
+        "recall": 0.767
       }
     },
     "75": {
       "verbatim": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 22,
+        "of": 30,
+        "recall": 0.733
       },
       "rename": {
-        "found": 3,
-        "of": 3,
-        "recall": 1
+        "found": 22,
+        "of": 30,
+        "recall": 0.733
       },
       "rename+literals": {
-        "found": 2,
-        "of": 3,
-        "recall": 0.667
+        "found": 19,
+        "of": 30,
+        "recall": 0.633
       },
       "+reformat": {
-        "found": 2,
-        "of": 3,
-        "recall": 0.667
+        "found": 18,
+        "of": 30,
+        "recall": 0.6
       },
       "+comments": {
-        "found": 2,
-        "of": 3,
-        "recall": 0.667
+        "found": 17,
+        "of": 30,
+        "recall": 0.567
       },
       "+reorder": {
-        "found": 2,
-        "of": 3,
-        "recall": 0.667
+        "found": 16,
+        "of": 30,
+        "recall": 0.533
       },
       "+extract": {
-        "found": 2,
-        "of": 3,
-        "recall": 0.667
+        "found": 16,
+        "of": 30,
+        "recall": 0.533
       }
     }
   },
   "byEcosystem": {
     "npm": {
-      "repos": 5,
+      "repos": 66,
       "recallAtChosen": {
-        "found": 5,
-        "of": 5,
-        "recall": 1
+        "found": 52,
+        "of": 66,
+        "recall": 0.788
       }
     }
   }
