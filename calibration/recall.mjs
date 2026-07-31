@@ -31,9 +31,11 @@ import { fileURLToPath } from 'node:url'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
-import { analyzeSource } from '../lib/analyze/index.js'
-import { findClones } from '../lib/analyze/metrics/duplication.js'
-import { isAnalyzable, isTestFile } from '../lib/analyze/parser.js'
+import { detect, isTest } from '../lib/jscpd.js'
+
+const JSCPD_VERSION = JSON.parse(
+  await readFile(new URL('../node_modules/jscpd/package.json', import.meta.url), 'utf8'),
+).version
 
 const run = promisify(execFile)
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -58,7 +60,11 @@ const splitOf = (url) => {
   for (let i = 0; i < url.length; i++) h = (Math.imul(h, 31) + url.charCodeAt(i)) >>> 0
   return h % 2 === 0 ? 'tune' : 'holdout'
 }
-const PERCENTILES = (flag('percentiles', '50,75,90')).split(',').map(Number)
+// The bar being swept. jscpd's own default is 30 — flat, and identical for a
+// 42-file repository and a 38,000-file one, which is the failure this project
+// already documented for its own flat threshold. Sweeping it here is what lets
+// the bar be chosen from an outcome instead of accepted from a default.
+const MIN_TOKENS = (flag('min-tokens', '20,30,50,75')).split(',').map(Number)
 // The injection harness lifts a JavaScript function and plants it back, so a
 // Java or Go repository yields nothing and its "recall 0" is an artifact of the
 // filter rather than a fact about the language. Sampling is restricted to the
@@ -166,24 +172,17 @@ function donorFunction(src) {
   return null
 }
 
+// Planted into the repository as a real file, because that is how the product
+// runs: jscpd scans a directory, not an in-memory list of parsed facts. The old
+// harness could append a synthetic fact to an array; measuring an external
+// engine means measuring it through the same interface the tool uses.
+const PLANTED = '__seenit_planted__.js'
+
 async function measure(repo, dir, rng) {
   const files = (await run('git', ['-C', dir, 'ls-files'], { maxBuffer: 1 << 28 })).stdout
     .split('\n')
-    .filter((f) => f && /\.(js|mjs|ts)$/.test(f) && isAnalyzable(f) && !isTestFile(f))
-  if (files.length < 3) return null
-
-  const facts = []
-  for (const path of files.slice(0, 400)) {
-    try {
-      const buf = await readFile(join(dir, path))
-      if (buf.length > 400_000) continue
-      const f = await analyzeSource(path, buf)
-      if (f) facts.push({ ...f, path })
-    } catch {
-      /* skip */
-    }
-  }
-  if (facts.length < 12) return null // too little JS here for the result to mean anything
+    .filter((f) => f && /\.(js|mjs|ts)$/.test(f) && !isTest(f) && !f.includes('node_modules/'))
+  if (files.length < 12) return null // too little JS here for the result to mean anything
 
   // Donor: the first file yielding a substantial function.
   let donor = null
@@ -200,29 +199,29 @@ async function measure(repo, dir, rng) {
   }
   if (!donor) return null
 
-  // One result per (percentile, transformation). The percentile is read from
-  // the environment by duplication.js, so it is set per measurement.
+  // One result per (min-tokens, transformation).
+  const plantedPath = join(dir, PLANTED)
   const found = {}
-  for (const pct of PERCENTILES) {
-    found[pct] = {}
+  for (const bar of MIN_TOKENS) {
+    found[bar] = {}
     for (const [level, transform] of LEVELS) {
-      const planted = `${transform(donor.body, rng)}\n`
-      const injected = await analyzeSource('__planted__.js', Buffer.from(planted))
-      if (!injected) {
-        found[pct][level] = false
-        continue
-      }
-      const clones = findClones([...facts, { ...injected, path: '__planted__.js' }], { percentile: pct })
-      // Did the planted copy get linked to anything at all?
-      found[pct][level] = clones.some((c) => c.a === '__planted__.js' || c.b === '__planted__.js')
+      await writeFile(plantedPath, `${transform(donor.body, rng)}\n`)
+      // --no-gitignore is not passed, so the planted file must not be ignored;
+      // it sits at the repository root with a name nothing globs.
+      const blocks = await detect([dir], { minTokens: bar, base: dir, includeTests: true })
+      // Did the planted copy get linked to anything other than itself?
+      found[bar][level] = blocks.some(
+        (b) => (b.a === PLANTED) !== (b.b === PLANTED),
+      )
     }
   }
+  await rm(plantedPath, { force: true })
   return {
     repo: repo.repository,
     split: splitOf(repo.repository),
     ecosystem: repo.ecosystem,
     donor: donor.path,
-    files: facts.length,
+    files: files.length,
     found,
   }
 }
@@ -282,18 +281,22 @@ const holdout = results.filter((r) => r.split === 'holdout')
 
 // Chosen by looking only at the tuning half, at the hardest transformation.
 const hardest = LEVELS[LEVELS.length - 1][0]
-const chosen = PERCENTILES.map((pct) => ({ pct, r: recallFor(tune, pct, hardest)?.recall ?? 0 })).sort(
+// Ties break toward the HIGHER bar: equal recall for fewer findings is a
+// strictly better trade, and the old study learned this the hard way when p60
+// and p75 tied inside the CI while p60 produced four times the noise.
+const chosen = MIN_TOKENS.map((bar) => ({ pct: bar, r: recallFor(tune, bar, hardest)?.recall ?? 0 })).sort(
   (a, b) => b.r - a.r || b.pct - a.pct,
 )[0]
 
 const summary = {
   measuredAt: new Date().toISOString().slice(0, 10),
   method:
-    'A substantial function is lifted from each repository, transformed, and planted back as a new file. Ground truth is known by construction, so no hand-labelling is involved. Repositories are split by a stable hash of their URL: the percentile is chosen on the tuning half only, and the headline recall is reported on the held-out half.',
+    'A substantial function is lifted from each repository, transformed, and planted back into the working tree as a real file, then jscpd is run over the directory exactly as the product runs it. Ground truth is known by construction, so no hand-labelling is involved. Repositories are split by a stable hash of their URL: the min-tokens bar is chosen on the tuning half only, and the headline recall is reported on the held-out half.',
   repos: { total: results.length, tune: tune.length, holdout: holdout.length },
-  chosenOnTuningSplit: { percentile: chosen?.pct ?? null, recallAtHardest: chosen?.r ?? null },
+  engine: 'jscpd ' + JSCPD_VERSION,
+  chosenOnTuningSplit: { minTokens: chosen?.pct ?? null, recallAtHardest: chosen?.r ?? null },
   heldOut: Object.fromEntries(
-    PERCENTILES.map((pct) => [
+    MIN_TOKENS.map((pct) => [
       pct,
       Object.fromEntries(
         LEVELS.map(([level]) => {
@@ -304,7 +307,7 @@ const summary = {
     ]),
   ),
   tuning: Object.fromEntries(
-    PERCENTILES.map((pct) => [pct, Object.fromEntries(LEVELS.map(([level]) => [level, recallFor(tune, pct, level)]))]),
+    MIN_TOKENS.map((pct) => [pct, Object.fromEntries(LEVELS.map(([level]) => [level, recallFor(tune, pct, level)]))]),
   ),
   byEcosystem: Object.fromEntries(
     [...new Set(results.map((r) => r.ecosystem))].map((eco) => {
@@ -315,4 +318,4 @@ const summary = {
 }
 
 await writeFile(join(HERE, 'results', 'recall.json'), JSON.stringify(summary, null, 2) + '\n')
-console.log(JSON.stringify({ chosen: summary.chosenOnTuningSplit, repos: summary.repos, heldOut: summary.heldOut[summary.chosenOnTuningSplit.percentile] }, null, 2))
+console.log(JSON.stringify({ chosen: summary.chosenOnTuningSplit, repos: summary.repos, heldOut: summary.heldOut[summary.chosenOnTuningSplit.minTokens] }, null, 2))
