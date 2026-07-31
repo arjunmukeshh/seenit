@@ -7,8 +7,8 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
-import { repoRoot } from '../lib/git.js'
-import { findExisting, guessLanguage, trackedFiles } from '../lib/find.js'
+import { repoRoot, trackedFiles } from '../lib/git.js'
+import { findExisting, guessLanguage } from '../lib/find.js'
 import { detectNormalized } from '../lib/jscpd.js'
 import { clusterBlocks } from '../lib/cluster.js'
 

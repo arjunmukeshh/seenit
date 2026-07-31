@@ -1,10 +1,8 @@
 node_modules/
-dist/
 *.log
+*.tgz
 
-# The analysis ledger and its cache live inside the *target* repo's .git/
-# directory (.git/seenit/ledger.git), so they are never part of a working tree
-# and need no ignore rule. Local scratch output does:
+# Local scratch from the accuracy study
 calibration/data/
 calibration/.venv/
-*.tgz
+.DS_Store

@@ -4,10 +4,10 @@
 
 import { readFile } from 'node:fs/promises'
 
-import { repoRoot, isRepo } from '../lib/git.js'
+import { repoRoot, isRepo, trackedFiles } from '../lib/git.js'
 import { detectNormalized, JSCPD_DEFAULT_MIN_TOKENS } from '../lib/jscpd.js'
 import { clusterBlocks } from '../lib/cluster.js'
-import { findExisting, guessLanguage, trackedFiles } from '../lib/find.js'
+import { findExisting, guessLanguage } from '../lib/find.js'
 
 const args = process.argv.slice(2)
 const command = args[0] && !args[0].startsWith('-') ? args[0] : 'default_'

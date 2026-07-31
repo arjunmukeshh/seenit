@@ -1,5 +1,10 @@
 # seenit
 
+> **Archived.** This documents seenit v0.1, which scored repository health across
+> seven dimensions and stored snapshots in a git-native ledger. None of it ships
+> today — v0.2 does one thing, duplication. Kept for the `v0.1-observatory` tag.
+> Commands and file paths below no longer exist.
+
 **A code observatory.** It measures the health of a repository and stores every
 measurement **as real git objects** — so the history of your codebase's health is
 itself version-controlled, diffable, blameable and bisectable.
