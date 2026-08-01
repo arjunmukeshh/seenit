@@ -227,7 +227,7 @@ async function measure(repo, dir, rng, donor) {
       const planted = `__seenit_probe__${foreign.ext}`
       const text = await normalizeSource(planted, `${foreign.body}\n`)
       await writeFile(join(shadow, planted), text ?? foreign.body)
-      const withProbe = await detect([shadow], { minTokens: MIN_TOKENS, base: shadow, includeTests: true })
+      const withProbe = await detect([shadow], { minTokens: MIN_TOKENS, base: shadow, includeSecondary: true })
       const hits = withProbe.filter((b) => (b.a === planted) !== (b.b === planted))
       probe = {
         from: foreign.repo,

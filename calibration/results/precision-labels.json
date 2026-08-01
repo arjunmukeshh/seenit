@@ -2,861 +2,826 @@
  {
   "id": "c001",
   "verdict": "no",
-  "reason": "Two distinct example RDF pipeline definitions (concat vs shell) that share only prefix/step boilerplate a declarative example file is expected to repeat."
+  "reason": "A is a React paint component's mouse-state hooks, B is GLSL bump-mapping/noise shader code; nothing in common."
  },
  {
   "id": "c002",
   "verdict": "yes",
-  "reason": "Byte-identical exported chartData OHLC arrays that could trivially be one shared data module."
+  "reason": "Two hand-written copies of the same pragma-resolution routine (settings override, JS_IDENTIFIER_REGEX validation, throw, return) differing only in which settings key and message string is used."
  },
  {
   "id": "c003",
-  "verdict": "yes",
-  "reason": "testbuild() and test() have the same body (unit tests, build, empty package.json, symlinks, e2e) differing only in a trailing chained step."
+  "verdict": "no",
+  "reason": "A is a dark color-scheme token map and B is an HTTP-status/MIME-type constant table; only the shape of a long object literal is shared."
  },
  {
   "id": "c004",
   "verdict": "yes",
-  "reason": "pushState and replaceState are near-copies of the same hash-route/history logic differing only in the history method and one fallback branch."
+  "reason": "Byte-for-byte identical bulk-operation creation, error rendering, watch/poll, and result reporting flow apart from the arguments passed to formatOperationInfo."
  },
  {
   "id": "c005",
   "verdict": "no",
-  "reason": "Different test cases asserting different math-markdown inputs and outputs; the repetition is the normal shape of a test suite."
+  "reason": "A is a union type listing component names, B is parameter validation helpers; unrelated code."
  },
  {
   "id": "c006",
   "verdict": "no",
-  "reason": "A schema-enchanting file loop and a JSON Lines transform stream doc comment are unrelated code."
+  "reason": "A is Splitter pane property declarations with doc comments, B is a cascading dropdown demo component; unrelated."
  },
  {
   "id": "c007",
   "verdict": "no",
-  "reason": "App bootstrap/render code and a Storybook story-fetching function do unrelated jobs."
+  "reason": "Parallel module scaffolding (imports, options interface, exported GetUriProtocol) for two genuinely different protocols, file: and ftp:, whose implementations diverge."
  },
  {
   "id": "c008",
   "verdict": "no",
-  "reason": "An http-proxy example server and a key-value Store request handler are unrelated apart from both being small Node scripts."
+  "reason": "A computes initials from name strings while B renders an Avatar image component; unrelated logic."
  },
  {
   "id": "c009",
   "verdict": "yes",
-  "reason": "The same SVG/React prop-name remap table appears twice and should be a single shared constant."
+  "reason": "The PLATFORM_MAP table and detectLinuxLibc function are character-for-character identical in both regions."
  },
  {
   "id": "c010",
-  "verdict": "unclear",
-  "reason": "Both fragments show the identical tail of a TypeScript AST walker but are truncated above the differing predicate, so it is impossible to tell if the full functions coincide."
+  "verdict": "no",
+  "reason": "A is a push-certificate-manager context class, B is an auto-generated OPC UA weight-item type interface; no shared logic."
  },
  {
   "id": "c011",
   "verdict": "no",
-  "reason": "A VitePress themeConfig fragment and CLI directory-validation code are entirely unrelated."
+  "reason": "Identical few-line plugin scaffolding required by the plugin interface, with each plugin wrapping a different webpack modification (CSS support vs Statoscope)."
  },
  {
   "id": "c012",
   "verdict": "no",
-  "reason": "Two parallel-but-distinct settings readers (createClass pragma vs base pragma) with different defaults and messages; only the shared identifier check looks alike."
+  "reason": "A is an export barrel of component modules, B is an 11ty playground-example shortcode; unrelated."
  },
  {
   "id": "c013",
-  "verdict": "no",
-  "reason": "Two loops over different DOM collections performing different work; only the index-loop boilerplate coincides."
+  "verdict": "yes",
+  "reason": "The same block of list-item token styles (label, supporting text, trailing text, slot icons) is duplicated verbatim except for one layout declaration."
  },
  {
   "id": "c014",
-  "verdict": "no",
-  "reason": "A Fluxible constructor/error handler and a doc-loading action are unrelated code."
+  "verdict": "yes",
+  "reason": "The same defaultCallback/customSuccess dispatch block is copied into both response branches, differing only in Message.success vs Message.error."
  },
  {
   "id": "c015",
   "verdict": "yes",
-  "reason": "Identical asideMenuConfig module duplicated verbatim."
+  "reason": "Identical e2e shell-script prologue (temp dirs, cleanup, handle_error/handle_exit, traps, root path) duplicated across two scripts."
  },
  {
   "id": "c016",
-  "verdict": "yes",
-  "reason": "CollectionReference and DocumentReference contain the same migrateContext__ version-migration logic and surrounding members, differing only in the class name in comments."
+  "verdict": "no",
+  "reason": "A is a prose HTML demo string for a Typography example, B is a HeaderControl component factory; unrelated."
  },
  {
   "id": "c017",
   "verdict": "no",
-  "reason": "A highlight-attribute parser and a JSX result-item template share nothing."
+  "reason": "Parallel NCCO serializers for two distinct action types over different field sets; the shape repeats but the content is type-specific."
  },
  {
   "id": "c018",
   "verdict": "no",
-  "reason": "A conditional type for CLI option names and numeric/template render helpers are unrelated."
+  "reason": "A is Argon2 parameter validation and hashing, B is an Expo config plugin patching a Podfile; unrelated."
  },
  {
   "id": "c019",
   "verdict": "no",
-  "reason": "A class constructor wiring stores and a DOM mutation-observer helper are unrelated."
+  "reason": "A is type declarations for actor run options, B is a schema-mapping build script; unrelated."
  },
  {
   "id": "c020",
   "verdict": "no",
-  "reason": "usePresence implements animation-aware visibility while the other region is a set of distinct one-line ARIA attribute hooks."
+  "reason": "A adds trigger nodes to a namespace, B asserts a reference exists on a node; only the import block and address-space lookup line resemble each other."
  },
  {
   "id": "c021",
-  "verdict": "no",
-  "reason": "Two parallel test fixture constants holding different npm error payloads; the repeated shape is the fixture schema, not duplicated logic."
+  "verdict": "yes",
+  "reason": "Both loops implement the identical read-schema, parse, read-rules, parse, enchantJsonSchema, write, log pipeline with only path/label variations."
  },
  {
   "id": "c022",
   "verdict": "no",
-  "reason": "Two rule files sharing only the XML header while declaring different rule kinds (AddDescription vs RemoveValue/ReplaceValue)."
+  "reason": "Parallel per-coin device test suites whose expected-address derivation genuinely differs (cashaddr/base58 for BCH vs bech32/p2sh for DGB)."
  },
  {
   "id": "c023",
   "verdict": "no",
-  "reason": "Both begin with the same three-line IPv4 dnsLookup prelude but then compute different results (resolved address vs netmask match)."
+  "reason": "Both are entries in a docs metadata registry describing different components; the repetition is the data format, not duplicated logic."
  },
  {
   "id": "c024",
-  "verdict": "no",
-  "reason": "Parallel branches of one placement mapping handling different Justify values and returning different placements — distinct cases, not duplicated logic."
+  "verdict": "yes",
+  "reason": "The Options struct, DefaultsConfig enum with get_defaults, and CapabilitiesConfig enum are duplicated verbatim except for the Error import."
  },
  {
   "id": "c025",
-  "verdict": "yes",
-  "reason": "The public-members and private-members decorator initializer-order tests are a large copy-paste differing only in member naming, with identical decorators and expected log string."
+  "verdict": "no",
+  "reason": "A is an express maintenance-access route pair, B is a dashboard commands/settings config object; unrelated."
  },
  {
   "id": "c026",
   "verdict": "no",
-  "reason": "Two different builder functions (button group vs API-call trigger) sharing only the options-object destructuring convention."
+  "reason": "A is GraphQL query/mutation string constants, B is imports plus a dev-command options interface; unrelated."
  },
  {
   "id": "c027",
-  "verdict": "no",
-  "reason": "readBytes/peekBytes and the stream cancel/fromAsync/getReader helpers implement different stream operations."
+  "verdict": "yes",
+  "reason": "The same w() helper and enumerateAllConditionTypes/findAllNodeOfType implementation appear twice, differing only by TypeScript annotations."
  },
  {
   "id": "c028",
   "verdict": "yes",
-  "reason": "The pixelmatch and odiff factories return identical matchImage/matchImages wrappers that differ only in which assert function is constructed."
+  "reason": "The electionData array is duplicated verbatim, including identical typos in the data."
  },
  {
   "id": "c029",
-  "verdict": "yes",
-  "reason": "Two nearly identical large JSX blocks for the same editor component, differing only in a prop above the copied section."
+  "verdict": "no",
+  "reason": "A is a CLI command definition and B is a function that shells out to eslint to collect TS extension rules; they share no logic."
  },
  {
   "id": "c030",
   "verdict": "no",
-  "reason": "The shared part is the required IPipelineFactory plugin boilerplate; each factory builds a different pipeline target (JsBundle vs BrowserApp) for a different project."
+  "reason": "A is a stream readBytes implementation and B is a jsdoc template config object; completely unrelated."
  },
  {
   "id": "c031",
-  "verdict": "no",
-  "reason": "One is a Dart code-emitter loop and the other is an Angular NgModule declaration list; they have nothing in common."
+  "verdict": "yes",
+  "reason": "Both regions contain a byte-identical tokenizeAnsi function, so one copy could serve both call sites."
  },
  {
   "id": "c032",
   "verdict": "no",
-  "reason": "Parallel test-vector fixtures that deliberately repeat structure while carrying distinct algorithm parameters and expected ciphertexts (no label vs with label)."
+  "reason": "Parallel @font-face declarations for two distinct font weights; the repetition is inherent to declaring separate fonts."
  },
  {
   "id": "c033",
-  "verdict": "no",
-  "reason": "One is TypeScript conditional type extraction for an API client, the other a plain HTTP resource class; only the coincidental shape of exported types is similar."
+  "verdict": "yes",
+  "reason": "The countdown and elapsed store classes are near-identical subscribe/getSnapshot/dispose/start/stop/tick implementations differing only in a target-instant guard."
  },
  {
   "id": "c034",
   "verdict": "yes",
-  "reason": "The same barrel export list is written twice with only a './chart/' path prefix differing, so one file could simply re-export the other."
+  "reason": "The union-type building loops are the same copy-pasted algorithm over different node shapes, down to the identical comments (and a typo divergence in the length check)."
  },
  {
   "id": "c035",
   "verdict": "yes",
-  "reason": "The entire .aa-Tag/.aa-TagRemoveButton CSS block is byte-for-byte duplicated across two stylesheets."
+  "reason": "ProxyServer.before and after are the same pass-lookup-and-splice logic differing only by the splice index expression."
  },
  {
   "id": "c036",
-  "verdict": "no",
-  "reason": "These are the forward (project) and inverse (unproject) transforms, mathematically distinct operations using different matrices."
+  "verdict": "yes",
+  "reason": "The two pricing tiers are the same copy-pasted five-item JSX list with only text, icon name, and class names swapped, replaceable by one data-driven component."
  },
  {
   "id": "c037",
-  "verdict": "yes",
-  "reason": "Identical checkout / read-go.version / setup-go step sequences copied between workflows, differing only in the OS matrix, and extractable into a reusable workflow or composite action."
+  "verdict": "no",
+  "reason": "Both are blocks of independent test cases with different inputs and expected outputs; the repeated assertion shape is the intended test boilerplate."
  },
  {
   "id": "c038",
   "verdict": "no",
-  "reason": "Each block configures a different social-login provider component with its own client id and props; the repetition is inherent to a per-provider demo."
+  "reason": "A parses highlighted attribute strings while B is JSX rendering a star-rating SVG; unrelated code."
  },
  {
   "id": "c039",
   "verdict": "no",
-  "reason": "One merges plugin configuration defaults, the other resolves an import declaration's file path; unrelated code."
+  "reason": "Two keypress handlers with different cases and behavior (menu navigation vs masked secret entry); only the switch/Promise scaffolding coincides."
  },
  {
   "id": "c040",
-  "verdict": "no",
-  "reason": "An esbuild binary download/integrity routine and a CSS prefix support type module share nothing."
+  "verdict": "yes",
+  "reason": "The React and Preact wrapper generators are the same code path with only the import module swapped, and the code itself comments \"Same inline pattern as React\"."
  },
  {
   "id": "c041",
-  "verdict": "yes",
-  "reason": "The same topic/command iteration building subArgs and argsBlock appears verbatim in two places and could be a single shared helper."
+  "verdict": "no",
+  "reason": "A is a mock todo service and B is a React application shell component; nothing in common."
  },
  {
   "id": "c042",
   "verdict": "no",
-  "reason": "Parallel-but-distinct CDN event classes, each representing a different lifecycle event with its own step, status and message."
+  "reason": "Light-theme :root and .dark blocks are parallel-but-distinct constant sets whose whole purpose is to define different values for the same variable names."
  },
  {
   "id": "c043",
-  "verdict": "yes",
-  "reason": "The full run of shape mixins (xl-selected through pressed-xl) is duplicated identically in two SCSS files."
+  "verdict": "no",
+  "reason": "Two identical per-package babel config files; per-package build config is boilerplate each package is expected to carry."
  },
  {
   "id": "c044",
   "verdict": "yes",
-  "reason": "The two Rust example files are character-for-character identical, including the schema, structs and test."
+  "reason": "The edit and new action handlers repeat the same populate/validate/notice/redirect flow with only the success message and update-vs-create call differing."
  },
  {
   "id": "c045",
-  "verdict": "yes",
-  "reason": "Both blocks are the same spawn-then-check-exit-code-then-maybe-continue idiom, differing only in the command and log text."
+  "verdict": "no",
+  "reason": "A emits GraphQL query/mutation parts from a config while B builds display-field options for a React form; unrelated logic."
  },
  {
   "id": "c046",
   "verdict": "no",
-  "reason": "One computes plugin steps over checks, the other resolves plugins and parses CLI args; unrelated logic."
+  "reason": "NextObserver/ErrorObserver/CompletionObserver are deliberately distinct interface variants differing in which member is required."
  },
  {
   "id": "c047",
-  "verdict": "no",
-  "reason": "Two pricing-tier cards with intentionally different copy, icons and highlight classes; the repetition is presentational content, not shared logic."
+  "verdict": "yes",
+  "reason": "The ComponentLoader add/override/unsafe methods are the same resolve-path-and-register body differing essentially by an `overrides` boolean."
  },
  {
   "id": "c048",
   "verdict": "no",
-  "reason": "A vite config template string in a generator versus a function shelling out to 'vite build'; only the word 'vite' connects them."
+  "reason": "A is a numeric literal tokenizer and B is a pnpm modules-validation function with its imports; entirely different code."
  },
  {
   "id": "c049",
-  "verdict": "yes",
-  "reason": "The two Home components are a copy-paste apart from the Link import source and one heading string."
+  "verdict": "no",
+  "reason": "Parallel CDN event classes, each a distinct value type with its own step, status, and message; the repeated shape is intentional declaration boilerplate."
  },
  {
   "id": "c050",
   "verdict": "yes",
-  "reason": "The same checkout/pnpm/node setup step sequence is duplicated across workflows with only the node-version source differing."
+  "reason": "createHighlightComponent and createSnippetComponent are identical apart from the parse function and component name, an obvious copy-paste."
  },
  {
   "id": "c051",
-  "verdict": "yes",
-  "reason": "The identical GraphQL Query, Mutation and User type definitions are declared in two schema files."
+  "verdict": "no",
+  "reason": "Two ordinary app.use route registrations for different routers; nothing beyond one line of framework boilerplate."
  },
  {
   "id": "c052",
   "verdict": "yes",
-  "reason": "The React and Preact wrapper generators duplicate the same generation logic line for line, as the code's own 'Same inline pattern as React' comment admits."
+  "reason": "Both Rust functions perform the same filename escaping, trailing-paren fixup, and shorten_virtual_store_name call."
  },
  {
   "id": "c053",
-  "verdict": "yes",
-  "reason": "addGitIgnore and addNpmIgnore are the same write-file-if-missing routine with different filenames and contents."
+  "verdict": "no",
+  "reason": "Two different support-status data tables (node crypto API surface vs WebCrypto algorithms); the entries are distinct data, not duplicated logic."
  },
  {
   "id": "c054",
   "verdict": "yes",
-  "reason": "The resource-action and record-action route components repeat the same css/drawer/filter rendering flow, differing only in records vs record and the guard message."
+  "reason": "The two regions are byte-identical copies of the same large world_map GeoJSON blob, which should live in one place."
  },
  {
   "id": "c055",
   "verdict": "no",
-  "reason": "Framework-mandated Next.js RootLayout boilerplate in two separate apps, each wrapping children in a different provider."
+  "reason": "The browser-client and node-server generators share a small emit-enums/structs/errors preamble but produce substantially different output for different targets."
  },
  {
   "id": "c056",
   "verdict": "yes",
-  "reason": "The Options, DefaultsConfig and CapabilitiesConfig definitions are duplicated verbatim across two crates, differing only in which Error type is imported."
+  "reason": "The two platform logger files are a verbatim copy differing only in the termios ioctl constant, which could be a per-platform constant over one shared implementation."
  },
  {
   "id": "c057",
   "verdict": "no",
-  "reason": "A titled Section wrapper and a styled header element are unrelated components that merely share React function-component shape."
+  "reason": "A is an HTTP fetch helper for a SurrealDB driver and B is TypeScript declaration text plus a napi build command array; they share nothing."
  },
  {
   "id": "c058",
   "verdict": "no",
-  "reason": "beforeEnter and beforeLeave are distinct transition hooks that necessarily save the same dataset fields before doing opposite work."
+  "reason": "Both are keyframes of the same generated Lottie animation JSON at different times (t=0 vs t=74), i.e. asset data that is expected to repeat, not logic to factor out."
  },
  {
   "id": "c059",
   "verdict": "no",
-  "reason": "Web Audio filter wiring and a sound-playback completion handler are entirely unrelated code."
+  "reason": "A defines a promise task Pool class while B is XHR error handling that rejects with Qiniu error objects; unrelated code."
  },
  {
   "id": "c060",
   "verdict": "no",
-  "reason": "A generic useService data-fetching hook and a tooltip shape-creator component share nothing but React/TS idiom."
+  "reason": "A is a Prism WGSL syntax-highlighting grammar and B is clone/duplication statistics aggregation; no shared behavior."
  },
  {
   "id": "c061",
-  "verdict": "no",
-  "reason": "An Angular component base ngOnInit/createElement helper is unrelated to a block of annotation property declarations."
+  "verdict": "yes",
+  "reason": "Both are the same stream-size measuring promise (error/data/end handlers accumulating buf.length) differing only in the compression pipe, so one shared helper parameterized by the transform would do."
  },
  {
   "id": "c062",
-  "verdict": "no",
-  "reason": "Both are API client methods that spread optional query params, but they hit different endpoints and shape their responses differently — parallel client boilerplate, not one implementation duplicated."
+  "verdict": "yes",
+  "reason": "pushState and replaceState are line-for-line copies apart from the history method called, so a single shared implementation taking the method name is natural."
  },
  {
   "id": "c063",
   "verdict": "no",
-  "reason": "A list-item Lit render method and standalone queryAssociatedById* DOM helpers do different jobs."
+  "reason": "A is a minified bundled parser-error-message module and B is a list of CSS custom properties for a light theme; completely unrelated."
  },
  {
   "id": "c064",
-  "verdict": "no",
-  "reason": "Two unrelated React components whose only similarity is the repo's propTypes/defaultProps boilerplate convention."
+  "verdict": "yes",
+  "reason": "The esm and iife build entries repeat the identical esbuildOptions merge/target-override logic with only the options key changed, which a single factory could produce."
  },
  {
   "id": "c065",
   "verdict": "no",
-  "reason": "Two unrelated ESLint rule fragments — one destructuring-pattern traversal, one report-with-location call."
+  "reason": "These are the minimal per-command factory classes the Vert.x launcher SPI requires, boilerplate that must exist once per command class."
  },
  {
   "id": "c066",
   "verdict": "no",
-  "reason": "Two generated lockfile entries for different versions of the same package; lockfiles are meant to repeat and are not refactorable."
+  "reason": "Two entries in an event-handler dispatch table that log different events with different payload fields; the repeated shape is inherent to the table."
  },
  {
   "id": "c067",
   "verdict": "no",
-  "reason": "CLI bootstrapping via oclif and store auth-scope resolution are unrelated functions."
+  "reason": "A renders an audio waveform onto a canvas texture while B constructs a stereo panner filter node; only the surrounding audio domain is shared."
  },
  {
   "id": "c068",
-  "verdict": "yes",
-  "reason": "Two icon-generation scripts share a byte-for-byte copy of the filter/progress-bar/name-normalization loop, differing only in one filter flag and a log line."
+  "verdict": "no",
+  "reason": "A is the hasXMetadata family and B the getXMetadata family, parallel accessors delegating to different underlying calls with different return types."
  },
  {
   "id": "c069",
-  "verdict": "no",
-  "reason": "A NodeClass bitmask enum plus flag parser has nothing in common with a yargs-based sample server script."
+  "verdict": "yes",
+  "reason": "imageView2/imageMogr2/watermark all build the URL the same way by conditionally appending '/name/' + encodeURIComponent(value) and then prefixing key/domain, so one shared segment builder could serve them all."
  },
  {
   "id": "c070",
   "verdict": "no",
-  "reason": "Identical text, but it is generated lockfile dependency blocks for two versions of the same package — repetition is expected and not editable."
+  "reason": "Two different table test cases with different table options and expectations; only the makeTable scaffolding convention is shared."
  },
  {
   "id": "c071",
-  "verdict": "yes",
-  "reason": "The same tool-call result renderer appears twice (JS and TS variants), identical down to styles and Chinese labels, differing only in the getStatusBackground call and a type annotation."
+  "verdict": "no",
+  "reason": "Two component index files attaching each component's own distinct subcomponents (Layout vs Panel); required per-component wiring."
  },
  {
   "id": "c072",
-  "verdict": "no",
-  "reason": "A Redux state type/combineReducers definition and an HTML shell template are unrelated."
+  "verdict": "yes",
+  "reason": "useAriaControls and useAriaActivedescendant are the same set-or-remove-attribute effect differing only in the attribute name, trivially unified into one helper."
  },
  {
   "id": "c073",
   "verdict": "no",
-  "reason": "A Watermark component wrapper and a demo configuration form are different code serving different purposes."
+  "reason": "Two unrelated React contexts (form vs URL generator) that merely follow the standard createContext + hook + propTypes idiom."
  },
  {
   "id": "c074",
-  "verdict": "no",
-  "reason": "Two thin semantic-release plugin wrappers that already delegate to a shared addPlugin helper; only the plugin name and defaults differ."
+  "verdict": "yes",
+  "reason": "SecuxDASH and SecuxDGB are the same class body copied verbatim with only the CoinType constant changed, a textbook case for a shared factory or base class."
  },
  {
   "id": "c075",
   "verdict": "no",
-  "reason": "Both are esbuild onLoad plugins reading a file, but they patch different libraries for different reasons — shared plugin boilerplate only."
+  "reason": "A is a source-location object literal and B is a template-literal interpolation joiner; nothing in common."
  },
  {
   "id": "c076",
   "verdict": "no",
-  "reason": "One region renders three day-grid calendars, the other renders month and year pickers; similar JSX scaffolding but different pickers."
+  "reason": "These are util.inspect snapshot dumps of a generated webpack config for different style rules (.module.sass vs .module.less), fixture output rather than maintained code."
  },
  {
   "id": "c077",
-  "verdict": "no",
-  "reason": "Two distinct guard clauses in request handling (method-not-allowed vs payload-too-large) that intentionally share an error-rejection shape."
+  "verdict": "yes",
+  "reason": "Footer and Header are identical component definitions differing only in the rendered element and display name, replaceable by one parameterized factory."
  },
  {
   "id": "c078",
   "verdict": "yes",
-  "reason": "Two slider templates are character-for-character the same modifier/class block apart from indentation and one extra data attribute."
+  "reason": "The same requestAnimationFrame throttled tick effect appears twice, differing only in the ref type annotation and null-check style."
  },
  {
   "id": "c079",
   "verdict": "no",
-  "reason": "Parallel dark-mode and light-mode color lookup tables — distinct constant data that must differ by design."
+  "reason": "A is menu popup setup with role/tabindex and activedescendant wiring while B is a thin tooltip positioner element definition; different responsibilities."
  },
  {
   "id": "c080",
   "verdict": "no",
-  "reason": "A nitrobase collection demo script and a StateSignal class implementation are unrelated."
+  "reason": "A is an Angular NgModule declaration list and B is an AST annotation-validation visitor; unrelated code that happens to be long lists."
  },
  {
   "id": "c081",
   "verdict": "no",
-  "reason": "Two different sections of ESLint rule configuration listing distinct rules; shared file shape only."
+  "reason": "A is a remark-math test suite and B is a MathJax renderer factory; they share only the math domain."
  },
  {
   "id": "c082",
   "verdict": "no",
-  "reason": "A license/contributors header block and logger transport configuration code are unrelated."
+  "reason": "useRequest and useIntervalWhen are different hooks solving different problems despite both living in the same hooks library."
  },
  {
   "id": "c083",
-  "verdict": "unclear",
-  "reason": "The two Creevey configs are identical in the shown prefix, but both are truncated and b's extra path import signals divergence below the cut."
+  "verdict": "no",
+  "reason": "A is the fade-in (open) animation spec and B the fade-out (close) spec, parallel-but-distinct constants with different keyframes and durations."
  },
  {
   "id": "c084",
-  "verdict": "yes",
-  "reason": "The queue and stack hooks are near-copies of the same list-state implementation, with enqueue/push identical and dequeue/pop differing only in which end is taken."
+  "verdict": "no",
+  "reason": "Two sections of ESLint rule configuration turning off different rules with different justifying comments; no shared logic."
  },
  {
   "id": "c085",
-  "verdict": "yes",
-  "reason": "Both layout components duplicate the same hasSider child-scan for 'IceLayoutAside' and the same classNames/render structure, differing only in flag and class names."
+  "verdict": "no",
+  "reason": "One validates HTTPS cert/key and reads env files, the other records and post-processes an asciinema screencast; unrelated code."
  },
  {
   "id": "c086",
   "verdict": "yes",
-  "reason": "isHelp and isVersion are the same four lines of option-matching logic against different fields and could be one parameterized helper."
+  "reason": "The same selector-rectangle computation written twice, once for the x/left/width axis and once for y/top/height, and could be a single axis-parameterized helper."
  },
  {
   "id": "c087",
-  "verdict": "no",
-  "reason": "Two sequential try/catch blocks in the same function guarding different operations (JSON parse vs decrypt) with distinct error messages."
+  "verdict": "yes",
+  "reason": "Identical Cargo.lock read/parse/package-lookup preamble duplicated, differing only by an added debug println."
  },
  {
   "id": "c088",
-  "verdict": "yes",
-  "reason": "Both blocks are the same copy-pasted path-matching routine (Array.isArray guard, normalizePath, some/includes) differing only in which option list is consulted, so a shared helper would cover both."
+  "verdict": "no",
+  "reason": "A semantic-release branches/plugins config versus a huge minified vendored bundle; nothing in common."
  },
  {
   "id": "c089",
-  "verdict": "no",
-  "reason": "Two different marketing sections of a page with different layout classes and copy; only the JSX section scaffolding coincides."
+  "verdict": "yes",
+  "reason": "Two decorator initializer-order test cases whose decorator setup and expectation strings are a character-for-character copy, differing only in public versus private member syntax."
  },
  {
   "id": "c090",
   "verdict": "no",
-  "reason": "Parallel DataTables API registrations that each delegate to a different keytable operation; this is intentional per-method boilerplate."
+  "reason": "A binary packet encoder versus a static map of feature names to JSFeature enum values; unrelated code."
  },
  {
   "id": "c091",
   "verdict": "no",
-  "reason": "One is a bash completion script template, the other unrelated class helper methods for shell/env-var naming."
+  "reason": "propTypes/defaultProps declarations for two different React components, which is per-component boilerplate expected to repeat."
  },
  {
   "id": "c092",
-  "verdict": "yes",
-  "reason": "broadcastBeforeUpdateEvent and broadcastAfterUpdateEvent are line-for-line the same listener/subscriber dispatch logic differing only in the before/after names."
+  "verdict": "no",
+  "reason": "Cell-scrolling logic in a DataTables plugin versus a rollup build configuration array; unrelated."
  },
  {
   "id": "c093",
-  "verdict": "yes",
-  "reason": "unwindState and rewindState are near-copies of one state-flush loop, differing only in appending codeCache[key].off versus prepending .on."
+  "verdict": "no",
+  "reason": "Two barrel files re-exporting entirely different module sets; identical shape but no shared logic to factor out."
  },
  {
   "id": "c094",
-  "verdict": "no",
-  "reason": "A worker-proxy message-posting class versus documentation-heavy option type declarations; nothing shared."
+  "verdict": "yes",
+  "reason": "The click and dblclick handlers register the same guard-and-resolve-cell logic on the same table body and could share one implementation."
  },
  {
   "id": "c095",
   "verdict": "no",
-  "reason": "Discord OAuth guild-join handling versus Express under-maintenance route setup — unrelated logic."
+  "reason": "Two index barrels listing different sibling modules; the repetition is inherent to barrel files."
  },
  {
   "id": "c096",
   "verdict": "no",
-  "reason": "String truncation utilities versus a test fixture building expected table output; only superficially adjacent."
+  "reason": "These are successive steps of one unrolled base64 chunk decode emitting different bytes with different masks and shifts, not two copies of the same step."
  },
  {
   "id": "c097",
   "verdict": "no",
-  "reason": "Two constant-declaration blocks defining distinct, parallel-but-different constants for the compiler."
+  "reason": "Bitcoin Cash address encoding/decoding versus transaction buffer serialization; different jobs entirely."
  },
  {
   "id": "c098",
   "verdict": "yes",
-  "reason": "The two shell-script prologues are byte-for-byte identical setup/cleanup/trap boilerplate that could live in one sourced file."
+  "reason": "The same install/list/install-package/build sequence copy-pasted for the test_build and test_tailwind directories."
  },
  {
   "id": "c099",
-  "verdict": "no",
-  "reason": "Two unrelated constructors assigning their own distinct fields; the shape is ordinary constructor boilerplate."
+  "verdict": "yes",
+  "reason": "Two demo entry files whose glob collection, routing and rendering code are character-identical across the shown region."
  },
  {
   "id": "c100",
-  "verdict": "no",
-  "reason": "A build/test orchestration script versus a path-normalizing helper and an ANSI color constant table."
+  "verdict": "yes",
+  "reason": "The primary-key drop-and-recreate query building is duplicated verbatim between two query runners and could live in one shared method."
  },
  {
   "id": "c101",
-  "verdict": "no",
-  "reason": "Commented-out OAuth1 signature code versus an Apple social-login React component."
+  "verdict": "yes",
+  "reason": "The same topic and command sub-argument loops building argsBlock appear twice, differing only in indentation level."
  },
  {
   "id": "c102",
   "verdict": "no",
-  "reason": "Both use the same webpack tap-wrapping idiom, but each intercepts a different plugin's distinct error case, which is the substantive part of each block."
+  "reason": "A license/contributors header comment versus a TypeScript logger type declaration; unrelated content."
  },
  {
   "id": "c103",
   "verdict": "yes",
-  "reason": "Both are the same secret-prompt request()/keypress handler, one simply adding the display-refresh calls in the backspace branch."
+  "reason": "The Discord channel-list building, filtering and sorting body is duplicated verbatim, differing only in a trailing option key."
  },
  {
   "id": "c104",
   "verdict": "yes",
-  "reason": "isPlainJsonObject is duplicated verbatim, differing only in whether it is exported."
+  "reason": "The HttpProxyAgent and HttpsProxyAgent constructors repeat the same proxy URL parsing, header, auth and host/port normalization logic."
  },
  {
   "id": "c105",
-  "verdict": "no",
-  "reason": "Storybook stories for two different components (form versus slider) — repetition is inherent to story files."
+  "verdict": "yes",
+  "reason": "The grant and revoke commands are hand-written near-copies of one validate-scope-team, resolve-registry, auth and fetch flow that differ only in HTTP method and message strings."
  },
  {
   "id": "c106",
   "verdict": "no",
-  "reason": "Parallel one-off scalar registrations for BigInt and Json; each wraps a different resolver with its own customization."
+  "reason": "Trivial get/set accessor pairs on two different classes whose refresh() means different things; per-class property boilerplate rather than shared logic."
  },
  {
   "id": "c107",
   "verdict": "no",
-  "reason": "Generated pnpm lockfile entries listing transitive peers for different packages, not hand-maintained code."
+  "reason": "Two unrelated React components (a fields group and a document card) that merely share the propTypes/defaultProps file layout."
  },
  {
   "id": "c108",
   "verdict": "no",
-  "reason": "encode and decode are deliberate inverse operations whose array-traversal branch mirrors, not one implementing the other's job."
+  "reason": "Two unrelated demo files, one for a PDF viewer plugin and one for an aspect-ratio box; only the demo-file shape matches."
  },
  {
   "id": "c109",
   "verdict": "no",
-  "reason": "An example entity using @Factory decorators versus the library's internal generate() implementation."
+  "reason": "A Storybook meta decorator for SearchInput versus a FocusableMenuItem component implementation; unrelated code."
  },
  {
   "id": "c110",
   "verdict": "no",
-  "reason": "A styled input-option content component versus a highlight-management hook — unrelated beyond both being TSX modules."
+  "reason": "Framework-mandated Next.js RootLayout signature in two separate apps whose bodies wrap different providers; boilerplate that must repeat per app."
  },
  {
   "id": "c111",
-  "verdict": "no",
-  "reason": "Internals of one ESLint rule versus the module/meta header of a different rule."
+  "verdict": "yes",
+  "reason": "The icon-file filtering, logging, progress bar and prefix/suffix stripping loop is copy-pasted, differing only in the endsWith predicate and one log line."
  },
  {
   "id": "c112",
   "verdict": "no",
-  "reason": "Config type interfaces versus context hook re-exports; distinct concerns in the same package."
+  "reason": "A table of error message strings versus a function that writes import loader files; unrelated."
  },
  {
   "id": "c113",
   "verdict": "no",
-  "reason": "EC keypair output formatting versus ML-KEM encapsulate/decapsulate wrappers, sharing only common KeyObject API calls."
+  "reason": "Both are one-line named wrappers that already delegate to the shared addPlugin helper, differing only in the plugin package they register."
  },
  {
   "id": "c114",
   "verdict": "no",
-  "reason": "useMap-style callbacks versus a MutationObserver hook setup — no shared logic."
+  "reason": "createTextNodeExpressions/createSimpleBinding and createValueExpression build different AST binding structures and only share imports."
  },
  {
   "id": "c115",
   "verdict": "no",
-  "reason": "Workspace dependency-range validation versus changelog link assembly; entirely different tasks."
+  "reason": "Commented-out Jest config options and a rollup license banner are unrelated files with no shared logic."
  },
  {
   "id": "c116",
-  "verdict": "yes",
-  "reason": "stripScript and stripStyle are the same regex-extract-and-trim function with only the tag name differing, easily parameterized into one."
+  "verdict": "no",
+  "reason": "Two unrelated class constructors assigning their own distinct fields; identical shape is ordinary constructor boilerplate."
  },
  {
   "id": "c117",
   "verdict": "no",
-  "reason": "Two different Flux stores each implementing the required dehydrate/rehydrate interface over their own distinct state fields — boilerplate that is meant to repeat."
+  "reason": "Parallel but distinct token declarations for different DI tokens, not duplicated logic."
  },
  {
   "id": "c118",
-  "verdict": "no",
-  "reason": "checkClientToServer and checkServerToClient are deliberate mirror images with inverted type-widening tables and opposite-direction diagnostics, so neither does the other's job."
+  "verdict": "yes",
+  "reason": "The two JSX blocks are character-for-character the same handler and render logic, a clear copy-paste."
  },
  {
   "id": "c119",
-  "verdict": "no",
-  "reason": "handleSelection and handleUnSelection are complementary opposite operations with different prop sets (multiSelectionToggle vs PrevSelectedSet)."
+  "verdict": "yes",
+  "reason": "Both worker classes implement the same constructor-assign and execute() message-building protocol, differing only in how entryPoint is stringified."
  },
  {
   "id": "c120",
-  "verdict": "yes",
-  "reason": "Byte-identical Vite changelog plugin except for the 'chat' vs 'web' argument, which could trivially be a parameter of one shared plugin factory."
+  "verdict": "no",
+  "reason": "Form type declarations and pagination prop declarations are unrelated interface definitions."
  },
  {
   "id": "c121",
-  "verdict": "no",
-  "reason": "An Express route/server bootstrap and a jscpd InFilesDetector class are unrelated code with no shared logic."
+  "verdict": "yes",
+  "reason": "parseMinorChange and parsePatchChange are the same start/end-index-then-slice routine hand-copied for a different severity level."
  },
  {
   "id": "c122",
   "verdict": "no",
-  "reason": "A MathJax renderer factory and a rehype-katex transform are different implementations of different plugins, sharing only the math-rendering domain."
+  "reason": "Command discovery from manifests and pipeline property validation are entirely different functions."
  },
  {
   "id": "c123",
   "verdict": "no",
-  "reason": "Two adjacent report sections appending different precomputed strings (Importers vs Packages) under distinct headings — parallel but distinct output blocks."
+  "reason": "An action-registration method and a build config object literal have nothing in common."
  },
  {
   "id": "c124",
   "verdict": "yes",
-  "reason": "Two hand-written Proxy handlers implementing the same get/getOwnPropertyDescriptor pattern, differing only in the underlying System.getenv vs System.getProperty lookup."
+  "reason": "drawLine and drawEmpty repeat the identical ten-line left-border/spanning-cell computation that could be a shared helper."
  },
  {
   "id": "c125",
-  "verdict": "no",
-  "reason": "Separate XML documentation entries for distinct events with different versions and descriptions; the repeated parameter block is documentation boilerplate."
+  "verdict": "yes",
+  "reason": "useNextTick and useLayoutNextTick are the same hook body differing only in useEffect vs useLayoutEffect."
  },
  {
   "id": "c126",
   "verdict": "no",
-  "reason": "A stream buffer-info helper and a dependency-validation rule object are entirely unrelated code."
+  "reason": "An ESLint config block and a DNS resolution function are unrelated code."
  },
  {
   "id": "c127",
-  "verdict": "no",
-  "reason": "A protocol-validation helper with getUri docs and a dnsDomainIs JSDoc comment share nothing but doc-comment shape."
+  "verdict": "yes",
+  "reason": "updateDependency and updatePeerDependency are the same lookup-and-assign routine copied for a different package.json field."
  },
  {
   "id": "c128",
   "verdict": "no",
-  "reason": "Two slices of the same component-to-files map listing different components — data entries, not duplicated logic."
+  "reason": "Thin log-level wrappers already delegate to a shared format() and are the expected parallel logger API surface."
  },
  {
   "id": "c129",
-  "verdict": "no",
-  "reason": "Two app.use route-mount calls for different routers; conventional per-route registration."
+  "verdict": "yes",
+  "reason": "LinearCopy and NearestCopy are the same component class copied with only the interpolation string changed."
  },
  {
   "id": "c130",
   "verdict": "no",
-  "reason": "Identical chunks of generated pnpm lockfile dependency data, which cannot be deduplicated into a shared implementation."
+  "reason": "Both are minified/generated compiler output for different records and functions, not hand-maintained duplicates."
  },
  {
   "id": "c131",
   "verdict": "no",
-  "reason": "A React upload-speed-peak effect and a Logger.info level method are unrelated code with only superficially similar shape."
+  "reason": "Two small wrappers around different Mantine primitives with different CSS modules; parallel but distinct components."
  },
  {
   "id": "c132",
-  "verdict": "yes",
-  "reason": "The two docker-compose files are byte-identical copies, including port mappings, and could be a single shared compose file."
+  "verdict": "no",
+  "reason": "A watermark options interface and a React useEffect that instantiates a Watermark are different kinds of code."
  },
  {
   "id": "c133",
   "verdict": "no",
-  "reason": "One builds a readable GET fetch and the other a writable/duplex POST fetch; only the imports and signature line up."
+  "reason": "Compiler type declarations and template-generation functions share no logic."
  },
  {
   "id": "c134",
-  "verdict": "no",
-  "reason": "Two slices of barrel re-export lists naming completely different modules — required repetition, not duplicated logic."
+  "verdict": "yes",
+  "reason": "assertSyncDisposeSupport and assertAsyncDisposeSupport are identical bodies differing only in which dispose symbol getter and name are used."
  },
  {
   "id": "c135",
   "verdict": "no",
-  "reason": "Two generator subclasses already sharing a PackageGenerator base, differing in config and in the layout generator's extra styles writing step."
+  "reason": "A debouncer trigger method and a filtered-signal factory implement unrelated behavior."
  },
  {
   "id": "c136",
   "verdict": "yes",
-  "reason": "Interactive and Quiz contain the same keypress/promise/selection loop verbatim, differing only in the answer vs result variable naming."
+  "reason": "The commands getter and getCommands() both walk plugins/commands to build the same CommandCompletion list, two hand-written versions of one routine."
  },
  {
   "id": "c137",
   "verdict": "no",
-  "reason": "A plugin barrel module's exports and a semantic-release config object are unrelated despite both being module.exports blocks."
+  "reason": "A README install template string and a build config module are unrelated."
  },
  {
   "id": "c138",
   "verdict": "no",
-  "reason": "The react-scripts bin dispatcher and the openBrowser fallback logic are different files doing different jobs."
+  "reason": "Two form rows declare different fields with different controls; repeated JSX layout boilerplate is expected here."
  },
  {
   "id": "c139",
   "verdict": "no",
-  "reason": "A list of Rx subject declarations and a TypeScript type/interface declaration block are unrelated declarations."
+  "reason": "Both wrap a call in try/catch returning [], but they wrap different pug libraries for different purposes and share only a trivial shape."
  },
  {
   "id": "c140",
   "verdict": "no",
-  "reason": "propertyToAttribute and propertyFromAttribute are inverse serialization directions dispatching to different converter functions."
+  "reason": "Two ESLint rule create() functions visit different node types with different option handling and report conditions."
  },
  {
   "id": "c141",
-  "verdict": "yes",
-  "reason": "The two Vue demo templates are character-for-character identical, so one copy could serve both."
+  "verdict": "no",
+  "reason": "One is date-selection/toggle state logic and the other is a set of small date-comparison predicates; they share only the date domain, not any logic."
  },
  {
   "id": "c142",
   "verdict": "no",
-  "reason": "Both build binding object expressions via the same builder helpers, but for different binding kinds with different keys and evaluate functions."
+  "reason": "Both are short call sites of the same shared error helper with different error codes, conditions, and meta payloads — the shared part is already factored out."
  },
  {
   "id": "c143",
-  "verdict": "yes",
-  "reason": "Identical union-type accumulation loop copy-pasted for two different sources, right down to the same structure and a divergent .length vs .children.length check."
+  "verdict": "no",
+  "reason": "A license header plus a Java Instant-to-Date shim versus a Vert.x/Postgres benchmark handler; entirely unrelated code."
  },
  {
   "id": "c144",
   "verdict": "no",
-  "reason": "Minimal per-package tsup build configs with different entry files — standard per-package configuration that is expected to repeat."
+  "reason": "Two parallel default-props constants for sibling picker components that legitimately differ in their first option; config data expected to repeat."
  },
  {
   "id": "c145",
   "verdict": "no",
-  "reason": "Identical nav/footer markup in two JSDoc-generated HTML pages; generated output, not maintained source."
+  "reason": "One builds an UPDATE query from join columns, the other marks cascade flags on relation subjects; different responsibilities that merely share TypeORM vocabulary."
  },
  {
   "id": "c146",
-  "verdict": "no",
-  "reason": "Two different chunks of an ESLint rules object listing distinct rules; config entries that are supposed to be enumerated, not duplicated logic."
+  "verdict": "yes",
+  "reason": "The Argument and Option classes carry the same switch-over-kind default initialization and the same value() prologue, differing only in field names and case labels."
  },
  {
   "id": "c147",
   "verdict": "no",
-  "reason": "Both are plain index loops over a $$ query but one wires filter controllers and the other attaches sprite-button click handlers, so only the loop skeleton coincides."
+  "reason": "A recursive template-literal type for parsing option names versus runtime string/progress rendering helpers; no shared logic."
  },
  {
   "id": "c148",
   "verdict": "no",
-  "reason": "Parallel table-rendering test cases with different cell content and different expected ASCII output; each asserts a distinct rowSpan behavior."
+  "reason": "Two distinct i18n/label dictionaries for different UI surfaces; overlapping keys are parallel data, not duplicated logic."
  },
  {
   "id": "c149",
-  "verdict": "unclear",
-  "reason": "Two nearly identical YAML package-name lists with small membership differences, but there is no context showing whether the two lists mean the same thing."
+  "verdict": "no",
+  "reason": "Both are example scripts' license headers and require lists, standard per-file boilerplate with different module sets."
  },
  {
   "id": "c150",
   "verdict": "yes",
-  "reason": "Drop handler and file-input handler both run the identical Array.from(files).forEach(file => props.onFile({key: Date.now()+file.name, file})) body, which could be one shared helper."
+  "reason": "The anchor and button templates are byte-for-byte the same markup apart from the wrapping element, an obvious copy-paste that could be one shared template."
  },
  {
   "id": "c151",
-  "verdict": "yes",
-  "reason": "The entire channel-enumeration, permission-filtering, name-deduplication and key-sorting block is duplicated verbatim between the two option definitions."
+  "verdict": "no",
+  "reason": "Standard React context-provider boilerplate instantiated for two different contexts and hooks, which is supposed to repeat per context."
  },
  {
   "id": "c152",
-  "verdict": "yes",
-  "reason": "The two Travis CI configurations are byte-for-byte identical."
+  "verdict": "no",
+  "reason": "Two detector functions matching different AST shapes; only the one-line walkTo existence check coincides, and that helper is already shared."
  },
  {
   "id": "c153",
-  "verdict": "no",
-  "reason": "Generated pnpm lockfile entries for two different Radix packages; repetition is inherent to the lockfile format."
+  "verdict": "yes",
+  "reason": "Rule 5 and rule 6 modules have identical validate() and describeRule() bodies, differing only in id and description strings."
  },
  {
   "id": "c154",
   "verdict": "yes",
-  "reason": "isAccountsShopifyUrl, defaultStorageStatePath and existingStorageStatePath are copied verbatim into both cleanup modules, along with the same option/banner/validation preamble."
+  "reason": "The Interactive and Quiz classes contain the same keypress/promise/cursor teardown block verbatim, differing only in the resolved value."
  },
  {
   "id": "c155",
   "verdict": "no",
-  "reason": "A TDesign Swiper usage demo and an AG-UI chatbot toolcall example are unrelated components sharing only the React function-component shape."
+  "reason": "A readable GET fetch and a writable POST duplex fetch are distinct operations; only the import prologue and signature shape look alike."
  },
  {
   "id": "c156",
-  "verdict": "yes",
-  "reason": "Two websocket proxy examples that are identical apart from the port number (9016 vs 9015) and a delayed vs immediate proxy.ws call."
+  "verdict": "no",
+  "reason": "Event subclass declarations versus a webpack build configuration; unrelated code with no common logic."
  },
  {
   "id": "c157",
   "verdict": "yes",
-  "reason": "The same align-items/background-color/border/border-radius declaration block is written out twice for two selectors and could be a shared mixin or placeholder."
+  "reason": "Both reducer cases repeat the exact same extension-asset URL normalization loop before diverging, an extractable duplicate."
  },
  {
   "id": "c158",
-  "verdict": "yes",
-  "reason": "Two copies of the same benchmark schema script creating identical World/Fortune tables with the same seed data."
+  "verdict": "no",
+  "reason": "One registers mutation/resize observers with cleanup, the other is a pointer-tracking store class; both add listeners but do different jobs."
  },
  {
   "id": "c159",
-  "verdict": "yes",
-  "reason": "The logger's level methods repeat one allow-list-check-then-console-call idea, differing only in the level array and console method, so a single parameterized log method would cover both."
+  "verdict": "no",
+  "reason": "Two unrelated import/type-declaration blocks from the same library; no duplicated implementation."
  },
  {
   "id": "c160",
-  "verdict": "no",
-  "reason": "Two different status-table data sections (Node crypto generateKeyPair variants vs WebCrypto algorithm import formats); parallel-but-distinct catalog data."
+  "verdict": "yes",
+  "reason": "Both hand-roll the same tap-interception idiom (match tap by plugin name, Object.assign a wrapped fn that filters an error) and could share one helper."
  },
  {
   "id": "c161",
-  "verdict": "yes",
-  "reason": "Both configs are the same spread-mainConfig-plus-three-plugins expression with only the package-manager plugin swapped, easily a single parameterized factory."
+  "verdict": "no",
+  "reason": "register and unregister are deliberate mirror-image counterparts (has/add versus !has/delete), not one doing the other's job."
  },
  {
   "id": "c162",
-  "verdict": "yes",
-  "reason": "Identical clsx div-wrapper components differing only in the component name and literal class string, replaceable by one factory."
+  "verdict": "no",
+  "reason": "Git tag partitioning versus semver bump-level helpers; unrelated utilities."
  },
  {
   "id": "c163",
-  "verdict": "no",
-  "reason": "Node-parsing/binding dispatch code versus an event-expression AST builder; different responsibilities in the same compiler."
+  "verdict": "yes",
+  "reason": "Two Gson Calendar type adapters with byte-identical write/read bodies, differing only in the SimpleDateFormat pattern, which could be a single parameterized adapter."
  },
  {
   "id": "c164",
   "verdict": "no",
-  "reason": "A Vert.x Postgres benchmark example versus a minified ClojureScript runtime bundle; entirely unrelated."
+  "reason": "Parallel deprecated subclasses adding different payloads (answer URLs versus NCCO actions) to a shared base; the common part is already in OutboundCall."
  },
  {
   "id": "c165",
   "verdict": "yes",
-  "reason": "Same compliance test suite duplicated as JS and TS, differing only in the type annotation and non-null assertion."
- },
- {
-  "id": "c166",
-  "verdict": "no",
-  "reason": "Both are three-line try/catch wrappers returning [] on failure, but they wrap different pug libraries producing different data, so only the defensive shape matches."
- },
- {
-  "id": "c167",
-  "verdict": "no",
-  "reason": "A React field-settings editor versus a commented-out PrismaSelect usage example; unrelated code."
- },
- {
-  "id": "c168",
-  "verdict": "no",
-  "reason": "TypeORM relation primary-id extraction versus a jscodeshift FileLogger codemod; nothing shared beyond general TypeScript idioms."
- },
- {
-  "id": "c169",
-  "verdict": "yes",
-  "reason": "The same field.list/field.type switch setting input options plus the same error-label-and-input JSX is written twice with only Tailwind class ordering differing."
- },
- {
-  "id": "c170",
-  "verdict": "no",
-  "reason": "An ERC20 contract type declaration file versus a TypeScript test-runner implementation; unrelated."
- },
- {
-  "id": "c171",
-  "verdict": "yes",
-  "reason": "Both promise bodies accumulate byte length from a gzip stream with identical error/data/end handlers, a clear copy of one size-measuring routine."
- },
- {
-  "id": "c172",
-  "verdict": "yes",
-  "reason": "buildHelpOption and buildVersionOption are the same cache-check/spec-lookup/rawOption-fallback logic with only the flag names and labels swapped."
+  "reason": "Both text-field templates repeat the identical ripple/floating-label/notched-outline markup block, differing only in an outer modifier class."
  }
 ]

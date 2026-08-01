@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { normalizeSource } from '../lib/normalize.js'
-import { detect, detectNormalized, isTest } from '../lib/jscpd.js'
+import { detect, detectNormalized, isTest, isSecondary } from '../lib/jscpd.js'
 import { clusterBlocks } from '../lib/cluster.js'
 import { findExisting } from '../lib/find.js'
 
@@ -139,6 +139,36 @@ test('test files are excluded unless asked for', async () => {
   assert.ok(isTest('test/helpers.js'))
   assert.ok(isTest('pkg/thing_test.go'))
   assert.ok(!isTest('src/latest.js'), 'a filename containing "test" is not a test file')
+})
+
+// Fixtures were the single largest source of findings in the ignore audit —
+// 290 of 702 — and a blind judge called that repetition the point of a fixture.
+test('test-adjacent directories count as tests', () => {
+  for (const path of [
+    'src/__fixtures__/big.js',
+    'fixtures/sample.js',
+    'src/__mocks__/fs.js',
+    'e2e/login.js',
+    'benchmarks/parse.js',
+    'src/parse.bench.js',
+  ]) {
+    assert.ok(isTest(path), `${path} must be treated as a test file`)
+  }
+  // Real source that merely reads as test-adjacent.
+  assert.ok(!isTest('src/fixtureLoader.js'))
+  assert.ok(!isTest('src/benchmarking.js'))
+})
+
+// The distinction that matters: hidden from the listing, still searchable. A
+// helper living in examples/ must remain a valid answer to "does this exist?",
+// so these are filtered at report time rather than dropped from the scan.
+test('examples and demos are secondary, not ignored', () => {
+  for (const path of ['examples/basic.js', 'demo/app.jsx', 'packages/x/samples/one.ts', 'src/Button.stories.tsx']) {
+    assert.ok(isSecondary(path), `${path} must be secondary`)
+    assert.ok(!isTest(path), `${path} is not a test file`)
+  }
+  assert.ok(isSecondary('test/helpers.js'), 'tests are secondary too')
+  assert.ok(!isSecondary('src/exampleParser.js'), 'real source is not secondary')
 })
 
 // ---------------------------------------------------------------- clustering

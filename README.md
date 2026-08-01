@@ -77,27 +77,27 @@ Recall measured by injection on 66 npm repositories: a real function is lifted, 
 
 | copy was… | found |
 |---|---|
-| pasted unchanged | 0.86 |
-| identifiers renamed | 0.86 |
-| + literals changed | 0.86 |
-| + reformatted | 0.86 |
-| + statements reordered | **0.78** |
+| pasted unchanged | 0.84 |
+| identifiers renamed | 0.81 |
+| + literals changed | 0.81 |
+| + reformatted | 0.81 |
+| + statements reordered | **0.73** |
 
 <img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations. Three thresholds sit on top of each other at 0.86 until comments are churned, then separate: k=20 ends at 0.81, k=30 at 0.78, k=75 at 0.69." width="740">
 
-n=36 held out, 95% CI [0.62, 0.88].
+n=37 held out, 95% CI [0.57, 0.85].
 
 Precision measured on 63 npm repositories, two ways.
 
-`find_existing` was asked about a real function taken from a *different* repository — code the repository provably does not contain. It reported a match **0 times out of 63**, 95% CI [0, 0.057].
+`find_existing` was asked about a real function taken from a *different* repository — code the repository provably does not contain. It reported a match **0 times out of 62**, 95% CI [0, 0.058].
 
-The duplicate listing was sampled and judged blind: 114 flagged pairs, no file paths, mixed with 58 pairs seenit had **not** flagged as controls.
+The duplicate listing was sampled and judged blind: 107 flagged pairs, no file paths, mixed with 58 pairs seenit had **not** flagged as controls.
 
 | | judged redundant | n |
 |---|---|---|
-| top 3 findings, which is what `seenit` prints | 0.57 | 61 |
-| findings past the third | 0.39 | 53 |
-| controls, which should be near zero | 0.03 | 58 |
+| top 3 findings, which is what `seenit` prints | 0.62 | 60 |
+| findings past the third | 0.45 | 47 |
+| controls, which should be near zero | 0.02 | 58 |
 
 About half of what the listing reports is not worth acting on. Most of the rest is parallel-but-distinct logic — two branches over different values, two readers with different defaults — which normalising identifiers away cannot distinguish from a copy.
 
@@ -114,7 +114,8 @@ Other formats fall back to exact matching. The accuracy figures above cover Java
 - Finds copies, not reimplementations. A `for` loop rewritten as `reduce` shares nothing.
 - Statements inserted mid-function split a match into fragments, which may fall below `--min-tokens`.
 - The listing is about half right. Read it as a list of candidates, not a list of defects. `find_existing` is the accurate surface.
-- Verbatim recall is 0.86, not 1.0; the cause of the remaining misses is not known.
+- Verbatim recall is 0.84, not 1.0; the cause of the remaining misses is not known.
+- Tests, fixtures, examples and demos are left out of the listing. `find_existing` still searches them.
 - Pre-1.0: output format and defaults may change.
 
 ## How it works

@@ -53,7 +53,9 @@ result.
 
 **The half that needs a judge.** Whether a reported pair is worth deduplicating
 is an opinion, so the listing is sampled and judged blind — see
-[judging.md](judging.md) for the protocol and the verbatim instruction.
+[judging.md](judging.md) for the protocol and the verbatim instruction. Result:
+0.62 on the three findings the CLI prints, 0.45 past that, against a control
+acceptance rate of 0.02.
 
 Two sampling rules, both learned from earlier mistakes in this project:
 
@@ -102,12 +104,40 @@ rather than a fact about the language.
 - **JavaScript and TypeScript only.**
 - **Verbatim recall is 0.86, not 1.0.** One exact copy in seven is missed and the
   cause is not yet understood.
-- **Listing precision is 0.49 and the causes are only partly addressable.** Of 57
-  judged-wrong findings, 29 were parallel-but-distinct logic, which normalising
-  identifiers away cannot separate from a copy. The remaining 28 were data,
-  config, generated files and test fixtures reaching the scanner — those are
-  ignore-list work, and doing it means deriving the change on the tuning half and
-  re-scoring on the held-out half rather than fitting to the labels above.
+- **Listing precision is 0.54 and most of what remains is not addressable.** The
+  ignore work below took it from 0.49; of the wrong findings that survive, the
+  bulk is parallel-but-distinct logic, which normalising identifiers away cannot
+  separate from a copy by construction.
+
+## The ignore pass
+
+The first precision run found half the listing not worth acting on, and roughly
+half of *that* was files which are not source. `ignore-audit.mjs` counted where
+findings came from across the tuning repositories only — 702 findings, 30 repos —
+and the held-out half was not looked at until the change was already made.
+
+| | appearances |
+|---|---|
+| `fixtures/` | 290 |
+| `examples/`, `demos/`, samples | 240 |
+| `scaffolds/` | 69 |
+| `.yml` / `.yaml` | 48 |
+| `.html` | 30 |
+
+What that bought, held-out precision 0.39 → 0.49 and findings per repository
+17 → 14 at the median, 180 → 74 at the worst. Intervals overlap; the direction
+was consistent across all four slices.
+
+It also cost five points of recall, which turned out to be a mistake in *where*
+the patterns went rather than in the patterns. `IGNORE` means never parsed, so a
+helper in `examples/` became invisible to `find_existing` too — the tool
+answering "no, go ahead" about code the repository visibly contains. Moving
+those to the listing-time filter (`isSecondary`) restored recall to 0.84 and
+changed the listing not at all, because the listing excluded them either way.
+
+Worth recording that the intermediate state also flipped the tuning half's
+choice of `--min-tokens` from 30 to 50, on a three-way tie broken toward the
+higher bar. Reverting the misplacement put it back at 30.
 
 ## results/
 

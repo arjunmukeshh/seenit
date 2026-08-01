@@ -3,1229 +3,2830 @@
   "engine": "jscpd 5.0.14",
   "minTokens": 30,
   "repos": {
-    "total": 63,
-    "tune": 28,
-    "holdout": 35
+    "total": 62,
+    "tune": 30,
+    "holdout": 32
   },
   "falsePositiveProbe": {
     "method": "A real function from a different corpus repository is planted as a find_existing probe. The repository does not contain it, so any hit is either a false positive or a genuinely equivalent implementation; matched source is kept so the two can be told apart.",
-    "probed": 63,
+    "probed": 62,
     "hits": 0,
     "rate": 0,
     "ci95": [
       0,
-      0.057
+      0.058
     ]
   },
   "findingCounts": {
     "reposWithNoFindings": 2,
-    "medianFindings": 17,
-    "maxFindings": 180
+    "medianFindings": 14,
+    "maxFindings": 74
   },
   "key": [
     {
       "id": "c001",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/zazuko/barnard59",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/gre/gl-react",
+      "split": "tune",
+      "a": {
+        "path": "packages/cookbook/src/examples/paint.tsx",
+        "start": 34,
+        "end": 73
+      },
+      "b": {
+        "path": "packages/cookbook/src/examples/demodesert.tsx",
+        "start": 65,
+        "end": 104
+      }
     },
     {
       "id": "c002",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
+      "split": "tune",
+      "a": {
+        "path": "lib/util/pragma.js",
+        "start": 15,
+        "end": 22
+      },
+      "b": {
+        "path": "lib/util/pragma.js",
+        "start": 36,
+        "end": 44
+      }
     },
     {
       "id": "c003",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
-      "split": "tune"
+      "repo": "https://github.com/alwatr/alwatr",
+      "split": "holdout",
+      "a": {
+        "path": "deprecated/style/lib/color-scheme.ts",
+        "start": 50,
+        "end": 152
+      },
+      "b": {
+        "path": "pkg/nanolib/http-primer/src/constant.ts",
+        "start": 446,
+        "end": 530
+      }
     },
     {
       "id": "c004",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/yahoo/fluxible",
-      "split": "tune"
+      "repo": "https://github.com/shopify/cli",
+      "split": "holdout",
+      "a": {
+        "path": "packages/app/src/cli/services/bulk-operations/execute-bulk-operation.ts",
+        "start": 100,
+        "end": 252
+      },
+      "b": {
+        "path": "packages/store/src/cli/services/store/bulk/execute-bulk-operation.ts",
+        "start": 95,
+        "end": 247
+      }
     },
     {
       "id": "c005",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/remarkjs/remark-math",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/softwarebrothers/adminjs",
+      "split": "holdout",
+      "a": {
+        "path": "src/frontend/utils/overridable-component.ts",
+        "start": 10,
+        "end": 35
+      },
+      "b": {
+        "path": "src/utils/param-converter/validate-param.ts",
+        "start": 2,
+        "end": 27
+      }
     },
     {
       "id": "c006",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/apify/apify-shared-js",
-      "split": "holdout"
+      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
+      "split": "tune",
+      "a": {
+        "path": "components/layouts/src/splitter/panesettings.directive.ts",
+        "start": 45,
+        "end": 84
+      },
+      "b": {
+        "path": "components/dropdowns/ej2-angular-samples/DropDownList/cascading/cascading.component.ts",
+        "start": 45,
+        "end": 84
+      }
     },
     {
       "id": "c007",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/creevey/creevey",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/tootallnate/proxy-agents",
+      "split": "holdout",
+      "a": {
+        "path": "packages/get-uri/src/file.ts",
+        "start": 4,
+        "end": 27
+      },
+      "b": {
+        "path": "packages/get-uri/src/ftp.ts",
+        "start": 4,
+        "end": 22
+      }
     },
     {
       "id": "c008",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/http-party/node-http-proxy",
-      "split": "tune"
+      "repo": "https://github.com/clutchd/clutchd",
+      "split": "holdout",
+      "a": {
+        "path": "packages/get-initials/src/index.ts",
+        "start": 11,
+        "end": 30
+      },
+      "b": {
+        "path": "packages/avatar/src/avatarImage.tsx",
+        "start": 26,
+        "end": 45
+      }
     },
     {
       "id": "c009",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/kucherenko/jscpd",
+      "split": "tune",
+      "a": {
+        "path": "rust/jscpd/platform-map.js",
+        "start": 1,
+        "end": 84
+      },
+      "b": {
+        "path": "rust/platform-map.js",
+        "start": 1,
+        "end": 84
+      }
     },
     {
       "id": "c010",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/node-opcua/node-opcua",
+      "split": "holdout",
+      "a": {
+        "path": "packages/node-opcua-server-configuration/source/server/push_certificate_manager/internal_context.ts",
+        "start": 13,
+        "end": 52
+      },
+      "b": {
+        "path": "packages/node-opcua-nodeset-scales-v-2/source/ua_weight_item.ts",
+        "start": 5,
+        "end": 44
+      }
     },
     {
       "id": "c011",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/xinlei3166/vitepress-theme-demoblock",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/ai/size-limit",
+      "split": "tune",
+      "a": {
+        "path": "packages/webpack-css/index.js",
+        "start": 30,
+        "end": 38
+      },
+      "b": {
+        "path": "packages/webpack-why/index.js",
+        "start": 38,
+        "end": 46
+      }
     },
     {
       "id": "c012",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/material-components/material-components-web-components",
+      "split": "holdout",
+      "a": {
+        "path": "all.ts",
+        "start": 64,
+        "end": 103
+      },
+      "b": {
+        "path": "catalog/eleventy-helpers/shortcodes/playground-example.cjs",
+        "start": 17,
+        "end": 56
+      }
     },
     {
       "id": "c013",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/pixijs/sound",
-      "split": "holdout"
+      "repo": "https://github.com/material-components/material-components-web-components",
+      "split": "holdout",
+      "a": {
+        "path": "list/internal/listitem/_list-item.scss",
+        "start": 110,
+        "end": 154
+      },
+      "b": {
+        "path": "menu/internal/menuitem/_menu-item.scss",
+        "start": 104,
+        "end": 148
+      }
     },
     {
       "id": "c014",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/yahoo/fluxible",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/ice-lab/react-materials",
+      "split": "tune",
+      "a": {
+        "path": "deprecated-components/data-binder/src/DataBinder.jsx",
+        "start": 243,
+        "end": 256
+      },
+      "b": {
+        "path": "deprecated-components/data-binder/src/DataBinder.jsx",
+        "start": 261,
+        "end": 274
+      }
     },
     {
       "id": "c015",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/ice-lab/react-materials",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/facebook/create-react-app",
+      "split": "holdout",
+      "a": {
+        "path": "tasks/e2e-kitchensink-eject.sh",
+        "start": 13,
+        "end": 103
+      },
+      "b": {
+        "path": "tasks/e2e-kitchensink.sh",
+        "start": 13,
+        "end": 103
+      }
     },
     {
       "id": "c016",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/alwatr/alwatr",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/mantinedev/mantine",
+      "split": "tune",
+      "a": {
+        "path": "packages/@docs/demos/src/demos/core/Typography/Typography.demo.usage.tsx",
+        "start": 8,
+        "end": 47
+      },
+      "b": {
+        "path": "packages/@mantine/schedule/src/components/ScheduleHeader/HeaderControl/HeaderControl.tsx",
+        "start": 61,
+        "end": 100
+      }
     },
     {
       "id": "c017",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/algolia/autocomplete",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/vonage/vonage-node-sdk",
+      "split": "holdout",
+      "a": {
+        "path": "packages/voice/lib/classes/NCCO/Connect.ts",
+        "start": 138,
+        "end": 180
+      },
+      "b": {
+        "path": "packages/voice/lib/classes/NCCO/Conversation.ts",
+        "start": 107,
+        "end": 152
+      }
     },
     {
       "id": "c018",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/yjl9903/breadc",
-      "split": "tune"
+      "repo": "https://github.com/margelo/react-native-quick-crypto",
+      "split": "holdout",
+      "a": {
+        "path": "packages/react-native-quick-crypto/src/argon2.ts",
+        "start": 93,
+        "end": 132
+      },
+      "b": {
+        "path": "packages/react-native-quick-crypto/src/expo-plugin/withXCode.ts",
+        "start": 10,
+        "end": 49
+      }
     },
     {
       "id": "c019",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/thibaultjanbeyer/dragselect",
-      "split": "tune"
+      "repo": "https://github.com/apify/apify-shared-js",
+      "split": "holdout",
+      "a": {
+        "path": "packages/actor-memory-expression/src/types.ts",
+        "start": 4,
+        "end": 19
+      },
+      "b": {
+        "path": "packages/json_schemas/scripts/describe-schemas.ts",
+        "start": 11,
+        "end": 26
+      }
     },
     {
       "id": "c020",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/ocavue/aria-ui",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/node-opcua/node-opcua",
+      "split": "holdout",
+      "a": {
+        "path": "packages/node-opcua-address-space-for-conformance-testing/src/conformance_testing/trigger_nodes.ts",
+        "start": 6,
+        "end": 13
+      },
+      "b": {
+        "path": "packages/node-opcua-address-space/test_helpers/assertHasMatchingReference.ts",
+        "start": 4,
+        "end": 28
+      }
     },
     {
       "id": "c021",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/changesets/changesets",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/apify/apify-shared-js",
+      "split": "holdout",
+      "a": {
+        "path": "packages/json_schemas/scripts/build-ide-schemas.ts",
+        "start": 18,
+        "end": 33
+      },
+      "b": {
+        "path": "packages/json_schemas/scripts/describe-schemas.ts",
+        "start": 24,
+        "end": 39
+      }
     },
     {
       "id": "c022",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/apify/apify-shared-js",
-      "split": "holdout"
+      "repo": "https://github.com/secux/secux-js",
+      "split": "holdout",
+      "a": {
+        "path": "ReactNative/src/btc/test_bch.js",
+        "start": 6,
+        "end": 269
+      },
+      "b": {
+        "path": "ReactNative/src/btc/test_dgb.js",
+        "start": 1,
+        "end": 272
+      }
     },
     {
       "id": "c023",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/tootallnate/proxy-agents",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/mantinedev/mantine",
+      "split": "tune",
+      "a": {
+        "path": "apps/mantine.dev/src/mdx/data/mdx-core-data.ts",
+        "start": 446,
+        "end": 660
+      },
+      "b": {
+        "path": "apps/mantine.dev/src/mdx/data/mdx-core-data.ts",
+        "start": 1192,
+        "end": 1420
+      }
     },
     {
       "id": "c024",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/mongodb/leafygreen-ui",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/surrealdb/surrealdb.js",
+      "split": "tune",
+      "a": {
+        "path": "packages/node/src-rust/app/options.rs",
+        "start": 1,
+        "end": 335
+      },
+      "b": {
+        "path": "packages/wasm/src-rust/app/options.rs",
+        "start": 1,
+        "end": 337
+      }
     },
     {
       "id": "c025",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/evanw/esbuild",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
+      "split": "holdout",
+      "a": {
+        "path": "router.js",
+        "start": 43,
+        "end": 82
+      },
+      "b": {
+        "path": "InitFunctions/initExampleDash.js",
+        "start": 78,
+        "end": 117
+      }
     },
     {
       "id": "c026",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/softwarebrothers/adminjs",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/shopify/cli",
+      "split": "holdout",
+      "a": {
+        "path": "packages/theme/src/cli/utilities/theme-environment/crawler-signature.ts",
+        "start": 22,
+        "end": 61
+      },
+      "b": {
+        "path": "packages/theme/src/cli/services/dev.ts",
+        "start": 22,
+        "end": 61
+      }
     },
     {
       "id": "c027",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/openpgpjs/web-stream-tools",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/node-opcua/node-opcua",
+      "split": "holdout",
+      "a": {
+        "path": "packages/node-opcua-samples/bin/client_example.js",
+        "start": 117,
+        "end": 255
+      },
+      "b": {
+        "path": "packages/node-opcua-samples/bin/client_example_ts.ts",
+        "start": 47,
+        "end": 185
+      }
     },
     {
       "id": "c028",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/creevey/creevey",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
+      "split": "tune",
+      "a": {
+        "path": "components/treemap/ej2-angular-samples/TreeMap/legend-default/assets/election-data.ts",
+        "start": 3,
+        "end": 57
+      },
+      "b": {
+        "path": "components/treemap/ej2-angular-samples/TreeMap/legend-interaction/assets/election-data.ts",
+        "start": 3,
+        "end": 57
+      }
     },
     {
       "id": "c029",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/orca-team/pocket",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/srbrahma/eslint-config-gev",
+      "split": "tune",
+      "a": {
+        "path": "bin.js",
+        "start": 39,
+        "end": 72
+      },
+      "b": {
+        "path": "scripts/makeTsExtensions.ts",
+        "start": 11,
+        "end": 44
+      }
     },
     {
       "id": "c030",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/youwol/webpm-client",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/openpgpjs/web-stream-tools",
+      "split": "tune",
+      "a": {
+        "path": "lib/reader.js",
+        "start": 131,
+        "end": 142
+      },
+      "b": {
+        "path": ".jsdocrc.cjs",
+        "start": 5,
+        "end": 16
+      }
     },
     {
       "id": "c031",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/sdkgen/sdkgen",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/yjl9903/breadc",
+      "split": "tune",
+      "a": {
+        "path": "packages/tui/src/render/diff.ts",
+        "start": 175,
+        "end": 204
+      },
+      "b": {
+        "path": "packages/tui/src/render/wrap.ts",
+        "start": 85,
+        "end": 114
+      }
     },
     {
       "id": "c032",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/margelo/react-native-quick-crypto",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/openpgpjs/web-stream-tools",
+      "split": "tune",
+      "a": {
+        "path": "docs/styles/jsdoc-default.css",
+        "start": 1,
+        "end": 12
+      },
+      "b": {
+        "path": "docs/styles/jsdoc-default.css",
+        "start": 14,
+        "end": 25
+      }
     },
     {
       "id": "c033",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/surrealdb/surrealdb.js",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/imbhargav5/rooks",
+      "split": "holdout",
+      "a": {
+        "path": "packages/rooks/src/hooks/useTemporalCountdown.ts",
+        "start": 76,
+        "end": 141
+      },
+      "b": {
+        "path": "packages/rooks/src/hooks/useTemporalElapsed.ts",
+        "start": 72,
+        "end": 137
+      }
     },
     {
       "id": "c034",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
+      "split": "tune",
+      "a": {
+        "path": "lib/rules/prop-types.js",
+        "start": 432,
+        "end": 449
+      },
+      "b": {
+        "path": "lib/rules/prop-types.js",
+        "start": 493,
+        "end": 510
+      }
     },
     {
       "id": "c035",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/algolia/autocomplete",
-      "split": "tune"
+      "repo": "https://github.com/http-party/node-http-proxy",
+      "split": "tune",
+      "a": {
+        "path": "lib/http-proxy/index.js",
+        "start": 153,
+        "end": 169
+      },
+      "b": {
+        "path": "lib/http-proxy/index.js",
+        "start": 169,
+        "end": 184
+      }
     },
     {
       "id": "c036",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/orca-team/pocket",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/thibaultjanbeyer/dragselect",
+      "split": "tune",
+      "a": {
+        "path": "www/src/components/sections/SectionPricing.tsx",
+        "start": 16,
+        "end": 60
+      },
+      "b": {
+        "path": "www/src/components/sections/SectionPricing.tsx",
+        "start": 72,
+        "end": 116
+      }
     },
     {
       "id": "c037",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/evanw/esbuild",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/remarkjs/remark-math",
+      "split": "holdout",
+      "a": {
+        "path": "packages/remark-math/test.js",
+        "start": 501,
+        "end": 555
+      },
+      "b": {
+        "path": "packages/remark-math/test.js",
+        "start": 685,
+        "end": 739
+      }
     },
     {
       "id": "c038",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/cuongdevjs/reactjs-social-login",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/algolia/autocomplete",
+      "split": "tune",
+      "a": {
+        "path": "packages/autocomplete-preset-algolia/src/highlight/parseAttribute.ts",
+        "start": 13,
+        "end": 40
+      },
+      "b": {
+        "path": "examples/github-repositories-custom-plugin/createGitHubReposPlugin.tsx",
+        "start": 93,
+        "end": 120
+      }
     },
     {
       "id": "c039",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
-      "split": "tune"
+      "repo": "https://github.com/klaussinani/qoa",
+      "split": "tune",
+      "a": {
+        "path": "src/interactive.js",
+        "start": 15,
+        "end": 44
+      },
+      "b": {
+        "path": "src/secure.js",
+        "start": 30,
+        "end": 59
+      }
     },
     {
       "id": "c040",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/evanw/esbuild",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/ocavue/aria-ui",
+      "split": "tune",
+      "a": {
+        "path": "packages/cli/src/generate.ts",
+        "start": 436,
+        "end": 576
+      },
+      "b": {
+        "path": "packages/cli/src/generate.ts",
+        "start": 598,
+        "end": 737
+      }
     },
     {
       "id": "c041",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/oclif/plugin-autocomplete",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/yahoo/fluxible",
+      "split": "tune",
+      "a": {
+        "path": "examples/todo/services/todo.js",
+        "start": 33,
+        "end": 62
+      },
+      "b": {
+        "path": "packages/generator-fluxible/app/templates/components/Application.js",
+        "start": 3,
+        "end": 32
+      }
     },
     {
       "id": "c042",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/youwol/webpm-client",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/paljs/prisma-tools",
+      "split": "holdout",
+      "a": {
+        "path": "packages/admin/src/tailwind.css",
+        "start": 4,
+        "end": 19
+      },
+      "b": {
+        "path": "packages/admin/src/tailwind.css",
+        "start": 23,
+        "end": 38
+      }
     },
     {
       "id": "c043",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/material-components/material-components-web-components",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
+      "split": "holdout",
+      "a": {
+        "path": "tools/build-config/babel.config.js",
+        "start": 1,
+        "end": 14
+      },
+      "b": {
+        "path": "tools/build-utils/babel.config.js",
+        "start": 1,
+        "end": 14
+      }
     },
     {
       "id": "c044",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/kucherenko/jscpd",
-      "split": "tune"
+      "repo": "https://github.com/softwarebrothers/adminjs",
+      "split": "holdout",
+      "a": {
+        "path": "src/backend/actions/edit/edit-action.ts",
+        "start": 44,
+        "end": 69
+      },
+      "b": {
+        "path": "src/backend/actions/new/new-action.ts",
+        "start": 37,
+        "end": 64
+      }
     },
     {
       "id": "c045",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/surrealdb/surrealdb.js",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/paljs/prisma-tools",
+      "split": "holdout",
+      "a": {
+        "path": "packages/generator/src/writers/graphql/index.ts",
+        "start": 292,
+        "end": 331
+      },
+      "b": {
+        "path": "packages/admin/src/Settings/UpdateModel.tsx",
+        "start": 79,
+        "end": 118
+      }
     },
     {
       "id": "c046",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/ai/size-limit",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/qiniu/js-sdk",
+      "split": "holdout",
+      "a": {
+        "path": "src/utils/observable.ts",
+        "start": 13,
+        "end": 19
+      },
+      "b": {
+        "path": "src/utils/observable.ts",
+        "start": 19,
+        "end": 25
+      }
     },
     {
       "id": "c047",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/thibaultjanbeyer/dragselect",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/softwarebrothers/adminjs",
+      "split": "holdout",
+      "a": {
+        "path": "src/backend/utils/component-loader.ts",
+        "start": 23,
+        "end": 30
+      },
+      "b": {
+        "path": "src/backend/utils/component-loader.ts",
+        "start": 37,
+        "end": 44
+      }
     },
     {
       "id": "c048",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/dword-design/base-config-component",
-      "split": "tune"
+      "repo": "https://github.com/pnpm/pnpm",
+      "split": "holdout",
+      "a": {
+        "path": "pnpm11/object/property-path/src/token/NumericLiteral.ts",
+        "start": 10,
+        "end": 42
+      },
+      "b": {
+        "path": "pnpm11/installing/deps-installer/src/install/validateModules.ts",
+        "start": 13,
+        "end": 45
+      }
     },
     {
       "id": "c049",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/ice-lab/react-materials",
-      "split": "tune"
+      "repo": "https://github.com/youwol/webpm-client",
+      "split": "holdout",
+      "a": {
+        "path": "src/lib/events.models.ts",
+        "start": 101,
+        "end": 132
+      },
+      "b": {
+        "path": "src/lib/events.models.ts",
+        "start": 203,
+        "end": 234
+      }
     },
     {
       "id": "c050",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/tootallnate/proxy-agents",
-      "split": "holdout"
+      "repo": "https://github.com/algolia/autocomplete",
+      "split": "tune",
+      "a": {
+        "path": "packages/autocomplete-js/src/components/Highlight.ts",
+        "start": 1,
+        "end": 28
+      },
+      "b": {
+        "path": "packages/autocomplete-js/src/components/Snippet.ts",
+        "start": 1,
+        "end": 28
+      }
     },
     {
       "id": "c051",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/kucherenko/jscpd",
-      "split": "tune"
+      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
+      "split": "holdout",
+      "a": {
+        "path": "router.js",
+        "start": 33,
+        "end": 40
+      },
+      "b": {
+        "path": "router.js",
+        "start": 110,
+        "end": 114
+      }
     },
     {
       "id": "c052",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/ocavue/aria-ui",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/pnpm/pnpm",
+      "split": "holdout",
+      "a": {
+        "path": "pnpm/crates/deps-path/src/dep_path_to_filename.rs",
+        "start": 7,
+        "end": 15
+      },
+      "b": {
+        "path": "pnpm/crates/lockfile/src/pkg_name_ver_peer.rs",
+        "start": 30,
+        "end": 38
+      }
     },
     {
       "id": "c053",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/ijstech/cli",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/margelo/react-native-quick-crypto",
+      "split": "holdout",
+      "a": {
+        "path": "docs/data/coverage.ts",
+        "start": 183,
+        "end": 312
+      },
+      "b": {
+        "path": "docs/data/coverage.ts",
+        "start": 690,
+        "end": 852
+      }
     },
     {
       "id": "c054",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/softwarebrothers/adminjs",
-      "split": "holdout"
+      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
+      "split": "tune",
+      "a": {
+        "path": "components/maps/ej2-angular-samples/Maps/bubble/assets/world-map.ts",
+        "start": 2,
+        "end": 183
+      },
+      "b": {
+        "path": "components/maps/ej2-angular-samples/Maps/color-mapping/assets/world-map.ts",
+        "start": 2,
+        "end": 183
+      }
     },
     {
       "id": "c055",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/clutchd/clutchd",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/sdkgen/sdkgen",
+      "split": "holdout",
+      "a": {
+        "path": "packages/typescript-generator/src/browser-client.ts",
+        "start": 2,
+        "end": 45
+      },
+      "b": {
+        "path": "packages/typescript-generator/src/node-server.ts",
+        "start": 2,
+        "end": 47
+      }
     },
     {
       "id": "c056",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/surrealdb/surrealdb.js",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/evanw/esbuild",
+      "split": "tune",
+      "a": {
+        "path": "internal/logger/logger_darwin.go",
+        "start": 4,
+        "end": 34
+      },
+      "b": {
+        "path": "internal/logger/logger_linux.go",
+        "start": 4,
+        "end": 34
+      }
     },
     {
       "id": "c057",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/clutchd/clutchd",
-      "split": "holdout"
+      "repo": "https://github.com/surrealdb/surrealdb.js",
+      "split": "tune",
+      "a": {
+        "path": "packages/sdk/src/internal/http.ts",
+        "start": 3,
+        "end": 42
+      },
+      "b": {
+        "path": "packages/node/build.ts",
+        "start": 14,
+        "end": 53
+      }
     },
     {
       "id": "c058",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/xinlei3166/vitepress-theme-demoblock",
-      "split": "tune"
+      "repo": "https://github.com/mongodb/leafygreen-ui",
+      "split": "tune",
+      "a": {
+        "path": "packages/loading-indicator/src/PageLoader/animation.ts",
+        "start": 97,
+        "end": 166
+      },
+      "b": {
+        "path": "packages/loading-indicator/src/PageLoader/animation.ts",
+        "start": 460,
+        "end": 529
+      }
     },
     {
       "id": "c059",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/pixijs/sound",
-      "split": "holdout"
+      "repo": "https://github.com/qiniu/js-sdk",
+      "split": "holdout",
+      "a": {
+        "path": "src/utils/pool.ts",
+        "start": 2,
+        "end": 20
+      },
+      "b": {
+        "path": "src/utils/helper.ts",
+        "start": 228,
+        "end": 246
+      }
     },
     {
       "id": "c060",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/orca-team/pocket",
-      "split": "tune"
+      "repo": "https://github.com/kucherenko/jscpd",
+      "split": "tune",
+      "a": {
+        "path": "packages/tokenizer/src/languages/wgsl.ts",
+        "start": 15,
+        "end": 54
+      },
+      "b": {
+        "path": "packages/core/src/statistic.ts",
+        "start": 53,
+        "end": 92
+      }
     },
     {
       "id": "c061",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/ai/size-limit",
+      "split": "tune",
+      "a": {
+        "path": "packages/file/index.js",
+        "start": 17,
+        "end": 27
+      },
+      "b": {
+        "path": "packages/file/index.js",
+        "start": 32,
+        "end": 41
+      }
     },
     {
       "id": "c062",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/vonage/vonage-node-sdk",
-      "split": "holdout"
+      "repo": "https://github.com/yahoo/fluxible",
+      "split": "tune",
+      "a": {
+        "path": "packages/fluxible-router/src/HistoryWithHash.js",
+        "start": 117,
+        "end": 146
+      },
+      "b": {
+        "path": "packages/fluxible-router/src/HistoryWithHash.js",
+        "start": 158,
+        "end": 187
+      }
     },
     {
       "id": "c063",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/material-components/material-components-web-components",
-      "split": "holdout"
+      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
+      "split": "tune",
+      "a": {
+        "path": ".yarn/releases/yarn-3.3.1.cjs",
+        "start": 163,
+        "end": 202
+      },
+      "b": {
+        "path": ".yarn/plugins/@yarnpkg/plugin-interactive-tools.cjs",
+        "start": 64,
+        "end": 103
+      }
     },
     {
       "id": "c064",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/folkloreinc/panneau-js",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/apify/apify-shared-js",
+      "split": "holdout",
+      "a": {
+        "path": "scripts/tsup.config.ts",
+        "start": 53,
+        "end": 64
+      },
+      "b": {
+        "path": "scripts/tsup.config.ts",
+        "start": 70,
+        "end": 81
+      }
     },
     {
       "id": "c065",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/reactiverse/es4x",
+      "split": "tune",
+      "a": {
+        "path": "pm/src/main/java/io/reactiverse/es4x/commands/DockerfileCommandFactory.java",
+        "start": 16,
+        "end": 25
+      },
+      "b": {
+        "path": "pm/src/main/java/io/reactiverse/es4x/commands/InstallCommandFactory.java",
+        "start": 16,
+        "end": 25
+      }
     },
     {
       "id": "c066",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/kucherenko/jscpd",
+      "split": "tune",
+      "a": {
+        "path": "packages/finder/src/subscribers/verbose.ts",
+        "start": 14,
+        "end": 20
+      },
+      "b": {
+        "path": "packages/finder/src/subscribers/verbose.ts",
+        "start": 21,
+        "end": 27
+      }
     },
     {
       "id": "c067",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/shopify/cli",
-      "split": "holdout"
+      "repo": "https://github.com/pixijs/sound",
+      "split": "holdout",
+      "a": {
+        "path": "src/utils/render.ts",
+        "start": 35,
+        "end": 74
+      },
+      "b": {
+        "path": "src/filters/StereoFilter.ts",
+        "start": 11,
+        "end": 50
+      }
     },
     {
       "id": "c068",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
-      "split": "holdout"
+      "repo": "https://github.com/zhouhoujun/tsioc",
+      "split": "tune",
+      "a": {
+        "path": "packages/ioc/src/services/TypeReflects.ts",
+        "start": 159,
+        "end": 169
+      },
+      "b": {
+        "path": "packages/ioc/src/services/TypeReflects.ts",
+        "start": 171,
+        "end": 181
+      }
     },
     {
       "id": "c069",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/node-opcua/node-opcua",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/qiniu/js-sdk",
+      "split": "holdout",
+      "a": {
+        "path": "src/image/index.ts",
+        "start": 67,
+        "end": 85
+      },
+      "b": {
+        "path": "src/image/index.ts",
+        "start": 86,
+        "end": 101
+      }
     },
     {
       "id": "c070",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/dword-design/base-config-component",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/cli-table/cli-table3",
+      "split": "tune",
+      "a": {
+        "path": "examples/col-and-row-span-examples.js",
+        "start": 253,
+        "end": 264
+      },
+      "b": {
+        "path": "examples/basic-usage-examples.js",
+        "start": 241,
+        "end": 252
+      }
     },
     {
       "id": "c071",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/tencent/tdesign-react",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/ice-lab/react-materials",
+      "split": "tune",
+      "a": {
+        "path": "deprecated-components/layout/src/index.js",
+        "start": 3,
+        "end": 11
+      },
+      "b": {
+        "path": "deprecated-components/panel/src/index.js",
+        "start": 1,
+        "end": 8
+      }
     },
     {
       "id": "c072",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/softwarebrothers/adminjs",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/ocavue/aria-ui",
+      "split": "tune",
+      "a": {
+        "path": "packages/utils/src/aria.ts",
+        "start": 17,
+        "end": 36
+      },
+      "b": {
+        "path": "packages/utils/src/aria.ts",
+        "start": 60,
+        "end": 77
+      }
     },
     {
       "id": "c073",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/pansyjs/watermark",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/folkloreinc/panneau-js",
+      "split": "holdout",
+      "a": {
+        "path": "forms/core/src/FormContext.jsx",
+        "start": 4,
+        "end": 12
+      },
+      "b": {
+        "path": "packages/core/src/contexts/UrlGenerator.jsx",
+        "start": 3,
+        "end": 11
+      }
     },
     {
       "id": "c074",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/myparcelnl/semantic-release-config",
-      "split": "holdout"
+      "repo": "https://github.com/secux/secux-js",
+      "split": "holdout",
+      "a": {
+        "path": "packages/app-dash/src/app-dash.ts",
+        "start": 20,
+        "end": 118
+      },
+      "b": {
+        "path": "packages/app-dgb/src/app-dgb.ts",
+        "start": 20,
+        "end": 118
+      }
     },
     {
       "id": "c075",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/shopify/cli",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
+      "split": "tune",
+      "a": {
+        "path": "lib/util/eslint.js",
+        "start": 7,
+        "end": 15
+      },
+      "b": {
+        "path": "lib/util/getTemplate.js",
+        "start": 11,
+        "end": 19
+      }
     },
     {
       "id": "c076",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/rehookify/datepicker",
-      "split": "holdout"
+      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
+      "split": "tune",
+      "a": {
+        "path": "packages/test_build/gatsby-plugin-purgecss-debug-config.js",
+        "start": 318,
+        "end": 385
+      },
+      "b": {
+        "path": "packages/test_build/gatsby-plugin-purgecss-debug-config.js",
+        "start": 448,
+        "end": 514
+      }
     },
     {
       "id": "c077",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/alwatr/alwatr",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/clutchd/clutchd",
+      "split": "holdout",
+      "a": {
+        "path": "packages/layout/src/footer.tsx",
+        "start": 1,
+        "end": 20
+      },
+      "b": {
+        "path": "packages/layout/src/header.tsx",
+        "start": 1,
+        "end": 20
+      }
     },
     {
       "id": "c078",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/onehilltech/ember-cli-mdc",
-      "split": "holdout"
+      "repo": "https://github.com/gre/gl-react",
+      "split": "tune",
+      "a": {
+        "path": "packages/cookbook-expo/shared/useTimeLoop.ts",
+        "start": 6,
+        "end": 26
+      },
+      "b": {
+        "path": "packages/cookbook/src/hooks/useTimeLoop.ts",
+        "start": 5,
+        "end": 25
+      }
     },
     {
       "id": "c079",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/mongodb/leafygreen-ui",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/ocavue/aria-ui",
+      "split": "tune",
+      "a": {
+        "path": "packages/elements/src/menu/menu-popup.ts",
+        "start": 40,
+        "end": 79
+      },
+      "b": {
+        "path": "packages/elements/src/tooltip/tooltip-positioner.ts",
+        "start": 15,
+        "end": 54
+      }
     },
     {
       "id": "c080",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/alwatr/alwatr",
-      "split": "holdout"
+      "repo": "https://github.com/sdkgen/sdkgen",
+      "split": "holdout",
+      "a": {
+        "path": "packages/playground/src/app/app.module.ts",
+        "start": 26,
+        "end": 65
+      },
+      "b": {
+        "path": "packages/parser/src/semantic/09_validate_annotations.ts",
+        "start": 49,
+        "end": 88
+      }
     },
     {
       "id": "c081",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/srbrahma/eslint-config-gev",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/remarkjs/remark-math",
+      "split": "holdout",
+      "a": {
+        "path": "packages/remark-math/test.js",
+        "start": 446,
+        "end": 485
+      },
+      "b": {
+        "path": "packages/rehype-mathjax/lib/create-renderer.js",
+        "start": 5,
+        "end": 44
+      }
     },
     {
       "id": "c082",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/mojaloop/central-services-logger",
-      "split": "holdout"
+      "repo": "https://github.com/imbhargav5/rooks",
+      "split": "holdout",
+      "a": {
+        "path": "packages/rooks/src/hooks/useRequest.ts",
+        "start": 115,
+        "end": 154
+      },
+      "b": {
+        "path": "packages/rooks/src/hooks/useIntervalWhen.ts",
+        "start": 2,
+        "end": 41
+      }
     },
     {
       "id": "c083",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/creevey/creevey",
-      "split": "holdout"
+      "repo": "https://github.com/material-components/material-components-web-components",
+      "split": "holdout",
+      "a": {
+        "path": "dialog/internal/animations.ts",
+        "start": 86,
+        "end": 100
+      },
+      "b": {
+        "path": "dialog/internal/animations.ts",
+        "start": 143,
+        "end": 161
+      }
     },
     {
       "id": "c084",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/imbhargav5/rooks",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/srbrahma/eslint-config-gev",
+      "split": "tune",
+      "a": {
+        "path": "ts.js",
+        "start": 33,
+        "end": 66
+      },
+      "b": {
+        "path": "ts.js",
+        "start": 71,
+        "end": 106
+      }
     },
     {
       "id": "c085",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/ice-lab/react-materials",
-      "split": "tune"
+      "repo": "https://github.com/facebook/create-react-app",
+      "split": "holdout",
+      "a": {
+        "path": "packages/react-scripts/config/getHttpsConfig.js",
+        "start": 8,
+        "end": 47
+      },
+      "b": {
+        "path": "tasks/screencast.js",
+        "start": 32,
+        "end": 71
+      }
     },
     {
       "id": "c086",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/yjl9903/breadc",
-      "split": "tune"
+      "repo": "https://github.com/thibaultjanbeyer/dragselect",
+      "split": "tune",
+      "a": {
+        "path": "DragSelect/src/methods/getSelectorPosition.ts",
+        "start": 49,
+        "end": 61
+      },
+      "b": {
+        "path": "DragSelect/src/methods/getSelectorPosition.ts",
+        "start": 61,
+        "end": 71
+      }
     },
     {
       "id": "c087",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/node-opcua/node-opcua",
-      "split": "holdout"
+      "repo": "https://github.com/surrealdb/surrealdb.js",
+      "split": "tune",
+      "a": {
+        "path": "packages/node/build.rs",
+        "start": 7,
+        "end": 15
+      },
+      "b": {
+        "path": "packages/wasm/build.rs",
+        "start": 4,
+        "end": 12
+      }
     },
     {
       "id": "c088",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/myparcelnl/semantic-release-config",
+      "split": "holdout",
+      "a": {
+        "path": "index.js",
+        "start": 11,
+        "end": 20
+      },
+      "b": {
+        "path": ".yarn/releases/yarn-3.3.0.cjs",
+        "start": 369,
+        "end": 378
+      }
     },
     {
       "id": "c089",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/clutchd/clutchd",
-      "split": "holdout"
+      "repo": "https://github.com/evanw/esbuild",
+      "split": "tune",
+      "a": {
+        "path": "scripts/decorator-tests.ts",
+        "start": 3133,
+        "end": 3389
+      },
+      "b": {
+        "path": "scripts/decorator-tests.ts",
+        "start": 3591,
+        "end": 3846
+      }
     },
     {
       "id": "c090",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/datatables/keytable",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/evanw/esbuild",
+      "split": "tune",
+      "a": {
+        "path": "lib/shared/stdio_protocol.ts",
+        "start": 244,
+        "end": 283
+      },
+      "b": {
+        "path": "compat-table/src/compat-table.ts",
+        "start": 20,
+        "end": 59
+      }
     },
     {
       "id": "c091",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/oclif/plugin-autocomplete",
-      "split": "tune"
+      "repo": "https://github.com/ice-lab/react-materials",
+      "split": "tune",
+      "a": {
+        "path": "deprecated-components/form/src/Field.js",
+        "start": 134,
+        "end": 147
+      },
+      "b": {
+        "path": "deprecated-components/panel/src/Panel.jsx",
+        "start": 13,
+        "end": 26
+      }
     },
     {
       "id": "c092",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/typeorm/typeorm",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/datatables/keytable",
+      "split": "holdout",
+      "a": {
+        "path": "js/KeyTable.ts",
+        "start": 849,
+        "end": 861
+      },
+      "b": {
+        "path": "rollup.config.mjs",
+        "start": 2,
+        "end": 14
+      }
     },
     {
       "id": "c093",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/cli-table/cli-table3",
-      "split": "tune"
+      "repo": "https://github.com/alwatr/alwatr",
+      "split": "holdout",
+      "a": {
+        "path": "pkg/core/src/main.ts",
+        "start": 4,
+        "end": 24
+      },
+      "b": {
+        "path": "pkg/nanolib/signal/src/main.ts",
+        "start": 1,
+        "end": 23
+      }
     },
     {
       "id": "c094",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/youwol/webpm-client",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/datatables/keytable",
+      "split": "holdout",
+      "a": {
+        "path": "js/KeyTable.ts",
+        "start": 190,
+        "end": 202
+      },
+      "b": {
+        "path": "js/KeyTable.ts",
+        "start": 291,
+        "end": 303
+      }
     },
     {
       "id": "c095",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/rehookify/datepicker",
+      "split": "holdout",
+      "a": {
+        "path": "packages/datepicker/src/index.ts",
+        "start": 1,
+        "end": 12
+      },
+      "b": {
+        "path": "packages/datepicker/src/types/index.ts",
+        "start": 1,
+        "end": 12
+      }
     },
     {
       "id": "c096",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/cli-table/cli-table3",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/margelo/react-native-quick-crypto",
+      "split": "holdout",
+      "a": {
+        "path": "packages/react-native-quick-crypto/cpp/utils/base64.h",
+        "start": 264,
+        "end": 272
+      },
+      "b": {
+        "path": "packages/react-native-quick-crypto/cpp/utils/base64.h",
+        "start": 273,
+        "end": 279
+      }
     },
     {
       "id": "c097",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/riot/compiler",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/secux/secux-js",
+      "split": "holdout",
+      "a": {
+        "path": "packages/app-btc/src/payment_bch.ts",
+        "start": 59,
+        "end": 98
+      },
+      "b": {
+        "path": "packages/app-btc/src/transaction.ts",
+        "start": 450,
+        "end": 489
+      }
     },
     {
       "id": "c098",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/facebook/create-react-app",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
+      "split": "tune",
+      "a": {
+        "path": "packages/gatsby-plugin-purgecss/scripts/test_ci.ts",
+        "start": 15,
+        "end": 23
+      },
+      "b": {
+        "path": "packages/gatsby-plugin-purgecss/scripts/test_ci.ts",
+        "start": 23,
+        "end": 32
+      }
     },
     {
       "id": "c099",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/typeorm/typeorm",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/tencent/tdesign-react",
+      "split": "tune",
+      "a": {
+        "path": "packages/tdesign-react-aigc/site/src/components/Playground.jsx",
+        "start": 1,
+        "end": 85
+      },
+      "b": {
+        "path": "packages/tdesign-react/site/src/components/Playground.jsx",
+        "start": 1,
+        "end": 85
+      }
     },
     {
       "id": "c100",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/anantoghosh/gatsby-plugin-purgecss",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/typeorm/typeorm",
+      "split": "holdout",
+      "a": {
+        "path": "src/driver/oracle/OracleQueryRunner.ts",
+        "start": 1860,
+        "end": 2215
+      },
+      "b": {
+        "path": "src/driver/sqlserver/SqlServerQueryRunner.ts",
+        "start": 2288,
+        "end": 2649
+      }
     },
     {
       "id": "c101",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/cuongdevjs/reactjs-social-login",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/oclif/plugin-autocomplete",
+      "split": "tune",
+      "a": {
+        "path": "src/autocomplete/zsh.ts",
+        "start": 249,
+        "end": 270
+      },
+      "b": {
+        "path": "src/autocomplete/zsh.ts",
+        "start": 278,
+        "end": 299
+      }
     },
     {
       "id": "c102",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/facebook/create-react-app",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/mojaloop/central-services-logger",
+      "split": "holdout",
+      "a": {
+        "path": "src/index.d.ts",
+        "start": 2,
+        "end": 21
+      },
+      "b": {
+        "path": "src/contextLogger.d.ts",
+        "start": 55,
+        "end": 74
+      }
     },
     {
       "id": "c103",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/klaussinani/qoa",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
+      "split": "holdout",
+      "a": {
+        "path": "ModuleExportsFunctions/formTypes.js",
+        "start": 144,
+        "end": 188
+      },
+      "b": {
+        "path": "ModuleExportsFunctions/formTypes.js",
+        "start": 204,
+        "end": 248
+      }
     },
     {
       "id": "c104",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/apify/apify-shared-js",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/tootallnate/proxy-agents",
+      "split": "holdout",
+      "a": {
+        "path": "packages/http-proxy-agent/src/index.ts",
+        "start": 66,
+        "end": 87
+      },
+      "b": {
+        "path": "packages/https-proxy-agent/src/index.ts",
+        "start": 81,
+        "end": 102
+      }
     },
     {
       "id": "c105",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/folkloreinc/panneau-js",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/pnpm/pnpm",
+      "split": "holdout",
+      "a": {
+        "path": "pnpm11/registry-access/commands/src/access.ts",
+        "start": 456,
+        "end": 488
+      },
+      "b": {
+        "path": "pnpm11/registry-access/commands/src/access.ts",
+        "start": 499,
+        "end": 534
+      }
     },
     {
       "id": "c106",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/paljs/prisma-tools",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/pixijs/sound",
+      "split": "holdout",
+      "a": {
+        "path": "src/Sound.ts",
+        "start": 675,
+        "end": 727
+      },
+      "b": {
+        "path": "src/htmlaudio/HTMLAudioInstance.ts",
+        "start": 169,
+        "end": 221
+      }
     },
     {
       "id": "c107",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/ai/size-limit",
-      "split": "tune"
+      "repo": "https://github.com/folkloreinc/panneau-js",
+      "split": "holdout",
+      "a": {
+        "path": "fields/core/src/FieldsGroup.jsx",
+        "start": 3,
+        "end": 84
+      },
+      "b": {
+        "path": "fields/media/src/DocumentCard.jsx",
+        "start": 1,
+        "end": 56
+      }
     },
     {
       "id": "c108",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/sdkgen/sdkgen",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/orca-team/pocket",
+      "split": "tune",
+      "a": {
+        "path": "packages/pdf-viewer/demo/Demo3.tsx",
+        "start": 4,
+        "end": 43
+      },
+      "b": {
+        "path": "packages/pocket/src/eq-ratio-box/demo/Demo1.tsx",
+        "start": 1,
+        "end": 40
+      }
     },
     {
       "id": "c109",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/edwardanthony/nestjs-seeder",
-      "split": "holdout"
+      "repo": "https://github.com/mongodb/leafygreen-ui",
+      "split": "tune",
+      "a": {
+        "path": "packages/search-input/src/SearchResultsMenu/SearchResultsMenu.stories.tsx",
+        "start": 29,
+        "end": 68
+      },
+      "b": {
+        "path": "packages/menu/src/FocusableMenuItem/FocusableMenuItem.tsx",
+        "start": 2,
+        "end": 41
+      }
     },
     {
       "id": "c110",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/mongodb/leafygreen-ui",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/clutchd/clutchd",
+      "split": "holdout",
+      "a": {
+        "path": "packages/ui/app/layout.tsx",
+        "start": 11,
+        "end": 20
+      },
+      "b": {
+        "path": "packages/www/app/layout.tsx",
+        "start": 16,
+        "end": 25
+      }
     },
     {
       "id": "c111",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
+      "split": "holdout",
+      "a": {
+        "path": "tools/cli/src/commands/build-map.js",
+        "start": 73,
+        "end": 99
+      },
+      "b": {
+        "path": "tools/cli/src/commands/convert-data.js",
+        "start": 121,
+        "end": 144
+      }
     },
     {
       "id": "c112",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/rehookify/datepicker",
-      "split": "holdout"
+      "repo": "https://github.com/ai/size-limit",
+      "split": "tune",
+      "a": {
+        "path": "packages/size-limit/size-limit-error.js",
+        "start": 22,
+        "end": 32
+      },
+      "b": {
+        "path": "packages/size-limit/process-import.js",
+        "start": 1,
+        "end": 11
+      }
     },
     {
       "id": "c113",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/margelo/react-native-quick-crypto",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/myparcelnl/semantic-release-config",
+      "split": "holdout",
+      "a": {
+        "path": "src/plugins/addComposerPlugin.js",
+        "start": 1,
+        "end": 10
+      },
+      "b": {
+        "path": "src/plugins/addExecPlugin.js",
+        "start": 1,
+        "end": 10
+      }
     },
     {
       "id": "c114",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/imbhargav5/rooks",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/riot/compiler",
+      "split": "tune",
+      "a": {
+        "path": "src/generators/template/bindings/simple.js",
+        "start": 6,
+        "end": 50
+      },
+      "b": {
+        "path": "src/generators/template/expressions/value.js",
+        "start": 1,
+        "end": 30
+      }
     },
     {
       "id": "c115",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/changesets/changesets",
-      "split": "holdout"
+      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
+      "split": "tune",
+      "a": {
+        "path": "jest.config.ts",
+        "start": 168,
+        "end": 176
+      },
+      "b": {
+        "path": "tsup.config.js",
+        "start": 2,
+        "end": 10
+      }
     },
     {
       "id": "c116",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/xinlei3166/vitepress-theme-demoblock",
-      "split": "tune"
+      "repo": "https://github.com/typeorm/typeorm",
+      "split": "holdout",
+      "a": {
+        "path": "src/find-options/FindOperator.ts",
+        "start": 57,
+        "end": 65
+      },
+      "b": {
+        "path": "src/migration/Migration.ts",
+        "start": 44,
+        "end": 52
+      }
     },
     {
       "id": "c117",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/yahoo/fluxible",
-      "split": "tune"
+      "repo": "https://github.com/zhouhoujun/tsioc",
+      "split": "tune",
+      "a": {
+        "path": "packages/activities/src/core/IWorkflowContext.ts",
+        "start": 1,
+        "end": 8
+      },
+      "b": {
+        "path": "packages/components/src/IComponentReflect.ts",
+        "start": 1,
+        "end": 8
+      }
     },
     {
       "id": "c118",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/sdkgen/sdkgen",
-      "split": "holdout"
+      "repo": "https://github.com/orca-team/pocket",
+      "split": "tune",
+      "a": {
+        "path": "packages/pdf-viewer/src/plugins/PDFMarkPlugin/PDFMarkPlugin.tsx",
+        "start": 236,
+        "end": 334
+      },
+      "b": {
+        "path": "packages/pdf-viewer/src/plugins/PDFPainterPlugin/PDFPainterPlugin.tsx",
+        "start": 294,
+        "end": 392
+      }
     },
     {
       "id": "c119",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/thibaultjanbeyer/dragselect",
-      "split": "tune"
+      "repo": "https://github.com/youwol/webpm-client",
+      "split": "holdout",
+      "a": {
+        "path": "src/lib/test-utils/index.ts",
+        "start": 17,
+        "end": 36
+      },
+      "b": {
+        "path": "src/lib/workers-pool/web-worker.proxy.ts",
+        "start": 66,
+        "end": 83
+      }
     },
     {
       "id": "c120",
-      "kind": "finding",
-      "rank": "tail",
+      "kind": "control",
+      "rank": null,
       "repo": "https://github.com/tencent/tdesign-react",
-      "split": "tune"
+      "split": "tune",
+      "a": {
+        "path": "packages/components/form/type.ts",
+        "start": 434,
+        "end": 473
+      },
+      "b": {
+        "path": "packages/components/pagination/type.ts",
+        "start": 60,
+        "end": 99
+      }
     },
     {
       "id": "c121",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/kucherenko/jscpd",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/mongodb/leafygreen-ui",
+      "split": "tune",
+      "a": {
+        "path": "tools/slackbot/src/release-bot/utils/parseChangeLog.ts",
+        "start": 62,
+        "end": 73
+      },
+      "b": {
+        "path": "tools/slackbot/src/release-bot/utils/parseChangeLog.ts",
+        "start": 73,
+        "end": 83
+      }
     },
     {
       "id": "c122",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/remarkjs/remark-math",
-      "split": "holdout"
+      "repo": "https://github.com/zazuko/barnard59",
+      "split": "holdout",
+      "a": {
+        "path": "packages/cli/lib/cli/dynamicCommands.js",
+        "start": 5,
+        "end": 31
+      },
+      "b": {
+        "path": "packages/validation/lib/validatePipelineProperty.js",
+        "start": 2,
+        "end": 28
+      }
     },
     {
       "id": "c123",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/pnpm/pnpm",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/zhouhoujun/tsioc",
+      "split": "tune",
+      "a": {
+        "path": "packages/ioc/src/actions/injector.ts",
+        "start": 28,
+        "end": 38
+      },
+      "b": {
+        "path": "packages/activities/taskfile.ts",
+        "start": 11,
+        "end": 21
+      }
     },
     {
       "id": "c124",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/reactiverse/es4x",
-      "split": "tune"
+      "rank": "displayed",
+      "repo": "https://github.com/cli-table/cli-table3",
+      "split": "tune",
+      "a": {
+        "path": "src/cell.js",
+        "start": 251,
+        "end": 262
+      },
+      "b": {
+        "path": "src/cell.js",
+        "start": 301,
+        "end": 312
+      }
     },
     {
       "id": "c125",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/datatables/keytable",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/orca-team/pocket",
+      "split": "tune",
+      "a": {
+        "path": "packages/hooks/src/useNextTick.ts",
+        "start": 6,
+        "end": 29
+      },
+      "b": {
+        "path": "packages/hooks/src/useNextTick.ts",
+        "start": 31,
+        "end": 54
+      }
     },
     {
       "id": "c126",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/zazuko/barnard59",
-      "split": "holdout"
+      "repo": "https://github.com/tootallnate/proxy-agents",
+      "split": "holdout",
+      "a": {
+        "path": ".eslintrc.js",
+        "start": 7,
+        "end": 28
+      },
+      "b": {
+        "path": "packages/pac-resolver/src/dnsResolve.ts",
+        "start": 5,
+        "end": 26
+      }
     },
     {
       "id": "c127",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/tootallnate/proxy-agents",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/changesets/changesets",
+      "split": "holdout",
+      "a": {
+        "path": "packages/assemble-release-plan/src/test-utils.ts",
+        "start": 93,
+        "end": 110
+      },
+      "b": {
+        "path": "packages/assemble-release-plan/src/test-utils.ts",
+        "start": 141,
+        "end": 156
+      }
     },
     {
       "id": "c128",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/material-components/material-components-web-components",
-      "split": "holdout"
+      "repo": "https://github.com/changesets/changesets",
+      "split": "holdout",
+      "a": {
+        "path": "packages/logger/src/index.ts",
+        "start": 13,
+        "end": 23
+      },
+      "b": {
+        "path": "packages/logger/src/index.ts",
+        "start": 26,
+        "end": 35
+      }
     },
     {
       "id": "c129",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/gre/gl-react",
+      "split": "tune",
+      "a": {
+        "path": "packages/gl-react/src/LinearCopy.tsx",
+        "start": 1,
+        "end": 41
+      },
+      "b": {
+        "path": "packages/gl-react/src/NearestCopy.tsx",
+        "start": 1,
+        "end": 41
+      }
     },
     {
       "id": "c130",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/pnpm/pnpm",
-      "split": "holdout"
+      "repo": "https://github.com/reactiverse/es4x",
+      "split": "tune",
+      "a": {
+        "path": "docs/.vuepress/public/player/asciinema-player.js",
+        "start": 687,
+        "end": 709
+      },
+      "b": {
+        "path": "docs/.vuepress/public/player/asciinema-player.js",
+        "start": 1051,
+        "end": 1074
+      }
     },
     {
       "id": "c131",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/qiniu/js-sdk",
-      "split": "holdout"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/mantinedev/mantine",
+      "split": "tune",
+      "a": {
+        "path": "apps/mantine.dev/src/components/HomePage/shared/HomePageDescription/HomePageDescription.tsx",
+        "start": 2,
+        "end": 9
+      },
+      "b": {
+        "path": "apps/mantine.dev/src/components/HomePage/shared/HomePageTitle/HomePageTitle.tsx",
+        "start": 2,
+        "end": 7
+      }
     },
     {
       "id": "c132",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/ijstech/cli",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/pansyjs/watermark",
+      "split": "holdout",
+      "a": {
+        "path": "packages/core/src/types.ts",
+        "start": 25,
+        "end": 41
+      },
+      "b": {
+        "path": "packages/core/docs/demo/demo02.tsx",
+        "start": 7,
+        "end": 23
+      }
     },
     {
       "id": "c133",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/zazuko/barnard59",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/riot/compiler",
+      "split": "tune",
+      "a": {
+        "path": "compiler.d.ts",
+        "start": 5,
+        "end": 44
+      },
+      "b": {
+        "path": "src/index.js",
+        "start": 112,
+        "end": 151
+      }
     },
     {
       "id": "c134",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/vonage/vonage-node-sdk",
-      "split": "holdout"
+      "repo": "https://github.com/imbhargav5/rooks",
+      "split": "holdout",
+      "a": {
+        "path": "packages/rooks/src/utils/explicitResourceManagement.ts",
+        "start": 60,
+        "end": 70
+      },
+      "b": {
+        "path": "packages/rooks/src/utils/explicitResourceManagement.ts",
+        "start": 70,
+        "end": 80
+      }
     },
     {
       "id": "c135",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/folkloreinc/panneau-js",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/alwatr/alwatr",
+      "split": "holdout",
+      "a": {
+        "path": "pkg/nanolib/debounce/src/debounce.ts",
+        "start": 58,
+        "end": 97
+      },
+      "b": {
+        "path": "pkg/nanolib/signal/src/operators/filter.ts",
+        "start": 21,
+        "end": 60
+      }
     },
     {
       "id": "c136",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/klaussinani/qoa",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/oclif/plugin-autocomplete",
+      "split": "tune",
+      "a": {
+        "path": "src/commands/autocomplete/create.ts",
+        "start": 75,
+        "end": 96
+      },
+      "b": {
+        "path": "src/autocomplete/powershell.ts",
+        "start": 367,
+        "end": 388
+      }
     },
     {
       "id": "c137",
       "kind": "control",
       "rank": null,
-      "repo": "https://github.com/myparcelnl/semantic-release-config",
-      "split": "holdout"
+      "repo": "https://github.com/dword-design/base-config-component",
+      "split": "tune",
+      "a": {
+        "path": "src/get-readme-install-string.ts",
+        "start": 41,
+        "end": 60
+      },
+      "b": {
+        "path": "src/index.ts",
+        "start": 7,
+        "end": 26
+      }
     },
     {
       "id": "c138",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/facebook/create-react-app",
-      "split": "holdout"
-    },
-    {
-      "id": "c139",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/pnpm/pnpm",
-      "split": "holdout"
-    },
-    {
-      "id": "c140",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/ocavue/aria-ui",
-      "split": "tune"
-    },
-    {
-      "id": "c141",
       "kind": "finding",
       "rank": "displayed",
       "repo": "https://github.com/pansyjs/watermark",
-      "split": "holdout"
+      "split": "holdout",
+      "a": {
+        "path": "docs/components/configurator/index.tsx",
+        "start": 91,
+        "end": 107
+      },
+      "b": {
+        "path": "docs/components/configurator/index.tsx",
+        "start": 176,
+        "end": 184
+      }
+    },
+    {
+      "id": "c139",
+      "kind": "finding",
+      "rank": "displayed",
+      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
+      "split": "tune",
+      "a": {
+        "path": "lib/util/getTokens.js",
+        "start": 1,
+        "end": 9
+      },
+      "b": {
+        "path": "lib/util/getVariables.js",
+        "start": 1,
+        "end": 9
+      }
+    },
+    {
+      "id": "c140",
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
+      "split": "tune",
+      "a": {
+        "path": "lib/util/makeNoMethodSetStateRule.js",
+        "start": 25,
+        "end": 42
+      },
+      "b": {
+        "path": "lib/rules/jsx-first-prop-new-line.js",
+        "start": 25,
+        "end": 42
+      }
+    },
+    {
+      "id": "c141",
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/rehookify/datepicker",
+      "split": "holdout",
+      "a": {
+        "path": "packages/datepicker/src/utils/get-multiple-dates.ts",
+        "start": 13,
+        "end": 24
+      },
+      "b": {
+        "path": "packages/datepicker/src/utils/predicates.ts",
+        "start": 8,
+        "end": 19
+      }
     },
     {
       "id": "c142",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/riot/compiler",
-      "split": "tune"
+      "rank": "tail",
+      "repo": "https://github.com/yahoo/fluxible",
+      "split": "tune",
+      "a": {
+        "path": "packages/dispatchr/lib/DispatcherContext.js",
+        "start": 42,
+        "end": 53
+      },
+      "b": {
+        "path": "packages/dispatchr/lib/DispatcherContext.js",
+        "start": 214,
+        "end": 225
+      }
     },
     {
       "id": "c143",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/khanhduy1407/eslint-plugin-dulcet",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/reactiverse/es4x",
+      "split": "tune",
+      "a": {
+        "path": "es4x/src/main/resources/io/reactiverse/es4x/polyfill/date.js",
+        "start": 2,
+        "end": 24
+      },
+      "b": {
+        "path": "examples/techempower/index.js",
+        "start": 38,
+        "end": 60
+      }
     },
     {
       "id": "c144",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/pansyjs/watermark",
-      "split": "holdout"
+      "repo": "https://github.com/tencent/tdesign-react",
+      "split": "tune",
+      "a": {
+        "path": "packages/components/time-picker/defaultProps.ts",
+        "start": 8,
+        "end": 15
+      },
+      "b": {
+        "path": "packages/components/time-picker/defaultProps.ts",
+        "start": 19,
+        "end": 26
+      }
     },
     {
       "id": "c145",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/openpgpjs/web-stream-tools",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/typeorm/typeorm",
+      "split": "holdout",
+      "a": {
+        "path": "src/query-builder/RelationUpdater.ts",
+        "start": 35,
+        "end": 74
+      },
+      "b": {
+        "path": "src/persistence/subject-builder/CascadesSubjectBuilder.ts",
+        "start": 74,
+        "end": 113
+      }
     },
     {
       "id": "c146",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/openpgpjs/web-stream-tools",
-      "split": "tune"
+      "repo": "https://github.com/yjl9903/breadc",
+      "split": "tune",
+      "a": {
+        "path": "packages/core/src/runtime/matched.ts",
+        "start": 24,
+        "end": 40
+      },
+      "b": {
+        "path": "packages/core/src/runtime/matched.ts",
+        "start": 105,
+        "end": 121
+      }
     },
     {
       "id": "c147",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/pixijs/sound",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/yjl9903/breadc",
+      "split": "tune",
+      "a": {
+        "path": "packages/core/src/breadc/types/infer.ts",
+        "start": 7,
+        "end": 36
+      },
+      "b": {
+        "path": "packages/tui/src/chat/helpers.ts",
+        "start": 9,
+        "end": 38
+      }
     },
     {
       "id": "c148",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/cli-table/cli-table3",
-      "split": "tune"
+      "repo": "https://github.com/paljs/prisma-tools",
+      "split": "holdout",
+      "a": {
+        "path": "packages/admin/src/PrismaTable/language.ts",
+        "start": 1,
+        "end": 46
+      },
+      "b": {
+        "path": "packages/admin/src/Settings/index.tsx",
+        "start": 15,
+        "end": 74
+      }
     },
     {
       "id": "c149",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/changesets/changesets",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/http-party/node-http-proxy",
+      "split": "tune",
+      "a": {
+        "path": "examples/http/concurrent-proxy.js",
+        "start": 15,
+        "end": 31
+      },
+      "b": {
+        "path": "examples/http/proxy-https-to-https.js",
+        "start": 25,
+        "end": 41
+      }
     },
     {
       "id": "c150",
       "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/qiniu/js-sdk",
-      "split": "holdout"
+      "rank": "displayed",
+      "repo": "https://github.com/onehilltech/ember-cli-mdc",
+      "split": "holdout",
+      "a": {
+        "path": "packages/mdc-button/addon/components/mdc-button-link-to.hbs",
+        "start": 1,
+        "end": 35
+      },
+      "b": {
+        "path": "packages/mdc-button/addon/components/mdc-button.hbs",
+        "start": 1,
+        "end": 35
+      }
     },
     {
       "id": "c151",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/rehookify/datepicker",
+      "split": "holdout",
+      "a": {
+        "path": "packages/datepicker/src/date-picker-provider.tsx",
+        "start": 8,
+        "end": 21
+      },
+      "b": {
+        "path": "packages/datepicker/src/date-picker-state-provider.tsx",
+        "start": 6,
+        "end": 19
+      }
     },
     {
       "id": "c152",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/onehilltech/ember-cli-mdc",
-      "split": "holdout"
+      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
+      "split": "tune",
+      "a": {
+        "path": "src/processors/typescript.ts",
+        "start": 24,
+        "end": 32
+      },
+      "b": {
+        "path": "src/processors/typescript.ts",
+        "start": 36,
+        "end": 44
+      }
     },
     {
       "id": "c153",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/imbhargav5/rooks",
-      "split": "holdout"
+      "repo": "https://github.com/zazuko/barnard59",
+      "split": "holdout",
+      "a": {
+        "path": "packages/validation/lib/validators/pipelinePropertiesMatchFirstStrict.js",
+        "start": 1,
+        "end": 27
+      },
+      "b": {
+        "path": "packages/validation/lib/validators/pipelinePropertiesMatchLastStrict.js",
+        "start": 1,
+        "end": 27
+      }
     },
     {
       "id": "c154",
       "kind": "finding",
       "rank": "displayed",
-      "repo": "https://github.com/shopify/cli",
-      "split": "holdout"
+      "repo": "https://github.com/klaussinani/qoa",
+      "split": "tune",
+      "a": {
+        "path": "src/interactive.js",
+        "start": 35,
+        "end": 64
+      },
+      "b": {
+        "path": "src/quiz.js",
+        "start": 58,
+        "end": 87
+      }
     },
     {
       "id": "c155",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/tencent/tdesign-react",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/zazuko/barnard59",
+      "split": "holdout",
+      "a": {
+        "path": "packages/http/lib/fetch.ts",
+        "start": 2,
+        "end": 10
+      },
+      "b": {
+        "path": "packages/http/lib/writableFetch.ts",
+        "start": 3,
+        "end": 11
+      }
     },
     {
       "id": "c156",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/http-party/node-http-proxy",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/youwol/webpm-client",
+      "split": "holdout",
+      "a": {
+        "path": "src/lib/events.models.ts",
+        "start": 277,
+        "end": 308
+      },
+      "b": {
+        "path": "webpack.config.ts",
+        "start": 12,
+        "end": 43
+      }
     },
     {
       "id": "c157",
       "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/algolia/autocomplete",
-      "split": "tune"
+      "repo": "https://github.com/shopify/cli",
+      "split": "holdout",
+      "a": {
+        "path": "packages/ui-extensions-server-kit/src/state/reducers/extensionServerReducer.ts",
+        "start": 9,
+        "end": 18
+      },
+      "b": {
+        "path": "packages/ui-extensions-server-kit/src/state/reducers/extensionServerReducer.ts",
+        "start": 24,
+        "end": 33
+      }
     },
     {
       "id": "c158",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/reactiverse/es4x",
-      "split": "tune"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/thibaultjanbeyer/dragselect",
+      "split": "tune",
+      "a": {
+        "path": "DragSelect/src/methods/addModificationObservers.ts",
+        "start": 11,
+        "end": 50
+      },
+      "b": {
+        "path": "DragSelect/src/stores/PointerStore.ts",
+        "start": 34,
+        "end": 73
+      }
     },
     {
       "id": "c159",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/qiniu/js-sdk",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/algolia/autocomplete",
+      "split": "tune",
+      "a": {
+        "path": "packages/autocomplete-plugin-query-suggestions/src/createQuerySuggestionsPlugin.ts",
+        "start": 3,
+        "end": 93
+      },
+      "b": {
+        "path": "packages/autocomplete-shared/src/js/AutocompleteOptions.ts",
+        "start": 3,
+        "end": 17
+      }
     },
     {
       "id": "c160",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/margelo/react-native-quick-crypto",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/facebook/create-react-app",
+      "split": "holdout",
+      "a": {
+        "path": "packages/react-dev-utils/ModuleNotFoundPlugin.js",
+        "start": 103,
+        "end": 109
+      },
+      "b": {
+        "path": "packages/react-dev-utils/ModuleNotFoundPlugin.js",
+        "start": 121,
+        "end": 129
+      }
     },
     {
       "id": "c161",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/myparcelnl/semantic-release-config",
-      "split": "holdout"
+      "rank": "tail",
+      "repo": "https://github.com/riot/compiler",
+      "split": "tune",
+      "a": {
+        "path": "src/postprocessors.js",
+        "start": 13,
+        "end": 31
+      },
+      "b": {
+        "path": "src/postprocessors.js",
+        "start": 32,
+        "end": 51
+      }
     },
     {
       "id": "c162",
-      "kind": "finding",
-      "rank": "tail",
-      "repo": "https://github.com/rehookify/datepicker",
-      "split": "holdout"
+      "kind": "control",
+      "rank": null,
+      "repo": "https://github.com/changesets/changesets",
+      "split": "holdout",
+      "a": {
+        "path": "packages/cli/src/utils/gitTags.ts",
+        "start": 15,
+        "end": 32
+      },
+      "b": {
+        "path": "packages/apply-release-plan/src/utils.ts",
+        "start": 3,
+        "end": 20
+      }
     },
     {
       "id": "c163",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/riot/compiler",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/sdkgen/sdkgen",
+      "split": "holdout",
+      "a": {
+        "path": "packages/android-runtime/runtime/src/main/java/io/sdkgen/runtime/SdkgenHttpClient.kt",
+        "start": 58,
+        "end": 88
+      },
+      "b": {
+        "path": "packages/android-runtime/runtime/src/main/java/io/sdkgen/runtime/SdkgenHttpClient.kt",
+        "start": 92,
+        "end": 122
+      }
     },
     {
       "id": "c164",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/reactiverse/es4x",
-      "split": "tune"
+      "kind": "finding",
+      "rank": "tail",
+      "repo": "https://github.com/vonage/vonage-node-sdk",
+      "split": "holdout",
+      "a": {
+        "path": "packages/voice/lib/classes/OutboundCallWithAnswerURL.ts",
+        "start": 1,
+        "end": 28
+      },
+      "b": {
+        "path": "packages/voice/lib/classes/OutboundCallWithNCCO.ts",
+        "start": 1,
+        "end": 29
+      }
     },
     {
       "id": "c165",
       "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/node-opcua/node-opcua",
-      "split": "holdout"
-    },
-    {
-      "id": "c166",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
-      "split": "tune"
-    },
-    {
-      "id": "c167",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/paljs/prisma-tools",
-      "split": "holdout"
-    },
-    {
-      "id": "c168",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/typeorm/typeorm",
-      "split": "holdout"
-    },
-    {
-      "id": "c169",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/paljs/prisma-tools",
-      "split": "holdout"
-    },
-    {
-      "id": "c170",
-      "kind": "control",
-      "rank": null,
-      "repo": "https://github.com/ijstech/cli",
-      "split": "holdout"
-    },
-    {
-      "id": "c171",
-      "kind": "finding",
       "rank": "tail",
-      "repo": "https://github.com/ai/size-limit",
-      "split": "tune"
-    },
-    {
-      "id": "c172",
-      "kind": "finding",
-      "rank": "displayed",
-      "repo": "https://github.com/yjl9903/breadc",
-      "split": "tune"
+      "repo": "https://github.com/onehilltech/ember-cli-mdc",
+      "split": "holdout",
+      "a": {
+        "path": "packages/mdc-textfield/addon/components/mdc-textarea.hbs",
+        "start": 8,
+        "end": 25
+      },
+      "b": {
+        "path": "packages/mdc-textfield/addon/components/mdc-textfield.hbs",
+        "start": 11,
+        "end": 28
+      }
     }
   ],
   "repos_detail": [
@@ -1235,8 +2836,8 @@
       "ecosystem": "npm",
       "files": 94,
       "codeFiles": 20,
-      "findings": 6,
-      "pairs": 32,
+      "findings": 2,
+      "pairs": 6,
       "probeHit": false,
       "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
@@ -1246,8 +2847,8 @@
       "ecosystem": "npm",
       "files": 239,
       "codeFiles": 88,
-      "findings": 23,
-      "pairs": 97,
+      "findings": 20,
+      "pairs": 56,
       "probeHit": false,
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
@@ -1256,9 +2857,9 @@
       "split": "holdout",
       "ecosystem": "npm",
       "files": 522,
-      "codeFiles": 173,
-      "findings": 29,
-      "pairs": 884,
+      "codeFiles": 124,
+      "findings": 20,
+      "pairs": 129,
       "probeHit": false,
       "probeFrom": "https://github.com/osohq/oso"
     },
@@ -1274,48 +2875,37 @@
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
     {
+      "repo": "https://github.com/shopify/cli",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 1813,
+      "codeFiles": 930,
+      "findings": 43,
+      "pairs": 1149,
+      "probeHit": false,
+      "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
+    },
+    {
       "repo": "https://github.com/yahoo/fluxible",
       "split": "tune",
       "ecosystem": "npm",
       "files": 416,
       "codeFiles": 207,
-      "findings": 33,
-      "pairs": 171,
+      "findings": 12,
+      "pairs": 41,
       "probeHit": false,
       "probeFrom": "https://github.com/youzan/vant"
-    },
-    {
-      "repo": "https://github.com/shopify/cli",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 1813,
-      "codeFiles": 947,
-      "findings": 51,
-      "pairs": 1309,
-      "probeHit": false,
-      "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
     {
       "repo": "https://github.com/http-party/node-http-proxy",
       "split": "tune",
       "ecosystem": "npm",
       "files": 59,
-      "codeFiles": 33,
-      "findings": 3,
-      "pairs": 37,
+      "codeFiles": 30,
+      "findings": 1,
+      "pairs": 5,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
-    },
-    {
-      "repo": "https://github.com/folkloreinc/panneau-js",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 1209,
-      "codeFiles": 575,
-      "findings": 25,
-      "pairs": 628,
-      "probeHit": false,
-      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
     {
       "repo": "https://github.com/thibaultjanbeyer/dragselect",
@@ -1329,13 +2919,24 @@
       "probeFrom": "https://github.com/angablue/exe"
     },
     {
+      "repo": "https://github.com/folkloreinc/panneau-js",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 1209,
+      "codeFiles": 572,
+      "findings": 23,
+      "pairs": 618,
+      "probeHit": false,
+      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
+    },
+    {
       "repo": "https://github.com/paljs/prisma-tools",
       "split": "holdout",
       "ecosystem": "npm",
       "files": 202,
       "codeFiles": 100,
-      "findings": 11,
-      "pairs": 178,
+      "findings": 6,
+      "pairs": 84,
       "probeHit": false,
       "probeFrom": "https://github.com/youzan/vant"
     },
@@ -1345,21 +2946,10 @@
       "ecosystem": "npm",
       "files": 58,
       "codeFiles": 14,
-      "findings": 5,
-      "pairs": 155,
+      "findings": 2,
+      "pairs": 5,
       "probeHit": false,
       "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
-    },
-    {
-      "repo": "https://github.com/youwol/webpm-client",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 129,
-      "codeFiles": 39,
-      "findings": 9,
-      "pairs": 40,
-      "probeHit": false,
-      "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
     {
       "repo": "https://github.com/oclif/plugin-autocomplete",
@@ -1373,13 +2963,24 @@
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
     {
+      "repo": "https://github.com/youwol/webpm-client",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 129,
+      "codeFiles": 39,
+      "findings": 9,
+      "pairs": 40,
+      "probeHit": false,
+      "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
+    },
+    {
       "repo": "https://github.com/alwatr/alwatr",
       "split": "holdout",
       "ecosystem": "npm",
       "files": 2167,
       "codeFiles": 282,
-      "findings": 48,
-      "pairs": 211,
+      "findings": 36,
+      "pairs": 153,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
@@ -1389,8 +2990,8 @@
       "ecosystem": "npm",
       "files": 2164,
       "codeFiles": 1652,
-      "findings": 67,
-      "pairs": 3269,
+      "findings": 41,
+      "pairs": 1258,
       "probeHit": false,
       "probeFrom": "https://github.com/youzan/vant"
     },
@@ -1422,10 +3023,54 @@
       "ecosystem": "npm",
       "files": 829,
       "codeFiles": 429,
-      "findings": 33,
-      "pairs": 490,
+      "findings": 16,
+      "pairs": 83,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
+    },
+    {
+      "repo": "https://github.com/gre/gl-react",
+      "split": "tune",
+      "ecosystem": "npm",
+      "files": 315,
+      "codeFiles": 179,
+      "findings": 13,
+      "pairs": 80,
+      "probeHit": false,
+      "probeFrom": "https://github.com/youzan/vant"
+    },
+    {
+      "repo": "https://github.com/zhouhoujun/tsioc",
+      "split": "tune",
+      "ecosystem": "npm",
+      "files": 496,
+      "codeFiles": 354,
+      "findings": 20,
+      "pairs": 536,
+      "probeHit": false,
+      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
+    },
+    {
+      "repo": "https://github.com/secux/secux-js",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 592,
+      "codeFiles": 218,
+      "findings": 33,
+      "pairs": 644,
+      "probeHit": false,
+      "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
+    },
+    {
+      "repo": "https://github.com/mantinedev/mantine",
+      "split": "tune",
+      "ecosystem": "npm",
+      "files": 6366,
+      "codeFiles": 4642,
+      "findings": 74,
+      "pairs": 6032,
+      "probeHit": false,
+      "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
     },
     {
       "repo": "https://github.com/mojaloop/central-services-logger",
@@ -1439,46 +3084,46 @@
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
     {
-      "repo": "https://github.com/reactiverse/es4x",
+      "repo": "https://github.com/yjl9903/breadc",
       "split": "tune",
       "ecosystem": "npm",
-      "files": 686,
-      "codeFiles": 51,
-      "findings": 19,
-      "pairs": 735,
+      "files": 140,
+      "codeFiles": 68,
+      "findings": 15,
+      "pairs": 48,
       "probeHit": false,
-      "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
+      "probeFrom": "https://github.com/youzan/vant"
     },
     {
       "repo": "https://github.com/surrealdb/surrealdb.js",
       "split": "tune",
       "ecosystem": "npm",
       "files": 341,
-      "codeFiles": 164,
-      "findings": 24,
-      "pairs": 387,
+      "codeFiles": 163,
+      "findings": 20,
+      "pairs": 343,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
     },
     {
-      "repo": "https://github.com/yjl9903/breadc",
+      "repo": "https://github.com/reactiverse/es4x",
       "split": "tune",
       "ecosystem": "npm",
-      "files": 140,
-      "codeFiles": 68,
-      "findings": 18,
-      "pairs": 60,
+      "files": 686,
+      "codeFiles": 51,
+      "findings": 8,
+      "pairs": 279,
       "probeHit": false,
-      "probeFrom": "https://github.com/youzan/vant"
+      "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
     },
     {
       "repo": "https://github.com/kucherenko/jscpd",
       "split": "tune",
       "ecosystem": "npm",
       "files": 1192,
-      "codeFiles": 352,
-      "findings": 180,
-      "pairs": 1501,
+      "codeFiles": 325,
+      "findings": 33,
+      "pairs": 1207,
       "probeHit": false,
       "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
@@ -1488,8 +3133,8 @@
       "ecosystem": "npm",
       "files": 43,
       "codeFiles": 14,
-      "findings": 4,
-      "pairs": 26,
+      "findings": 3,
+      "pairs": 3,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
     },
@@ -1499,8 +3144,8 @@
       "ecosystem": "npm",
       "files": 807,
       "codeFiles": 476,
-      "findings": 30,
-      "pairs": 795,
+      "findings": 22,
+      "pairs": 566,
       "probeHit": false,
       "probeFrom": "https://github.com/osohq/oso"
     },
@@ -1510,8 +3155,8 @@
       "ecosystem": "npm",
       "files": 349,
       "codeFiles": 44,
-      "findings": 32,
-      "pairs": 3041,
+      "findings": 28,
+      "pairs": 3032,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
@@ -1532,21 +3177,10 @@
       "ecosystem": "npm",
       "files": 131,
       "codeFiles": 71,
-      "findings": 10,
-      "pairs": 116,
+      "findings": 5,
+      "pairs": 14,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
-    },
-    {
-      "repo": "https://github.com/node-opcua/node-opcua",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 4182,
-      "codeFiles": 2654,
-      "findings": 52,
-      "pairs": 2290,
-      "probeHit": false,
-      "probeFrom": "https://github.com/youzan/vant"
     },
     {
       "repo": "https://github.com/clutchd/clutchd",
@@ -1560,26 +3194,37 @@
       "probeFrom": "https://github.com/youzan/vant"
     },
     {
+      "repo": "https://github.com/material-components/material-components-web-components",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 1486,
+      "codeFiles": 403,
+      "findings": 39,
+      "pairs": 1554,
+      "probeHit": false,
+      "probeFrom": "https://github.com/osohq/oso"
+    },
+    {
+      "repo": "https://github.com/node-opcua/node-opcua",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 4182,
+      "codeFiles": 2652,
+      "findings": 49,
+      "pairs": 2274,
+      "probeHit": false,
+      "probeFrom": "https://github.com/youzan/vant"
+    },
+    {
       "repo": "https://github.com/syncfusion/ej2-angular-ui-components",
       "split": "tune",
       "ecosystem": "npm",
       "files": 4396,
       "codeFiles": 934,
       "findings": 20,
-      "pairs": 1032,
+      "pairs": 1030,
       "probeHit": false,
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
-    },
-    {
-      "repo": "https://github.com/material-components/material-components-web-components",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 1486,
-      "codeFiles": 403,
-      "findings": 57,
-      "pairs": 1756,
-      "probeHit": false,
-      "probeFrom": "https://github.com/osohq/oso"
     },
     {
       "repo": "https://github.com/imbhargav5/rooks",
@@ -1587,8 +3232,8 @@
       "ecosystem": "npm",
       "files": 650,
       "codeFiles": 212,
-      "findings": 25,
-      "pairs": 411,
+      "findings": 22,
+      "pairs": 303,
       "probeHit": false,
       "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
     },
@@ -1598,8 +3243,8 @@
       "ecosystem": "npm",
       "files": 3179,
       "codeFiles": 698,
-      "findings": 36,
-      "pairs": 397,
+      "findings": 33,
+      "pairs": 277,
       "probeHit": false,
       "probeFrom": "https://github.com/youzan/vant"
     },
@@ -1609,8 +3254,8 @@
       "ecosystem": "npm",
       "files": 549,
       "codeFiles": 184,
-      "findings": 28,
-      "pairs": 106,
+      "findings": 27,
+      "pairs": 86,
       "probeHit": false,
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
@@ -1620,10 +3265,21 @@
       "ecosystem": "npm",
       "files": 92,
       "codeFiles": 32,
-      "findings": 6,
-      "pairs": 401,
+      "findings": 2,
+      "pairs": 10,
       "probeHit": false,
       "probeFrom": "https://github.com/osohq/oso"
+    },
+    {
+      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 46195,
+      "codeFiles": 44678,
+      "findings": 21,
+      "pairs": 181,
+      "probeHit": false,
+      "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
     {
       "repo": "https://github.com/riot/compiler",
@@ -1637,24 +3293,13 @@
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
     {
-      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
-      "split": "tune",
-      "ecosystem": "npm",
-      "files": 73,
-      "codeFiles": 13,
-      "findings": 4,
-      "pairs": 24,
-      "probeHit": false,
-      "probeFrom": "https://github.com/youzan/vant"
-    },
-    {
       "repo": "https://github.com/pnpm/pnpm",
       "split": "holdout",
       "ecosystem": "npm",
       "files": 5439,
-      "codeFiles": 1005,
-      "findings": 85,
-      "pairs": 16848,
+      "codeFiles": 991,
+      "findings": 68,
+      "pairs": 15432,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
     },
@@ -1663,33 +3308,22 @@
       "split": "holdout",
       "ecosystem": "npm",
       "files": 604,
-      "codeFiles": 168,
-      "findings": 23,
-      "pairs": 853,
+      "codeFiles": 146,
+      "findings": 14,
+      "pairs": 723,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
     },
     {
-      "repo": "https://github.com/svgr-iconkit/svgr-iconkit",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 46195,
-      "codeFiles": 44678,
-      "findings": 22,
-      "pairs": 185,
-      "probeHit": false,
-      "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
-    },
-    {
-      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
+      "repo": "https://github.com/poimen/stencil-tailwind-plugin",
       "split": "tune",
       "ecosystem": "npm",
-      "files": 57,
-      "codeFiles": 26,
+      "files": 73,
+      "codeFiles": 13,
       "findings": 3,
-      "pairs": 27,
+      "pairs": 6,
       "probeHit": false,
-      "probeFrom": "https://github.com/osohq/oso"
+      "probeFrom": "https://github.com/youzan/vant"
     },
     {
       "repo": "https://github.com/assistants-center/discord.js-web-dashboard",
@@ -1703,26 +3337,26 @@
       "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
     {
+      "repo": "https://github.com/ezhlobo/eslint-plugin-react-pug",
+      "split": "tune",
+      "ecosystem": "npm",
+      "files": 57,
+      "codeFiles": 26,
+      "findings": 3,
+      "pairs": 27,
+      "probeHit": false,
+      "probeFrom": "https://github.com/osohq/oso"
+    },
+    {
       "repo": "https://github.com/qiniu/js-sdk",
       "split": "holdout",
       "ecosystem": "npm",
       "files": 112,
       "codeFiles": 43,
-      "findings": 12,
-      "pairs": 22,
+      "findings": 11,
+      "pairs": 19,
       "probeHit": false,
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
-    },
-    {
-      "repo": "https://github.com/vonage/vonage-node-sdk",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 1447,
-      "codeFiles": 1028,
-      "findings": 15,
-      "pairs": 292,
-      "probeHit": false,
-      "probeFrom": "https://github.com/angablue/exe"
     },
     {
       "repo": "https://github.com/ice-lab/react-materials",
@@ -1730,21 +3364,21 @@
       "ecosystem": "npm",
       "files": 607,
       "codeFiles": 257,
-      "findings": 38,
-      "pairs": 239,
+      "findings": 5,
+      "pairs": 65,
       "probeHit": false,
       "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
     {
-      "repo": "https://github.com/changesets/changesets",
+      "repo": "https://github.com/vonage/vonage-node-sdk",
       "split": "holdout",
       "ecosystem": "npm",
-      "files": 426,
-      "codeFiles": 121,
-      "findings": 17,
-      "pairs": 131,
+      "files": 1447,
+      "codeFiles": 1028,
+      "findings": 14,
+      "pairs": 291,
       "probeHit": false,
-      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
+      "probeFrom": "https://github.com/angablue/exe"
     },
     {
       "repo": "https://github.com/typeorm/typeorm",
@@ -1752,10 +3386,21 @@
       "ecosystem": "npm",
       "files": 3778,
       "codeFiles": 582,
-      "findings": 48,
-      "pairs": 2983,
+      "findings": 43,
+      "pairs": 2526,
       "probeHit": false,
       "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
+    },
+    {
+      "repo": "https://github.com/changesets/changesets",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 426,
+      "codeFiles": 121,
+      "findings": 14,
+      "pairs": 84,
+      "probeHit": false,
+      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
     {
       "repo": "https://github.com/pixijs/sound",
@@ -1763,8 +3408,8 @@
       "ecosystem": "npm",
       "files": 88,
       "codeFiles": 40,
-      "findings": 5,
-      "pairs": 83,
+      "findings": 1,
+      "pairs": 44,
       "probeHit": false,
       "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
     },
@@ -1774,21 +3419,10 @@
       "ecosystem": "npm",
       "files": 32,
       "codeFiles": 19,
-      "findings": 4,
-      "pairs": 9,
+      "findings": 3,
+      "pairs": 8,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
-    },
-    {
-      "repo": "https://github.com/softwarebrothers/adminjs",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 501,
-      "codeFiles": 377,
-      "findings": 20,
-      "pairs": 303,
-      "probeHit": false,
-      "probeFrom": "https://github.com/angablue/exe"
     },
     {
       "repo": "https://github.com/ocavue/aria-ui",
@@ -1796,21 +3430,21 @@
       "ecosystem": "npm",
       "files": 170,
       "codeFiles": 99,
-      "findings": 23,
-      "pairs": 142,
+      "findings": 16,
+      "pairs": 84,
       "probeHit": false,
       "probeFrom": "https://github.com/redhat-developer/yaml-language-server"
     },
     {
-      "repo": "https://github.com/sdkgen/sdkgen",
+      "repo": "https://github.com/softwarebrothers/adminjs",
       "split": "holdout",
       "ecosystem": "npm",
-      "files": 290,
-      "codeFiles": 86,
+      "files": 501,
+      "codeFiles": 377,
       "findings": 19,
-      "pairs": 285,
+      "pairs": 295,
       "probeHit": false,
-      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
+      "probeFrom": "https://github.com/angablue/exe"
     },
     {
       "repo": "https://github.com/srbrahma/eslint-config-gev",
@@ -1818,19 +3452,30 @@
       "ecosystem": "npm",
       "files": 30,
       "codeFiles": 17,
-      "findings": 2,
-      "pairs": 9,
+      "findings": 1,
+      "pairs": 2,
       "probeHit": false,
       "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
+    },
+    {
+      "repo": "https://github.com/sdkgen/sdkgen",
+      "split": "holdout",
+      "ecosystem": "npm",
+      "files": 290,
+      "codeFiles": 86,
+      "findings": 15,
+      "pairs": 267,
+      "probeHit": false,
+      "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
     },
     {
       "repo": "https://github.com/ai/size-limit",
       "split": "tune",
       "ecosystem": "npm",
       "files": 339,
-      "codeFiles": 123,
-      "findings": 7,
-      "pairs": 58,
+      "codeFiles": 42,
+      "findings": 4,
+      "pairs": 16,
       "probeHit": false,
       "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
     },
@@ -1840,21 +3485,10 @@
       "ecosystem": "npm",
       "files": 47,
       "codeFiles": 13,
-      "findings": 1,
-      "pairs": 29,
+      "findings": 0,
+      "pairs": 0,
       "probeHit": false,
       "probeFrom": "https://github.com/youzan/vant"
-    },
-    {
-      "repo": "https://github.com/ijstech/cli",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 91,
-      "codeFiles": 28,
-      "findings": 8,
-      "pairs": 20,
-      "probeHit": false,
-      "probeFrom": "https://github.com/osohq/oso"
     },
     {
       "repo": "https://github.com/tootallnate/proxy-agents",
@@ -1862,65 +3496,21 @@
       "ecosystem": "npm",
       "files": 203,
       "codeFiles": 48,
-      "findings": 7,
-      "pairs": 42,
+      "findings": 5,
+      "pairs": 26,
       "probeHit": false,
       "probeFrom": "https://github.com/onekeyhq/cross-inpage-provider"
-    },
-    {
-      "repo": "https://github.com/cuongdevjs/reactjs-social-login",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 51,
-      "codeFiles": 19,
-      "findings": 3,
-      "pairs": 75,
-      "probeHit": false,
-      "probeFrom": "https://github.com/release-it-plugins/lerna-changelog"
     },
     {
       "repo": "https://github.com/mongodb/leafygreen-ui",
       "split": "tune",
       "ecosystem": "npm",
       "files": 4162,
-      "codeFiles": 2826,
-      "findings": 65,
-      "pairs": 3850,
+      "codeFiles": 2825,
+      "findings": 66,
+      "pairs": 2235,
       "probeHit": false,
       "probeFrom": "https://github.com/angablue/exe"
-    },
-    {
-      "repo": "https://github.com/edwardanthony/nestjs-seeder",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 36,
-      "codeFiles": 19,
-      "findings": 0,
-      "pairs": 0,
-      "probeHit": false,
-      "probeFrom": "https://github.com/angablue/exe"
-    },
-    {
-      "repo": "https://github.com/creevey/creevey",
-      "split": "holdout",
-      "ecosystem": "npm",
-      "files": 355,
-      "codeFiles": 128,
-      "findings": 22,
-      "pairs": 176,
-      "probeHit": false,
-      "probeFrom": "https://github.com/stdlib-js/random-base-minstd-shuffle"
-    },
-    {
-      "repo": "https://github.com/xinlei3166/vitepress-theme-demoblock",
-      "split": "tune",
-      "ecosystem": "npm",
-      "files": 75,
-      "codeFiles": 29,
-      "findings": 7,
-      "pairs": 35,
-      "probeHit": false,
-      "probeFrom": "https://github.com/youzan/vant"
     }
   ],
   "probeEvidence": []

@@ -3,9 +3,9 @@
   "engine": "jscpd 5.0.14",
   "minTokens": 30,
   "repos": {
-    "total": 63,
-    "tune": 28,
-    "holdout": 35
+    "total": 62,
+    "tune": 30,
+    "holdout": 32
   },
   "judging": {
     "protocol": "calibration/judging.md",
@@ -14,83 +14,83 @@
   },
   "falsePositiveProbe": {
     "method": "A real function from a different corpus repository is planted as a find_existing probe. The repository does not contain it, so any hit is either a false positive or a genuinely equivalent implementation; matched source is kept so the two can be told apart.",
-    "probed": 63,
+    "probed": 62,
     "hits": 0,
     "rate": 0,
     "ci95": [
       0,
-      0.057
+      0.058
     ]
   },
   "controls": {
     "meaning": "Pairs seenit did NOT flag, mixed in unmarked. A judge that accepts these is not discriminating, and the precision numbers below would be measuring agreeableness instead.",
     "n": 58,
-    "yes": 2,
-    "no": 56,
+    "yes": 1,
+    "no": 57,
     "unclear": 0,
-    "precision": 0.034,
+    "precision": 0.017,
     "ci95": [
-      0.01,
-      0.117
+      0.003,
+      0.091
     ],
-    "floorCountingUnclearAgainst": 0.034,
-    "acceptanceRate": 0.034
+    "floorCountingUnclearAgainst": 0.017,
+    "acceptanceRate": 0.017
   },
   "precision": {
     "all": {
-      "n": 114,
-      "yes": 54,
-      "no": 57,
-      "unclear": 3,
-      "precision": 0.486,
+      "n": 107,
+      "yes": 58,
+      "no": 49,
+      "unclear": 0,
+      "precision": 0.542,
       "ci95": [
-        0.396,
-        0.578
+        0.448,
+        0.633
       ],
-      "floorCountingUnclearAgainst": 0.474,
-      "macroByRepo": 0.475
+      "floorCountingUnclearAgainst": 0.542,
+      "macroByRepo": 0.525
     },
     "displayed": {
       "note": "The top three findings, which is what the CLI prints.",
-      "n": 61,
-      "yes": 34,
-      "no": 26,
-      "unclear": 1,
-      "precision": 0.567,
+      "n": 60,
+      "yes": 37,
+      "no": 23,
+      "unclear": 0,
+      "precision": 0.617,
       "ci95": [
-        0.441,
-        0.684
+        0.49,
+        0.729
       ],
-      "floorCountingUnclearAgainst": 0.557,
-      "macroByRepo": 0.567
+      "floorCountingUnclearAgainst": 0.617,
+      "macroByRepo": 0.617
     },
     "tail": {
       "note": "Findings past the third, which only an agent asking for everything sees.",
-      "n": 53,
-      "yes": 20,
-      "no": 31,
-      "unclear": 2,
-      "precision": 0.392,
+      "n": 47,
+      "yes": 21,
+      "no": 26,
+      "unclear": 0,
+      "precision": 0.447,
       "ci95": [
-        0.27,
-        0.529
+        0.314,
+        0.588
       ],
-      "floorCountingUnclearAgainst": 0.377,
-      "macroByRepo": 0.392
+      "floorCountingUnclearAgainst": 0.447,
+      "macroByRepo": 0.447
     },
     "heldOut": {
       "note": "Repositories whose URL hash put them in the half that did not tune min-tokens.",
-      "n": 64,
-      "yes": 24,
-      "no": 38,
-      "unclear": 2,
-      "precision": 0.387,
+      "n": 57,
+      "yes": 28,
+      "no": 29,
+      "unclear": 0,
+      "precision": 0.491,
       "ci95": [
-        0.276,
-        0.512
+        0.366,
+        0.617
       ],
-      "floorCountingUnclearAgainst": 0.375
+      "floorCountingUnclearAgainst": 0.491
     }
   },
-  "liftOverControls": 0.452
+  "liftOverControls": 0.525
 }

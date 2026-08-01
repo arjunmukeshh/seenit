@@ -213,7 +213,7 @@ async function measure(repo, dir, rng) {
       for (const [level, transform] of LEVELS) {
         const text = await normalizeSource(planted, `${transform(donor.body, rng)}\n`)
         await writeFile(join(shadow, planted), text ?? '')
-        const blocks = await detect([shadow], { minTokens: bar, base: shadow, includeTests: true })
+        const blocks = await detect([shadow], { minTokens: bar, base: shadow, includeSecondary: true })
         // Did the planted copy get linked to anything other than itself?
         found[bar][level] = blocks.some((b) => (b.a === planted) !== (b.b === planted))
       }
