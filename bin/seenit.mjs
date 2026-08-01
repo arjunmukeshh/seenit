@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// seenit CLI: `seenit` lists duplication, `seenit check` tests one snippet.
-// Nothing is written to the working tree.
+// seenit CLI. `seenit` lists duplicated regions; `seenit check` tests one
+// snippet against the repository. The working tree is never written to.
 
 import { readFile } from 'node:fs/promises'
 
@@ -24,7 +24,7 @@ const FLAGS = {
   help: [],
 }
 
-// Silently ignoring an unknown flag looks like it worked.
+// Report unknown flags rather than ignoring them.
 function validateFlags(name) {
   const allowed = new Set(FLAGS[name] ?? [])
   const unknown = args
@@ -61,7 +61,7 @@ async function open() {
 const minTokens = () => Number(flag('min-tokens', JSCPD_DEFAULT_MIN_TOKENS))
 
 const commands = {
-  // What is already duplicated here.
+  // Duplicated regions in the repository.
   async default_() {
     const root = await open()
     const files = await trackedFiles(root)
@@ -74,7 +74,7 @@ const commands = {
       return
     }
 
-    // Findings, not pairs: one file copied six times is fifteen pairs.
+    // Findings, not pairs: one file copied six times produces fifteen pairs.
     const groups = clusterBlocks(blocks)
     const limit = Number(flag('limit', 3))
     console.log(`  ${C.bold}Duplicated${C.reset}\n`)
@@ -90,7 +90,7 @@ const commands = {
     console.log(`  ${C.dim}Check a snippet before writing it:  seenit check --file draft.js${C.reset}\n`)
   },
 
-  // The pre-write query, from a file or stdin.
+  // Check one snippet, read from --file or stdin.
   async check() {
     const root = await open()
     const file = flag('file', null)
@@ -118,7 +118,7 @@ const commands = {
       console.log(`  ${C.bold}${h.file}${C.reset}${C.dim}:${h.startLine}-${h.endLine}${C.reset}  ${C.dim}${h.lines} lines shared${C.reset}`)
     }
     console.log()
-    // Non-zero so this works as a gate in a hook or script.
+    // Non-zero so this can gate a hook or script.
     process.exit(1)
   },
 

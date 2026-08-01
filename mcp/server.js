@@ -1,7 +1,7 @@
 // MCP server: find_existing and check_duplication.
 //
-// Tool definitions are permanent context, so the surface stays at two tools and
-// 247 tokens, and results are paths and line ranges with no prose.
+// Tool definitions occupy context on every request, so the surface is kept to
+// two tools (247 tokens) and results to paths and line ranges.
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
@@ -52,7 +52,7 @@ const TOOLS = [
 let root = null
 const repo = async () => (root ??= await repoRoot(process.env.SEENIT_REPO || process.cwd()))
 
-// A location an agent can act on: path plus line range.
+// path:start-end
 const at = (file, start, end) => `${file}:${start}-${end}`
 
 const handlers = {
@@ -102,8 +102,7 @@ export async function startServer() {
       const text = await handler(request.params.arguments ?? {})
       return { content: [{ type: 'text', text }] }
     } catch (err) {
-      // Never crash the server on one bad call — the agent should see the error
-      // and be able to continue.
+      // One bad call must not kill the server; return the error as content.
       return { content: [{ type: 'text', text: `seenit error: ${err.message}` }], isError: true }
     }
   })

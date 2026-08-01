@@ -1,6 +1,6 @@
-// Tests for the seam: that normalisation erases names, that jscpd's output
-// survives the trip back to real paths and line numbers, and that a renamed copy
-// is still found. Each of these has been broken once.
+// Tests for the seam between normalisation and jscpd: that names are erased,
+// that paths and line numbers survive the round trip, and that a renamed copy is
+// found.
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -25,8 +25,8 @@ function calculateOrderTotal(items, taxRate) {
 }
 `
 
-// The same function after the treatment an agent gives it: every identifier
-// renamed, every literal changed, comments added, reformatted.
+// The same function with every identifier renamed, every literal changed,
+// comments added and formatting redone.
 const COPY = `
 // Work out what the basket costs once everything is applied.
 function computeBasketSum(lines, vatFraction) {
@@ -76,7 +76,7 @@ test('a file in a language with no grammar normalises to null', async () => {
 
 // ------------------------------------------------------------------ the claim
 
-// The README's headline claim, so it fails CI when it stops being true.
+// The claim in the README, asserted here so it fails CI if it stops holding.
 test('a renamed, re-littered, re-commented, reformatted copy is still found', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'seenit-test-'))
   try {
