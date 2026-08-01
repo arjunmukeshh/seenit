@@ -73,19 +73,19 @@ The two tool definitions total 247 tokens. Results are paths and line ranges.
 
 ## Accuracy
 
-Recall measured by injection on 66 npm repositories: a real function is lifted, transformed, planted back, and seenit is asked whether it finds it. `--min-tokens` was chosen on half the repositories and reported on the other half.
+Recall measured by injection on 65 npm repositories: a real function is lifted, transformed, planted back, and seenit is asked whether it finds it. `--min-tokens` was chosen on half the repositories and reported on the other half.
 
-| copy was… | found |
-|---|---|
-| pasted unchanged | 0.84 |
-| identifiers renamed | 0.81 |
-| + literals changed | 0.81 |
-| + reformatted | 0.81 |
-| + statements reordered | **0.73** |
+| copy was… | k=20 | k=30 (shipped) | k=75 |
+|---|---|---|---|
+| pasted unchanged | 0.84 | 0.84 | 0.81 |
+| identifiers renamed | 0.81 | 0.81 | 0.81 |
+| + literals changed | 0.81 | 0.81 | 0.81 |
+| + reformatted | 0.81 | 0.81 | 0.81 |
+| + comments churned | 0.76 | 0.76 | 0.76 |
+| + statements reordered | 0.76 | **0.73** | 0.68 |
+| + subexpression extracted | 0.76 | 0.73 | 0.68 |
 
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations. Three thresholds sit on top of each other at 0.86 until comments are churned, then separate: k=20 ends at 0.81, k=30 at 0.78, k=75 at 0.69." width="740">
-
-n=37 held out, 95% CI [0.57, 0.85].
+n=37 held out, 95% CI [0.57, 0.85] at the shipped bar and hardest level.
 
 Precision measured on 63 npm repositories, two ways.
 
