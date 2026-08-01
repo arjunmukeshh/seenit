@@ -42,7 +42,8 @@
     "test": "node --test 'test/*.test.js'",
     "media": "node docs/media/build.mjs",
     "recall": "node calibration/recall.mjs --repos 63 --concurrency 4",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "precision": "node calibration/precision.mjs --repos 60 --concurrency 4 && node calibration/score-precision.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

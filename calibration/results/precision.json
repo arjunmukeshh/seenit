@@ -1,0 +1,96 @@
+{
+  "measuredAt": "2026-08-01",
+  "engine": "jscpd 5.0.14",
+  "minTokens": 30,
+  "repos": {
+    "total": 63,
+    "tune": 28,
+    "holdout": 35
+  },
+  "judging": {
+    "protocol": "calibration/judging.md",
+    "judge": "Claude, in fresh contexts with no knowledge of this project, six batches, one batch each",
+    "blind": "Cases carry two code regions and an id. No repository, no file paths, no indication of which pairs were flagged, controls unmarked."
+  },
+  "falsePositiveProbe": {
+    "method": "A real function from a different corpus repository is planted as a find_existing probe. The repository does not contain it, so any hit is either a false positive or a genuinely equivalent implementation; matched source is kept so the two can be told apart.",
+    "probed": 63,
+    "hits": 0,
+    "rate": 0,
+    "ci95": [
+      0,
+      0.057
+    ]
+  },
+  "controls": {
+    "meaning": "Pairs seenit did NOT flag, mixed in unmarked. A judge that accepts these is not discriminating, and the precision numbers below would be measuring agreeableness instead.",
+    "n": 58,
+    "yes": 2,
+    "no": 56,
+    "unclear": 0,
+    "precision": 0.034,
+    "ci95": [
+      0.01,
+      0.117
+    ],
+    "floorCountingUnclearAgainst": 0.034,
+    "acceptanceRate": 0.034
+  },
+  "precision": {
+    "all": {
+      "n": 114,
+      "yes": 54,
+      "no": 57,
+      "unclear": 3,
+      "precision": 0.486,
+      "ci95": [
+        0.396,
+        0.578
+      ],
+      "floorCountingUnclearAgainst": 0.474,
+      "macroByRepo": 0.475
+    },
+    "displayed": {
+      "note": "The top three findings, which is what the CLI prints.",
+      "n": 61,
+      "yes": 34,
+      "no": 26,
+      "unclear": 1,
+      "precision": 0.567,
+      "ci95": [
+        0.441,
+        0.684
+      ],
+      "floorCountingUnclearAgainst": 0.557,
+      "macroByRepo": 0.567
+    },
+    "tail": {
+      "note": "Findings past the third, which only an agent asking for everything sees.",
+      "n": 53,
+      "yes": 20,
+      "no": 31,
+      "unclear": 2,
+      "precision": 0.392,
+      "ci95": [
+        0.27,
+        0.529
+      ],
+      "floorCountingUnclearAgainst": 0.377,
+      "macroByRepo": 0.392
+    },
+    "heldOut": {
+      "note": "Repositories whose URL hash put them in the half that did not tune min-tokens.",
+      "n": 64,
+      "yes": 24,
+      "no": 38,
+      "unclear": 2,
+      "precision": 0.387,
+      "ci95": [
+        0.276,
+        0.512
+      ],
+      "floorCountingUnclearAgainst": 0.375
+    }
+  },
+  "liftOverControls": 0.452
+}
