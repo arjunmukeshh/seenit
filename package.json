@@ -1,6 +1,6 @@
 {
   "name": "seenit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Has this already been written? Asks a copy/paste detector the question it does not answer — before you write, not after. Matches through renames and reformatting.",
   "keywords": [

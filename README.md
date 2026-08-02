@@ -14,9 +14,49 @@ npm install -g seenit          # or use npx, no install needed
 
 Requires Node 20.11+ and a git repository. The detector ships as a prebuilt binary; there is no compile step.
 
-## Use
+## Use with an AI agent
 
-Check a snippet against the repository. Exits 1 if it already exists, 0 if not.
+Two ways in, and they answer different problems.
+
+**As a hook**, so nothing has to remember to ask. Add to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": "npx seenit hook" }]
+      }
+    ]
+  }
+}
+```
+
+Every write over a dozen lines gets checked against the repository. When the code already exists, the agent is told where; otherwise the hook is silent. It never blocks a write — see [Why it warns instead of blocking](#why-it-warns-instead-of-blocking).
+
+Run `seenit prime` once per repository first. The hook has a five-second budget and stays quiet rather than stalling a write, so on a cold cache it will not have time to answer.
+
+**As an MCP server**, so the agent can ask deliberately. Add to `.mcp.json` (Claude Code) or `.cursor/mcp.json` (Cursor):
+
+```json
+{
+  "mcpServers": {
+    "seenit": { "command": "npx", "args": ["seenit", "mcp"] }
+  }
+}
+```
+
+| tool | does |
+|---|---|
+| `find_existing` | paste code, get back file paths and line ranges, or "safe to write" |
+| `check_duplication` | list duplicated regions, largest first |
+
+The two tool definitions total 247 tokens. Results are paths and line ranges.
+
+## Use from the terminal
+
+Check a snippet. Exits 1 if it already exists, 0 if not.
 
 ```bash
 cat draft.js | seenit check
@@ -39,25 +79,6 @@ seenit
 
 Nothing is written to your working tree.
 
-## Use with an AI agent
-
-Add to `.mcp.json` (Claude Code) or `.cursor/mcp.json` (Cursor):
-
-```json
-{
-  "mcpServers": {
-    "seenit": { "command": "npx", "args": ["seenit", "mcp"] }
-  }
-}
-```
-
-| tool | does |
-|---|---|
-| `find_existing` | paste code, get back file paths and line ranges, or "safe to write" |
-| `check_duplication` | list duplicated regions, largest first |
-
-The two tool definitions total 247 tokens. Results are paths and line ranges.
-
 ## Options
 
 | | |
@@ -65,15 +86,19 @@ The two tool definitions total 247 tokens. Results are paths and line ranges.
 | `seenit` | list duplicated regions |
 | `seenit check` | check a snippet from stdin or `--file` |
 | `seenit mcp` | run as an MCP server |
+| `seenit hook` | run as a pre-write hook, reading the tool call on stdin |
+| `seenit prime` | normalise the repository up front, so the hook is fast |
 | `--min-tokens N` | how much shared code counts as a duplicate (default 30) |
 | `--limit N` | findings to show (default 3) |
 | `--file PATH` | read the snippet from a file instead of stdin |
 
-`NO_COLOR` and `FORCE_COLOR` are respected.
+`NO_COLOR` and `FORCE_COLOR` are respected. `SEENIT_BUDGET_MS` raises the hook's time budget.
 
 ## Accuracy
 
-Recall measured by injection on 65 npm repositories: a real function is lifted, transformed, planted back, and seenit is asked whether it finds it. `--min-tokens` was chosen on half the repositories and reported on the other half.
+### Recall
+
+Measured by injection on 65 npm repositories: a real function is lifted, transformed, planted back, and seenit is asked whether it finds it. Ground truth is known by construction. `--min-tokens` was chosen on half the repositories and reported on the other half.
 
 | copy was… | k=20 | k=30 (shipped) | k=75 |
 |---|---|---|---|
@@ -87,11 +112,13 @@ Recall measured by injection on 65 npm repositories: a real function is lifted, 
 
 n=37 held out, 95% CI [0.57, 0.85] at the shipped bar and hardest level.
 
-Precision measured on 63 npm repositories, two ways.
+### Precision
 
-`find_existing` was asked about a real function taken from a *different* repository — code the repository provably does not contain. It reported a match **0 times out of 62**, 95% CI [0, 0.058].
+Measured on 62 npm repositories, two ways.
 
-The duplicate listing was sampled and judged blind: 107 flagged pairs, no file paths, mixed with 58 pairs seenit had **not** flagged as controls.
+`find_existing` — what the hook and the MCP server call — was asked about a real function taken from a *different* repository, code the repository provably does not contain. It claimed a match **0 times out of 62**, 95% CI [0, 0.058].
+
+The duplicate listing is weaker, and was sampled and judged blind: 107 flagged pairs with no file paths, mixed with 58 pairs seenit had **not** flagged as unmarked controls.
 
 | | judged redundant | n |
 |---|---|---|
@@ -99,9 +126,21 @@ The duplicate listing was sampled and judged blind: 107 flagged pairs, no file p
 | findings past the third | 0.45 | 47 |
 | controls, which should be near zero | 0.02 | 58 |
 
-About half of what the listing reports is not worth acting on. Most of the rest is parallel-but-distinct logic — two branches over different values, two readers with different defaults — which normalising identifiers away cannot distinguish from a copy.
+Read the listing as candidates, not defects. What survives is mostly parallel-but-distinct logic — two branches over different values, two readers with different defaults — which erasing identifiers cannot separate from a copy.
 
 Method, judging protocol and raw labels: [calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration).
+
+## Speed
+
+Normalising the tree is most of the cost, so it is cached between runs and only changed files are redone.
+
+| repository | first run | after |
+|---|---|---|
+| 95 files | 0.3s | 0.3s |
+| 704 files | 1.7s | 0.3s |
+| 17,106 files | 29s | 8s |
+
+The floor on a large repository is jscpd comparing every file against every other, which caching cannot remove. Past roughly ten thousand files the hook exceeds its budget and goes quiet even when warm; raise `SEENIT_BUDGET_MS` if you would rather wait.
 
 ## Languages
 
@@ -109,11 +148,20 @@ Renamed-copy matching: JavaScript, TypeScript, JSX/TSX, Python, Go, Rust, Java, 
 
 Other formats fall back to exact matching. The accuracy figures above cover JavaScript and TypeScript only.
 
+## Why it warns instead of blocking
+
+The hook reports and steps aside. That is a decision the measurements above forced:
+
+- Recall is 0.84 on a verbatim copy, 0.73 once statements move, and 0 on a genuine reimplementation. Calling that a gate would imply nothing gets past it. Plenty does, and people stop checking once they believe something is enforced.
+- Blocking on the listing's 0.62 precision would reject real work often enough that the hook gets switched off within a day.
+
+`seenit check` exits 1 when it finds something, so a hard gate is one line of shell if you want one.
+
 ## Limitations
 
 - Finds copies, not reimplementations. A `for` loop rewritten as `reduce` shares nothing.
 - Statements inserted mid-function split a match into fragments, which may fall below `--min-tokens`.
-- The listing is about half right. Read it as a list of candidates, not a list of defects. `find_existing` is the accurate surface.
+- The listing is about half right. `find_existing` is the accurate surface.
 - Verbatim recall is 0.84, not 1.0; the cause of the remaining misses is not known.
 - Tests, fixtures, examples and demos are left out of the listing. `find_existing` still searches them.
 - Pre-1.0: output format and defaults may change.
@@ -131,15 +179,15 @@ This covers Type-1 and Type-2 clones, and Type-3 partially. Type-4 is out of sco
 ```bash
 git clone https://github.com/arjunmukeshh/seenit.git && cd seenit
 npm install
-npm test          # 12 tests
+npm test          # 19 tests
 npm run recall    # re-run the recall study (clones 63 repos, ~20 min)
-npm run precision # re-run the precision study (clones 63 repos, ~40 min)
+npm run precision # re-run the precision study (clones 60 repos, ~40 min)
 npm run media     # regenerate README images (needs Chrome)
 ```
 
 Issues and pull requests: [github.com/arjunmukeshh/seenit/issues](https://github.com/arjunmukeshh/seenit/issues).
 
-The figures under Accuracy come from `npm run recall`; regenerate them rather than editing them by hand.
+The figures under Accuracy come from the calibration scripts; regenerate them rather than editing them by hand.
 
 ## License
 

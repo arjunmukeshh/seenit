@@ -21,6 +21,8 @@ const FLAGS = {
   default_: ['min-tokens', 'limit'],
   check: ['file', 'min-tokens'],
   mcp: [],
+  hook: ['min-tokens'],
+  prime: [],
   help: [],
 }
 
@@ -65,7 +67,9 @@ const commands = {
   async default_() {
     const root = await open()
     const files = await trackedFiles(root)
-    const blocks = await detectNormalized(root, files, { minTokens: minTokens() })
+    // Cached, so a second run costs only the files that changed — and so the
+    // hook is already warm once anyone has run this.
+    const blocks = await detectNormalized(root, files, { minTokens: minTokens(), cache: true })
 
     console.log()
     if (!blocks.length) {
@@ -127,6 +131,41 @@ const commands = {
     await startServer()
   },
 
+  // PreToolUse hook. Reads the tool call on stdin and warns when the code about
+  // to be written is already in the repository.
+  async hook() {
+    const { runHook } = await import('../lib/hook.js')
+    const message = await runHook({ minTokens: minTokens() })
+    if (message) {
+      // additionalContext reaches the model without blocking the write. Exiting
+      // non-zero here would block it, which this hook deliberately does not do.
+      console.log(
+        JSON.stringify({
+          hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: message },
+        }),
+      )
+    }
+    // Exit rather than return. On a cold cache the scan outlives its own time
+    // budget, and returning leaves that work pending: the hook gave up waiting
+    // at five seconds but the process still sat there for forty-two on a
+    // 17,000-file repository, stalling the write it had already cleared.
+    process.exit(0)
+  },
+
+  // Build the cache without a time budget, so the hook is fast from its first
+  // write. Worth running once per repository; `seenit` warms it too.
+  async prime() {
+    const root = await open()
+    const files = await trackedFiles(root)
+    const { syncShadow } = await import('../lib/shadow.js')
+    const started = Date.now()
+    const s = await syncShadow(root, files)
+    const secs = ((Date.now() - started) / 1000).toFixed(1)
+    console.log(
+      `\n  ${C.green}Ready.${C.reset} ${C.dim}${s.rebuilt} normalised, ${s.reused} reused${s.failed ? `, ${s.failed} unreadable` : ''} in ${secs}s${C.reset}\n`,
+    )
+  },
+
   help() {
     console.log(`
 ${C.bold}seenit${C.reset} — has this already been written?
@@ -134,6 +173,8 @@ ${C.bold}seenit${C.reset} — has this already been written?
   ${C.bold}npx seenit${C.reset}                    what is already duplicated  ${C.dim}[--limit 3]${C.reset}
   ${C.bold}seenit check --file f.js${C.reset}      does this code exist yet?  ${C.dim}(exits 1 if it does)${C.reset}
   ${C.bold}seenit mcp${C.reset}                    run as an MCP server, so your agent asks before writing
+  ${C.bold}seenit hook${C.reset}                   run as a pre-write hook, so it does not have to ask
+  ${C.bold}seenit prime${C.reset}                  normalise the repository up front, so the hook is fast
 
 ${C.dim}Matches renamed and reformatted copies, not just exact ones.
 Nothing is written to your working tree.
