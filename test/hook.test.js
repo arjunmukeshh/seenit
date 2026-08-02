@@ -10,7 +10,7 @@ import { execFile as execFileCb } from 'node:child_process'
 import { promisify } from 'node:util'
 
 import { extractWrite, reviewWrite } from '../lib/hook.js'
-import { clearCache } from '../lib/shadow.js'
+import { clearCache, syncShadow } from '../lib/shadow.js'
 
 const execFile = promisify(execFileCb)
 
@@ -47,6 +47,9 @@ async function repo() {
   await execFile('git', ['-C', dir, 'init', '-q'])
   await writeFile(join(dir, 'orders.js'), ORIGINAL)
   await execFile('git', ['-C', dir, 'add', '-A'])
+  // Every test below assumes the hook is past the cold-cache warning, which
+  // fires once and would otherwise be the first thing each one sees.
+  await syncShadow(dir, ['orders.js'])
   return dir
 }
 
@@ -135,6 +138,29 @@ test('a renamed copy of existing code is reported, with a location', async () =>
     assert.ok(msg, 'the copy must be reported')
     assert.match(msg, /orders\.js:\d+-\d+/, 'the message must name a file and line range')
     assert.doesNotMatch(msg, /basket\.js/, 'the file being written is not the answer')
+  } finally {
+    await clearCache(dir)
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+// The quietest failure mode: an unprimed hook and a clean repository produce
+// byte-identical silence. Someone installs the hook, sees nothing for a week,
+// and concludes their code has no duplication.
+test('an unprimed repository says so, once', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'seenit-hook-'))
+  try {
+    await execFile('git', ['-C', dir, 'init', '-q'])
+    await writeFile(join(dir, 'orders.js'), ORIGINAL)
+    await execFile('git', ['-C', dir, 'add', '-A'])
+
+    const first = await reviewWrite({ path: 'basket.js', content: COPY, cwd: dir, minTokens: 20 })
+    assert.match(first ?? '', /not primed/, 'the first write must say the cache is cold')
+    assert.match(first ?? '', /seenit prime/, 'and must say what to do about it')
+
+    // Repeating it on every write is how a hook gets uninstalled.
+    const second = await reviewWrite({ path: 'other.js', content: COPY, cwd: dir, minTokens: 20 })
+    assert.equal(second, null, 'the warning must not repeat')
   } finally {
     await clearCache(dir)
     await rm(dir, { recursive: true, force: true })
