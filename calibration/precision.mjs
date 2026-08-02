@@ -80,6 +80,17 @@ const splitOf = (url) => {
   return h % 2 === 0 ? 'tune' : 'holdout'
 }
 
+// Deleting a shallow clone races git's own writes: rm walked .git/objects/pack
+// while it was still being written and threw ENOTEMPTY, which killed a run 25
+// minutes in. Losing a temp directory is always cheaper than losing the run.
+const discard = async (dir) => {
+  try {
+    await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
+  } catch {
+    /* the OS will clear tmp eventually */
+  }
+}
+
 function mulberry32(a) {
   return () => {
     a = (a + 0x6d2b79f5) >>> 0
@@ -178,7 +189,7 @@ async function harvestDonor(repo) {
   } catch {
     return null
   } finally {
-    await rm(dir, { recursive: true, force: true })
+    await discard(dir)
   }
 }
 
@@ -260,7 +271,7 @@ async function measure(repo, dir, rng, donor) {
       probe,
     }
   } finally {
-    await rm(shadow, { recursive: true, force: true })
+    await discard(shadow)
   }
 }
 
@@ -272,7 +283,7 @@ async function one(repo, rng, donor) {
   } catch {
     return null
   } finally {
-    await rm(dir, { recursive: true, force: true })
+    await discard(dir)
   }
 }
 

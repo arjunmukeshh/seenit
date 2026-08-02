@@ -32,9 +32,25 @@ function was lifted from. Answering with some other file is a false positive, no
 a hit — scoring it as one measured "something came back" rather than "the right
 thing came back".
 
-Negatives run through the same shadow and the same code path: a real function
-from a *different* corpus repository, which this one provably does not contain,
-so any hit is an error. Donor repositories are held out of the measured set.
+Negatives run through the same shadow and the same code path, in two classes,
+reported apart because they are not the same question.
+
+**Easy negatives** are a real function from a *different* corpus repository,
+which this one provably does not contain. Donor repositories are held out of the
+measured set. These are easy by construction: two unrelated codebases share
+little structure, so passing measures the distance between repositories more
+than it measures the tool.
+
+**Hard negatives** are a function from *this* repository, probed against a copy
+of the repository with its own file removed. Whatever it matches now is a
+sibling — same codebase, same idiom, sharing shape without being the same
+function. That is precisely the error the listing makes most often, and the easy
+negatives never put `find_existing` near it.
+
+One caveat on the hard negatives, and it runs against the tool: if the
+repository genuinely contains a second copy of that function, a hit is correct
+and gets scored as an error anyway. The hard false-positive rate is therefore an
+**upper** bound.
 
 Ground truth is known by construction on both sides, so nothing is hand-labelled.
 
@@ -120,9 +136,12 @@ rather than a fact about the language.
   corpus is frozen; the code measured is not, so a re-run months from now will
   not reproduce these numbers exactly.
 - **JavaScript and TypeScript only.**
-- **Verbatim recall is 0.84, not 1.0.** One exact copy in six is missed and the
-  cause is not yet understood. The misses are silent, not wrong: precision over
-  the same 38 held-out repositories is 1.00, CI [0.88, 1].
+- **Verbatim recall is 0.81, not 1.0.** One exact copy in five is missed and the
+  cause is not yet understood.
+- **Precision is 0.84, and it was 1.00 until the negatives got harder.** Probing
+  only with functions from unrelated repositories measured the distance between
+  codebases. Against siblings from the same repository, 5 of 29 come back
+  wrong.
 - **Listing precision is 0.54 and most of what remains is not addressable.** The
   ignore work below took it from 0.49; of the wrong findings that survive, the
   bulk is parallel-but-distinct logic, which normalising identifiers away cannot

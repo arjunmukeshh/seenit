@@ -118,25 +118,32 @@ The two surfaces are measured separately because they behave differently. Figure
 
 One confusion matrix, one code path, ground truth known by construction on both sides.
 
-**Positives:** a real function is lifted from the repository, transformed, and planted back as a probe. It counts as found only when the location returned is the file the function came from — a hit on some other file is a false positive, not a hit. **Negatives:** a real function from a *different* corpus repository, which this one provably does not contain, planted through the same code path. Any hit is a false positive.
+**Positives:** a real function is lifted from the repository, transformed, and planted back as a probe. It counts as found only when the location returned is the file the function came from — a hit on some other file is a false positive, not a hit.
 
-Held out: **38 repositories**, at the shipped `--min-tokens 30`. The bar was chosen on the other 28.
+Held out: **37 repositories**, at the shipped `--min-tokens 30`. The bar was chosen on the other 29.
 
-| copy was… | recall | precision | specificity |
+| copy was… | k=20 | k=30 (shipped) | k=75 |
 |---|---|---|---|
-| pasted unchanged | 0.84 | 1.00 | 1.00 |
-| identifiers renamed | 0.82 | 1.00 | 1.00 |
-| + literals changed | 0.82 | 1.00 | 1.00 |
-| + reformatted | 0.82 | 1.00 | 1.00 |
-| + comments churned | 0.76 | 1.00 | 1.00 |
-| + statements reordered | **0.74** | **1.00** | **1.00** |
-| + subexpression extracted | 0.74 | 1.00 | 1.00 |
+| pasted unchanged | 0.81 | 0.81 | 0.78 |
+| identifiers renamed | 0.78 | 0.78 | 0.78 |
+| + literals changed | 0.78 | 0.78 | 0.78 |
+| + reformatted | 0.78 | 0.78 | 0.78 |
+| + comments churned | 0.73 | 0.73 | 0.73 |
+| + statements reordered | 0.73 | **0.70** | 0.65 |
+| + subexpression extracted | 0.73 | 0.70 | 0.65 |
 
-At the hardest level: 28 true positives, 0 false positives, 10 false negatives, 38 true negatives. Precision 95% CI [0.88, 1]; recall [0.58, 0.85]; specificity [0.91, 1].
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, on 37 repositories. All three thresholds sit together near 0.81 through reformatting, dip at comment churn, then separate once statements are reordered: k=20 ends at 0.73, k=30 at 0.70, k=75 at 0.65." width="740">
 
-Precision is 1.00 because nothing ever came back wrong — no probe was answered with the wrong file, and no foreign function was ever claimed to exist. What seenit misses, it misses silently; what it reports, it got right.
+**Negatives** run through the same code path, in two classes:
 
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, on 38 repositories. All three thresholds sit together near 0.84 through reformatting, dip at comment churn, then separate once statements are reordered: k=20 ends at 0.76, k=30 at 0.73, k=75 at 0.68." width="740">
+| asked about | false positives |
+|---|---|
+| a function from an unrelated repository | 0 / 37 |
+| a sibling from *this* repository — same codebase, similar shape, different function | **5 / 29** — 0.17, CI [0.08, 0.34] |
+
+Only the second is a real test. Unrelated repositories share little structure, so passing the first measures the distance between codebases rather than the tool. The hard negative plants a function from the repository itself with its own file removed, so whatever it matches is a sibling — which is exactly the mistake this kind of matching makes. It's an upper bound: if the repository genuinely contains a second copy, that hit is right and gets scored as an error anyway.
+
+Precision at the shipped bar is **0.84–0.86** across all seven transformation levels (95% CI [0.67, 0.93] at the hardest). It barely moves, because the false positives come from the negatives rather than from how hard the positives were made — roughly one report in six or seven points at a sibling rather than the thing you asked about.
 
 ### `seenit` — the duplicate listing
 
@@ -184,7 +191,7 @@ Other formats fall back to exact matching. The accuracy figures above cover Java
 
 The hook reports and steps aside. That is a decision the measurements above forced:
 
-- Recall is 0.84 on a verbatim copy, 0.74 once statements move, and 0 on a genuine reimplementation. Calling that a gate would imply nothing gets past it. Plenty does, and people stop checking once they believe something is enforced.
+- Recall is 0.81 on a verbatim copy, 0.70 once statements move, and 0 on a genuine reimplementation. Calling that a gate would imply nothing gets past it. Plenty does, and people stop checking once they believe something is enforced.
 - Blocking on the listing's 0.62 precision would reject real work often enough that the hook gets switched off within a day.
 
 `seenit check` exits 1 when it finds something, so a hard gate is one line of shell if you want one.
@@ -194,7 +201,8 @@ The hook reports and steps aside. That is a decision the measurements above forc
 - Finds copies, not reimplementations. A `for` loop rewritten as `reduce` shares nothing.
 - Statements inserted mid-function split a match into fragments, which may fall below `--min-tokens`.
 - The listing runs at 0.62 on what it prints and 0.45 below that. `find_existing` is the accurate surface.
-- `find_existing` recall is 0.84 on an unchanged copy, not 1.0; the cause of the remaining misses is not known. It fails by staying silent, not by answering wrongly.
+- `find_existing` recall is 0.81 on an unchanged copy, not 1.0, and the cause of the remaining misses is not known.
+- About one `find_existing` report in six names a sibling — code from the same repository that shares shape without being the same function.
 - Best on repositories up to a few thousand files. The hook stops answering on much larger ones.
 - Tests, fixtures, examples and demos are left out of the listing. `find_existing` still searches them.
 - Pre-1.0: output format and defaults may change.

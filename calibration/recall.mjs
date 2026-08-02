@@ -78,6 +78,17 @@ const CONCURRENCY = Number(flag('concurrency', 4))
 // measured set.
 const DONOR_REPOS = Number(flag('donors', 8))
 
+// Deleting a shallow clone races git's own writes: rm walked .git/objects/pack
+// while it was still being written and threw ENOTEMPTY, which killed a run 25
+// minutes in. Losing a temp directory is always cheaper than losing the run.
+const discard = async (dir) => {
+  try {
+    await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
+  } catch {
+    /* the OS will clear tmp eventually */
+  }
+}
+
 function mulberry32(a) {
   return () => {
     a = (a + 0x6d2b79f5) >>> 0
@@ -183,18 +194,20 @@ async function measure(repo, dir, rng, foreign) {
   if (files.length < 12) return null // too little JS here for the result to mean anything
 
   // Donor: the first file yielding a substantial function.
-  let donor = null
+  // Two functions from two different files. The first is the positive probe.
+  // The second is the hard negative — see below.
+  const harvested = []
   for (const path of files.slice(0, 60)) {
     try {
       const body = donorFunction(await readFile(join(dir, path), 'utf8'))
-      if (body) {
-        donor = { path, body }
-        break
-      }
+      if (body) harvested.push({ path, body })
+      if (harvested.length === 2) break
     } catch {
       /* skip */
     }
   }
+  const donor = harvested[0]
+  const sibling = harvested[1] ?? null
   if (!donor) return null
 
   // Plant with the DONOR's extension. jscpd treats .ts and .js as separate
@@ -210,6 +223,7 @@ async function measure(repo, dir, rng, foreign) {
   const shadow = await mkdtemp(join(tmpdir(), 'seenit-recall-shadow-'))
   const found = {}
   const negative = {}
+  const hardNegative = {}
   try {
     await buildShadow(dir, files, shadow)
 
@@ -240,11 +254,13 @@ async function measure(repo, dir, rng, foreign) {
       }
     }
 
-    // Negatives, through the same code path and the same shadow: a real
-    // function from a DIFFERENT repository, which this one provably does not
-    // contain. Measuring these separately, on a separate surface, was the other
-    // half of the labelling problem — specificity and recall have to come from
-    // the same thing before they can be read together.
+    // EASY negatives: a real function from a DIFFERENT repository, which this
+    // one provably does not contain.
+    //
+    // These are easy by construction. Two unrelated repositories share little
+    // structure, so this is a negative the tool should never fail, and passing
+    // it says more about the distance between repositories than about the
+    // tool's discrimination.
     if (foreign) {
       const text = await normalizeSource(planted, `${foreign.body}\n`)
       await writeFile(join(shadow, planted), text ?? '')
@@ -253,8 +269,31 @@ async function measure(repo, dir, rng, foreign) {
         negative[bar] = { hit: hits.length > 0, matched: hits.slice(0, 3) }
       }
     }
+
+    // HARD negatives: a function from THIS repository, probed against a copy of
+    // the repository with its own file removed.
+    //
+    // Whatever it now matches is a sibling — code from the same codebase, in the
+    // same idiom, sharing shape without being the same function. That is the
+    // error the listing makes constantly (two branches over different values,
+    // two readers with different defaults), and the easy negatives above never
+    // put find_existing anywhere near it.
+    //
+    // One caveat, and it runs against the tool: if the repository genuinely
+    // contains a second copy of this function, a hit here is correct rather than
+    // an error, and gets counted as an error anyway. So this is an UPPER bound
+    // on the false-positive rate, not a point estimate.
+    if (sibling) {
+      await rm(join(shadow, sibling.path), { force: true })
+      const text = await normalizeSource(planted, `${sibling.body}\n`)
+      await writeFile(join(shadow, planted), text ?? '')
+      for (const bar of MIN_TOKENS) {
+        const hits = await probeHits(bar)
+        hardNegative[bar] = { hit: hits.length > 0, matched: hits.slice(0, 3) }
+      }
+    }
   } finally {
-    await rm(shadow, { recursive: true, force: true })
+    await discard(shadow)
   }
   return {
     repo: repo.repository,
@@ -264,6 +303,8 @@ async function measure(repo, dir, rng, foreign) {
     files: files.length,
     found,
     negative,
+    hardNegative,
+    sibling: sibling?.path ?? null,
     foreignFrom: foreign?.repo ?? null,
   }
 }
@@ -291,7 +332,7 @@ async function harvestDonor(repo) {
   } catch {
     return null
   } finally {
-    await rm(dir, { recursive: true, force: true })
+    await discard(dir)
   }
 }
 
@@ -303,7 +344,7 @@ async function one(repo, rng, foreign) {
   } catch {
     return null
   } finally {
-    await rm(dir, { recursive: true, force: true })
+    await discard(dir)
   }
 }
 
@@ -357,8 +398,8 @@ const recallFor = (rows, pct, level) => {
 // Negatives share the surface, the shadow and the code path with the positives
 // above, so the two compose into one confusion matrix instead of describing two
 // different things that happen to both be called accuracy.
-const negativesFor = (rows, pct) => {
-  const cells = rows.map((r) => r.negative?.[pct]).filter(Boolean)
+const negativesFor = (rows, pct, key = 'negative') => {
+  const cells = rows.map((r) => r[key]?.[pct]).filter(Boolean)
   const fp = cells.filter((c) => c.hit).length
   return { of: cells.length, falsePositives: fp, trueNegatives: cells.length - fp }
 }
@@ -392,14 +433,19 @@ const chosen = MIN_TOKENS.map((bar) => ({ pct: bar, r: recallFor(tune, bar, hard
 const matrixFor = (rows, pct, level) => {
   const pos = recallFor(rows, pct, level)
   const neg = negativesFor(rows, pct)
+  const hard = negativesFor(rows, pct, 'hardNegative')
   if (!pos) return null
   const tp = pos.found
   // Every wrong answer counts against precision, whichever probe produced it:
   // a positive probe answered with the wrong file, and a negative probe
   // answered at all, are both the tool claiming code exists where it does not.
-  const fp = pos.wrongFile + neg.falsePositives
+  //
+  // Hard negatives belong in this sum and easy ones barely move it. Counting
+  // only the easy ones gave precision 1.00, which was measuring the distance
+  // between unrelated repositories rather than the tool's discrimination.
+  const fp = pos.wrongFile + neg.falsePositives + hard.falsePositives
   const fn = pos.missed
-  const tn = neg.trueNegatives
+  const tn = neg.trueNegatives + hard.trueNegatives
   return {
     truePositives: tp,
     falsePositives: fp,
@@ -409,8 +455,9 @@ const matrixFor = (rows, pct, level) => {
     precisionCi95: tp + fp ? wilson(tp, tp + fp) : null,
     recall: tp + fn ? Number((tp / (tp + fn)).toFixed(3)) : null,
     recallCi95: tp + fn ? wilson(tp, tp + fn) : null,
-    specificity: tn + neg.falsePositives ? Number((tn / (tn + neg.falsePositives)).toFixed(3)) : null,
-    specificityCi95: tn + neg.falsePositives ? wilson(tn, tn + neg.falsePositives) : null,
+    specificity: tn + neg.falsePositives + hard.falsePositives ? Number((tn / (tn + neg.falsePositives + hard.falsePositives)).toFixed(3)) : null,
+    specificityCi95:
+      tn + neg.falsePositives + hard.falsePositives ? wilson(tn, tn + neg.falsePositives + hard.falsePositives) : null,
   }
 }
 
@@ -428,6 +475,22 @@ const summary = {
     MIN_TOKENS.map((pct) => [pct, Object.fromEntries(LEVELS.map(([level]) => [level, matrixFor(holdout, pct, level)]))]),
   ),
   heldOutNegatives: Object.fromEntries(MIN_TOKENS.map((pct) => [pct, negativesFor(holdout, pct)])),
+  // Reported apart from the easy negatives, because they are not the same
+  // question and averaging them would hide the one that is hard.
+  heldOutHardNegatives: Object.fromEntries(
+    MIN_TOKENS.map((pct) => {
+      const n = negativesFor(holdout, pct, 'hardNegative')
+      return [
+        pct,
+        {
+          ...n,
+          note: 'A function from this repository, probed with its own file removed. Any hit is a structurally similar sibling. Upper bound: a genuine second copy in the repository counts as an error here.',
+          falsePositiveRate: n.of ? Number((n.falsePositives / n.of).toFixed(3)) : null,
+          ci95: n.of ? wilson(n.falsePositives, n.of) : null,
+        },
+      ]
+    }),
+  ),
   heldOut: Object.fromEntries(
     MIN_TOKENS.map((pct) => [
       pct,
@@ -450,6 +513,10 @@ const summary = {
   ),
 }
 
+// The per-repository rows, so a scoring change can be re-applied without
+// cloning 63 repositories again. Rescoring on stored rows is also the only way
+// to compare two definitions of a metric on identical data.
+await writeFile(join(HERE, 'results', 'recall-rows.json'), JSON.stringify(results, null, 1) + '\n')
 await writeFile(join(HERE, 'results', 'recall.json'), JSON.stringify(summary, null, 2) + '\n')
 const bar = summary.chosenOnTuningSplit.minTokens
 console.log(
@@ -459,6 +526,7 @@ console.log(
       repos: summary.repos,
       chosen: summary.chosenOnTuningSplit,
       heldOutNegatives: summary.heldOutNegatives[bar],
+      heldOutHardNegatives: summary.heldOutHardNegatives[bar],
       matrixVerbatim: summary.heldOutMatrix[bar]?.verbatim,
       matrixHardest: summary.heldOutMatrix[bar]?.['+extract'],
     },

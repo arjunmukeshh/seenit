@@ -4,948 +4,994 @@
   "method": "Positives: a substantial function is lifted from the repository, transformed, and planted back as a probe; a hit counts only when the location returned is the file the function came from. Negatives: a real function from a different corpus repository, which this one provably does not contain, planted through the same code path — any hit is a false positive. Ground truth is known by construction on both sides, so nothing is hand-labelled. Repositories are split by a stable hash of their URL: the min-tokens bar is chosen on the tuning half only, and headline figures come from the held-out half.",
   "repos": {
     "total": 66,
-    "tune": 28,
-    "holdout": 38
+    "tune": 29,
+    "holdout": 37
   },
   "engine": "jscpd 5.0.14",
   "chosenOnTuningSplit": {
     "minTokens": 30,
-    "recallAtHardest": 0.786
+    "recallAtHardest": 0.724
   },
   "heldOutMatrix": {
     "20": {
       "verbatim": {
-        "truePositives": 32,
-        "falsePositives": 0,
-        "falseNegatives": 6,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 30,
+        "falsePositives": 6,
+        "falseNegatives": 7,
+        "trueNegatives": 60,
+        "precision": 0.833,
         "precisionCi95": [
-          0.893,
-          1
+          0.681,
+          0.921
         ],
-        "recall": 0.842,
+        "recall": 0.811,
         "recallCi95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "rename": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 6,
+        "falseNegatives": 8,
+        "trueNegatives": 60,
+        "precision": 0.829,
         "precisionCi95": [
-          0.89,
-          1
+          0.673,
+          0.919
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "rename+literals": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 6,
+        "falseNegatives": 8,
+        "trueNegatives": 60,
+        "precision": 0.829,
         "precisionCi95": [
-          0.89,
-          1
+          0.673,
+          0.919
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "+reformat": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 6,
+        "falseNegatives": 8,
+        "trueNegatives": 60,
+        "precision": 0.829,
         "precisionCi95": [
-          0.89,
-          1
+          0.673,
+          0.919
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "+comments": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 6,
+        "falseNegatives": 10,
+        "trueNegatives": 60,
+        "precision": 0.818,
         "precisionCi95": [
-          0.883,
-          1
+          0.656,
+          0.914
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "+reorder": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 6,
+        "falseNegatives": 10,
+        "trueNegatives": 60,
+        "precision": 0.818,
         "precisionCi95": [
-          0.883,
-          1
+          0.656,
+          0.914
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       },
       "+extract": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 6,
+        "falseNegatives": 10,
+        "trueNegatives": 60,
+        "precision": 0.818,
         "precisionCi95": [
-          0.883,
-          1
+          0.656,
+          0.914
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.909,
         "specificityCi95": [
-          0.908,
-          1
+          0.816,
+          0.958
         ]
       }
     },
     "30": {
       "verbatim": {
-        "truePositives": 32,
-        "falsePositives": 0,
-        "falseNegatives": 6,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 30,
+        "falsePositives": 5,
+        "falseNegatives": 7,
+        "trueNegatives": 61,
+        "precision": 0.857,
         "precisionCi95": [
-          0.893,
-          1
+          0.706,
+          0.937
         ],
-        "recall": 0.842,
+        "recall": 0.811,
         "recallCi95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "rename": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 5,
+        "falseNegatives": 8,
+        "trueNegatives": 61,
+        "precision": 0.853,
         "precisionCi95": [
-          0.89,
-          1
+          0.699,
+          0.936
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "rename+literals": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 5,
+        "falseNegatives": 8,
+        "trueNegatives": 61,
+        "precision": 0.853,
         "precisionCi95": [
-          0.89,
-          1
+          0.699,
+          0.936
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "+reformat": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 5,
+        "falseNegatives": 8,
+        "trueNegatives": 61,
+        "precision": 0.853,
         "precisionCi95": [
-          0.89,
-          1
+          0.699,
+          0.936
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "+comments": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 5,
+        "falseNegatives": 10,
+        "trueNegatives": 61,
+        "precision": 0.844,
         "precisionCi95": [
-          0.883,
-          1
+          0.682,
+          0.931
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "+reorder": {
-        "truePositives": 28,
-        "falsePositives": 0,
-        "falseNegatives": 10,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 26,
+        "falsePositives": 5,
+        "falseNegatives": 11,
+        "trueNegatives": 61,
+        "precision": 0.839,
         "precisionCi95": [
-          0.879,
-          1
+          0.674,
+          0.929
         ],
-        "recall": 0.737,
+        "recall": 0.703,
         "recallCi95": [
-          0.58,
-          0.85
+          0.542,
+          0.825
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       },
       "+extract": {
-        "truePositives": 28,
-        "falsePositives": 0,
-        "falseNegatives": 10,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 26,
+        "falsePositives": 5,
+        "falseNegatives": 11,
+        "trueNegatives": 61,
+        "precision": 0.839,
         "precisionCi95": [
-          0.879,
-          1
+          0.674,
+          0.929
         ],
-        "recall": 0.737,
+        "recall": 0.703,
         "recallCi95": [
-          0.58,
-          0.85
+          0.542,
+          0.825
         ],
-        "specificity": 1,
+        "specificity": 0.924,
         "specificityCi95": [
-          0.908,
-          1
+          0.835,
+          0.967
         ]
       }
     },
     "50": {
       "verbatim": {
-        "truePositives": 32,
-        "falsePositives": 0,
-        "falseNegatives": 6,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 30,
+        "falsePositives": 2,
+        "falseNegatives": 7,
+        "trueNegatives": 64,
+        "precision": 0.938,
         "precisionCi95": [
-          0.893,
-          1
+          0.799,
+          0.983
         ],
-        "recall": 0.842,
+        "recall": 0.811,
         "recallCi95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "rename": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "rename+literals": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+reformat": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+comments": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 2,
+        "falseNegatives": 10,
+        "trueNegatives": 64,
+        "precision": 0.931,
         "precisionCi95": [
-          0.883,
-          1
+          0.78,
+          0.981
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+reorder": {
-        "truePositives": 27,
-        "falsePositives": 0,
-        "falseNegatives": 11,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 25,
+        "falsePositives": 2,
+        "falseNegatives": 12,
+        "trueNegatives": 64,
+        "precision": 0.926,
         "precisionCi95": [
-          0.875,
-          1
+          0.766,
+          0.979
         ],
-        "recall": 0.711,
+        "recall": 0.676,
         "recallCi95": [
-          0.552,
-          0.83
+          0.515,
+          0.804
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+extract": {
-        "truePositives": 27,
-        "falsePositives": 0,
-        "falseNegatives": 11,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 25,
+        "falsePositives": 2,
+        "falseNegatives": 12,
+        "trueNegatives": 64,
+        "precision": 0.926,
         "precisionCi95": [
-          0.875,
-          1
+          0.766,
+          0.979
         ],
-        "recall": 0.711,
+        "recall": 0.676,
         "recallCi95": [
-          0.552,
-          0.83
+          0.515,
+          0.804
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       }
     },
     "75": {
       "verbatim": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "rename": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "rename+literals": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+reformat": {
-        "truePositives": 31,
-        "falsePositives": 0,
-        "falseNegatives": 7,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 29,
+        "falsePositives": 2,
+        "falseNegatives": 8,
+        "trueNegatives": 64,
+        "precision": 0.935,
         "precisionCi95": [
-          0.89,
-          1
+          0.793,
+          0.982
         ],
-        "recall": 0.816,
+        "recall": 0.784,
         "recallCi95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+comments": {
-        "truePositives": 29,
-        "falsePositives": 0,
-        "falseNegatives": 9,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 27,
+        "falsePositives": 2,
+        "falseNegatives": 10,
+        "trueNegatives": 64,
+        "precision": 0.931,
         "precisionCi95": [
-          0.883,
-          1
+          0.78,
+          0.981
         ],
-        "recall": 0.763,
+        "recall": 0.73,
         "recallCi95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+reorder": {
-        "truePositives": 26,
-        "falsePositives": 0,
-        "falseNegatives": 12,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 24,
+        "falsePositives": 2,
+        "falseNegatives": 13,
+        "trueNegatives": 64,
+        "precision": 0.923,
         "precisionCi95": [
-          0.871,
-          1
+          0.759,
+          0.979
         ],
-        "recall": 0.684,
+        "recall": 0.649,
         "recallCi95": [
-          0.525,
-          0.809
+          0.488,
+          0.782
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       },
       "+extract": {
-        "truePositives": 26,
-        "falsePositives": 0,
-        "falseNegatives": 12,
-        "trueNegatives": 38,
-        "precision": 1,
+        "truePositives": 24,
+        "falsePositives": 2,
+        "falseNegatives": 13,
+        "trueNegatives": 64,
+        "precision": 0.923,
         "precisionCi95": [
-          0.871,
-          1
+          0.759,
+          0.979
         ],
-        "recall": 0.684,
+        "recall": 0.649,
         "recallCi95": [
-          0.525,
-          0.809
+          0.488,
+          0.782
         ],
-        "specificity": 1,
+        "specificity": 0.97,
         "specificityCi95": [
-          0.908,
-          1
+          0.896,
+          0.992
         ]
       }
     }
   },
   "heldOutNegatives": {
     "20": {
-      "of": 38,
+      "of": 37,
       "falsePositives": 0,
-      "trueNegatives": 38
+      "trueNegatives": 37
     },
     "30": {
-      "of": 38,
+      "of": 37,
       "falsePositives": 0,
-      "trueNegatives": 38
+      "trueNegatives": 37
     },
     "50": {
-      "of": 38,
+      "of": 37,
       "falsePositives": 0,
-      "trueNegatives": 38
+      "trueNegatives": 37
     },
     "75": {
-      "of": 38,
+      "of": 37,
       "falsePositives": 0,
-      "trueNegatives": 38
+      "trueNegatives": 37
+    }
+  },
+  "heldOutHardNegatives": {
+    "20": {
+      "of": 29,
+      "falsePositives": 6,
+      "trueNegatives": 23,
+      "note": "A function from this repository, probed with its own file removed. Any hit is a structurally similar sibling. Upper bound: a genuine second copy in the repository counts as an error here.",
+      "falsePositiveRate": 0.207,
+      "ci95": [
+        0.098,
+        0.384
+      ]
+    },
+    "30": {
+      "of": 29,
+      "falsePositives": 5,
+      "trueNegatives": 24,
+      "note": "A function from this repository, probed with its own file removed. Any hit is a structurally similar sibling. Upper bound: a genuine second copy in the repository counts as an error here.",
+      "falsePositiveRate": 0.172,
+      "ci95": [
+        0.076,
+        0.345
+      ]
+    },
+    "50": {
+      "of": 29,
+      "falsePositives": 2,
+      "trueNegatives": 27,
+      "note": "A function from this repository, probed with its own file removed. Any hit is a structurally similar sibling. Upper bound: a genuine second copy in the repository counts as an error here.",
+      "falsePositiveRate": 0.069,
+      "ci95": [
+        0.019,
+        0.22
+      ]
+    },
+    "75": {
+      "of": 29,
+      "falsePositives": 2,
+      "trueNegatives": 27,
+      "note": "A function from this repository, probed with its own file removed. Any hit is a structurally similar sibling. Upper bound: a genuine second copy in the repository counts as an error here.",
+      "falsePositiveRate": 0.069,
+      "ci95": [
+        0.019,
+        0.22
+      ]
     }
   },
   "heldOut": {
     "20": {
       "verbatim": {
-        "found": 32,
-        "of": 38,
-        "recall": 0.842,
+        "found": 30,
+        "of": 37,
+        "recall": 0.811,
         "wrongFile": 0,
-        "missed": 6,
+        "missed": 7,
         "ci95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ]
       },
       "rename": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "rename+literals": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+reformat": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+comments": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       },
       "+reorder": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       },
       "+extract": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       }
     },
     "30": {
       "verbatim": {
-        "found": 32,
-        "of": 38,
-        "recall": 0.842,
+        "found": 30,
+        "of": 37,
+        "recall": 0.811,
         "wrongFile": 0,
-        "missed": 6,
+        "missed": 7,
         "ci95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ]
       },
       "rename": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "rename+literals": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+reformat": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+comments": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       },
       "+reorder": {
-        "found": 28,
-        "of": 38,
-        "recall": 0.737,
+        "found": 26,
+        "of": 37,
+        "recall": 0.703,
         "wrongFile": 0,
-        "missed": 10,
+        "missed": 11,
         "ci95": [
-          0.58,
-          0.85
+          0.542,
+          0.825
         ]
       },
       "+extract": {
-        "found": 28,
-        "of": 38,
-        "recall": 0.737,
+        "found": 26,
+        "of": 37,
+        "recall": 0.703,
         "wrongFile": 0,
-        "missed": 10,
+        "missed": 11,
         "ci95": [
-          0.58,
-          0.85
+          0.542,
+          0.825
         ]
       }
     },
     "50": {
       "verbatim": {
-        "found": 32,
-        "of": 38,
-        "recall": 0.842,
+        "found": 30,
+        "of": 37,
+        "recall": 0.811,
         "wrongFile": 0,
-        "missed": 6,
+        "missed": 7,
         "ci95": [
-          0.696,
-          0.926
+          0.658,
+          0.905
         ]
       },
       "rename": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "rename+literals": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+reformat": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+comments": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       },
       "+reorder": {
-        "found": 27,
-        "of": 38,
-        "recall": 0.711,
+        "found": 25,
+        "of": 37,
+        "recall": 0.676,
         "wrongFile": 0,
-        "missed": 11,
+        "missed": 12,
         "ci95": [
-          0.552,
-          0.83
+          0.515,
+          0.804
         ]
       },
       "+extract": {
-        "found": 27,
-        "of": 38,
-        "recall": 0.711,
+        "found": 25,
+        "of": 37,
+        "recall": 0.676,
         "wrongFile": 0,
-        "missed": 11,
+        "missed": 12,
         "ci95": [
-          0.552,
-          0.83
+          0.515,
+          0.804
         ]
       }
     },
     "75": {
       "verbatim": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "rename": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "rename+literals": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+reformat": {
-        "found": 31,
-        "of": 38,
-        "recall": 0.816,
+        "found": 29,
+        "of": 37,
+        "recall": 0.784,
         "wrongFile": 0,
-        "missed": 7,
+        "missed": 8,
         "ci95": [
-          0.666,
-          0.908
+          0.628,
+          0.886
         ]
       },
       "+comments": {
-        "found": 29,
-        "of": 38,
-        "recall": 0.763,
+        "found": 27,
+        "of": 37,
+        "recall": 0.73,
         "wrongFile": 0,
-        "missed": 9,
+        "missed": 10,
         "ci95": [
-          0.608,
-          0.87
+          0.57,
+          0.846
         ]
       },
       "+reorder": {
-        "found": 26,
-        "of": 38,
-        "recall": 0.684,
+        "found": 24,
+        "of": 37,
+        "recall": 0.649,
         "wrongFile": 0,
-        "missed": 12,
+        "missed": 13,
         "ci95": [
-          0.525,
-          0.809
+          0.488,
+          0.782
         ]
       },
       "+extract": {
-        "found": 26,
-        "of": 38,
-        "recall": 0.684,
+        "found": 24,
+        "of": 37,
+        "recall": 0.649,
         "wrongFile": 0,
-        "missed": 12,
+        "missed": 13,
         "ci95": [
-          0.525,
-          0.809
+          0.488,
+          0.782
         ]
       }
     }
@@ -954,205 +1000,205 @@
     "20": {
       "verbatim": {
         "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "rename": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "rename+literals": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "+reformat": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "+comments": {
-        "found": 23,
-        "of": 28,
-        "recall": 0.821,
+        "of": 29,
+        "recall": 0.828,
         "wrongFile": 0,
         "missed": 5
       },
-      "+reorder": {
-        "found": 22,
-        "of": 28,
-        "recall": 0.786,
+      "rename": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "rename+literals": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "+reformat": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "+comments": {
+        "found": 23,
+        "of": 29,
+        "recall": 0.793,
         "wrongFile": 0,
         "missed": 6
       },
-      "+extract": {
-        "found": 22,
-        "of": 28,
-        "recall": 0.786,
+      "+reorder": {
+        "found": 21,
+        "of": 29,
+        "recall": 0.724,
         "wrongFile": 0,
-        "missed": 6
+        "missed": 8
+      },
+      "+extract": {
+        "found": 21,
+        "of": 29,
+        "recall": 0.724,
+        "wrongFile": 0,
+        "missed": 8
       }
     },
     "30": {
       "verbatim": {
         "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "rename": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "rename+literals": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "+reformat": {
-        "found": 24,
-        "of": 28,
-        "recall": 0.857,
-        "wrongFile": 0,
-        "missed": 4
-      },
-      "+comments": {
-        "found": 23,
-        "of": 28,
-        "recall": 0.821,
+        "of": 29,
+        "recall": 0.828,
         "wrongFile": 0,
         "missed": 5
       },
-      "+reorder": {
-        "found": 22,
-        "of": 28,
-        "recall": 0.786,
+      "rename": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "rename+literals": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "+reformat": {
+        "found": 24,
+        "of": 29,
+        "recall": 0.828,
+        "wrongFile": 0,
+        "missed": 5
+      },
+      "+comments": {
+        "found": 23,
+        "of": 29,
+        "recall": 0.793,
         "wrongFile": 0,
         "missed": 6
       },
-      "+extract": {
-        "found": 22,
-        "of": 28,
-        "recall": 0.786,
+      "+reorder": {
+        "found": 21,
+        "of": 29,
+        "recall": 0.724,
         "wrongFile": 0,
-        "missed": 6
+        "missed": 8
+      },
+      "+extract": {
+        "found": 21,
+        "of": 29,
+        "recall": 0.724,
+        "wrongFile": 0,
+        "missed": 8
       }
     },
     "50": {
       "verbatim": {
         "found": 23,
-        "of": 28,
-        "recall": 0.821,
-        "wrongFile": 0,
-        "missed": 5
-      },
-      "rename": {
-        "found": 23,
-        "of": 28,
-        "recall": 0.821,
-        "wrongFile": 0,
-        "missed": 5
-      },
-      "rename+literals": {
-        "found": 23,
-        "of": 28,
-        "recall": 0.821,
-        "wrongFile": 0,
-        "missed": 5
-      },
-      "+reformat": {
-        "found": 23,
-        "of": 28,
-        "recall": 0.821,
-        "wrongFile": 0,
-        "missed": 5
-      },
-      "+comments": {
-        "found": 22,
-        "of": 28,
-        "recall": 0.786,
+        "of": 29,
+        "recall": 0.793,
         "wrongFile": 0,
         "missed": 6
       },
-      "+reorder": {
-        "found": 21,
-        "of": 28,
-        "recall": 0.75,
+      "rename": {
+        "found": 23,
+        "of": 29,
+        "recall": 0.793,
+        "wrongFile": 0,
+        "missed": 6
+      },
+      "rename+literals": {
+        "found": 23,
+        "of": 29,
+        "recall": 0.793,
+        "wrongFile": 0,
+        "missed": 6
+      },
+      "+reformat": {
+        "found": 23,
+        "of": 29,
+        "recall": 0.793,
+        "wrongFile": 0,
+        "missed": 6
+      },
+      "+comments": {
+        "found": 22,
+        "of": 29,
+        "recall": 0.759,
         "wrongFile": 0,
         "missed": 7
       },
-      "+extract": {
-        "found": 21,
-        "of": 28,
-        "recall": 0.75,
+      "+reorder": {
+        "found": 20,
+        "of": 29,
+        "recall": 0.69,
         "wrongFile": 0,
-        "missed": 7
+        "missed": 9
+      },
+      "+extract": {
+        "found": 20,
+        "of": 29,
+        "recall": 0.69,
+        "wrongFile": 0,
+        "missed": 9
       }
     },
     "75": {
       "verbatim": {
         "found": 20,
-        "of": 28,
-        "recall": 0.714,
+        "of": 29,
+        "recall": 0.69,
         "wrongFile": 0,
-        "missed": 8
+        "missed": 9
       },
       "rename": {
         "found": 20,
-        "of": 28,
-        "recall": 0.714,
+        "of": 29,
+        "recall": 0.69,
         "wrongFile": 0,
-        "missed": 8
+        "missed": 9
       },
       "rename+literals": {
         "found": 17,
-        "of": 28,
-        "recall": 0.607,
-        "wrongFile": 0,
-        "missed": 11
-      },
-      "+reformat": {
-        "found": 16,
-        "of": 28,
-        "recall": 0.571,
+        "of": 29,
+        "recall": 0.586,
         "wrongFile": 0,
         "missed": 12
       },
-      "+comments": {
-        "found": 15,
-        "of": 28,
-        "recall": 0.536,
+      "+reformat": {
+        "found": 16,
+        "of": 29,
+        "recall": 0.552,
         "wrongFile": 0,
         "missed": 13
       },
-      "+reorder": {
-        "found": 14,
-        "of": 28,
-        "recall": 0.5,
+      "+comments": {
+        "found": 15,
+        "of": 29,
+        "recall": 0.517,
         "wrongFile": 0,
         "missed": 14
       },
-      "+extract": {
-        "found": 14,
-        "of": 28,
-        "recall": 0.5,
+      "+reorder": {
+        "found": 13,
+        "of": 29,
+        "recall": 0.448,
         "wrongFile": 0,
-        "missed": 14
+        "missed": 16
+      },
+      "+extract": {
+        "found": 13,
+        "of": 29,
+        "recall": 0.448,
+        "wrongFile": 0,
+        "missed": 16
       }
     }
   },
@@ -1160,11 +1206,11 @@
     "npm": {
       "repos": 66,
       "recallAtChosen": {
-        "found": 50,
+        "found": 47,
         "of": 66,
-        "recall": 0.758,
+        "recall": 0.712,
         "wrongFile": 0,
-        "missed": 16
+        "missed": 19
       }
     }
   }
