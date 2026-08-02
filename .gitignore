@@ -2,6 +2,9 @@ node_modules/
 *.log
 *.tgz
 
+# Local agent skills, not part of the package
+.agents/
+
 # Local scratch from the accuracy study
 calibration/data/
 calibration/.venv/

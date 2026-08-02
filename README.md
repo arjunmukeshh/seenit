@@ -15,7 +15,7 @@ Coding agents rewrite helpers that are already there, because they search for te
 npm install -g seenit          # or use npx, no install needed
 ```
 
-Requires Node 20.11+ and a git repository. The detector ships as a prebuilt binary, so there is no compile step. Tested on macOS (arm64); Linux and Windows builds ship but are not yet covered by CI.
+Requires Node 20.11+ and a git repository. The detector ships as a prebuilt binary for Linux, macOS and Windows, so there is no compile step.
 
 ## Quick start
 
