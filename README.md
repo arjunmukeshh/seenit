@@ -2,9 +2,10 @@
 
 Check whether code already exists in a repository before writing it. Matching ignores identifier names, literal values, formatting and comments, so a copy that shares no text with the original is still found.
 
-[![npm](https://img.shields.io/npm/v/seenit)](https://www.npmjs.com/package/seenit)
-[![node](https://img.shields.io/node/v/seenit)](https://nodejs.org)
-[![license](https://img.shields.io/npm/l/seenit)](https://github.com/arjunmukeshh/seenit/blob/main/LICENSE)
+[![npm](https://img.shields.io/npm/v/seenit?style=flat-square&color=0b7285)](https://www.npmjs.com/package/seenit)
+[![node](https://img.shields.io/node/v/seenit?style=flat-square&color=0b7285)](https://nodejs.org)
+[![size](https://img.shields.io/npm/unpacked-size/seenit?style=flat-square&color=0b7285)](https://www.npmjs.com/package/seenit)
+[![license](https://img.shields.io/npm/l/seenit?style=flat-square&color=0b7285)](https://github.com/arjunmukeshh/seenit/blob/main/LICENSE)
 
 ## Install
 
@@ -109,6 +110,8 @@ Measured by injection on 65 npm repositories: a real function is lifted, transfo
 | + comments churned | 0.76 | 0.76 | 0.76 |
 | + statements reordered | 0.76 | **0.73** | 0.68 |
 | + subexpression extracted | 0.76 | 0.73 | 0.68 |
+
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, on 37 repositories. All three thresholds sit together near 0.84 through reformatting, dip at comment churn, then separate once statements are reordered: k=20 ends at 0.76, k=30 at 0.73, k=75 at 0.68." width="740">
 
 n=37 held out, 95% CI [0.57, 0.85] at the shipped bar and hardest level.
 
