@@ -112,39 +112,47 @@ Nothing is written to your working tree in either case.
 
 ## Accuracy
 
-### Recall
+The two surfaces are measured separately because they behave differently. Figures below always name which one they describe.
 
-Measured by injection on 65 npm repositories: a real function is lifted, transformed, planted back, and seenit is asked whether it finds it. Ground truth is known by construction. `--min-tokens` was chosen on half the repositories and reported on the other half.
+### `find_existing` — the hook and the MCP tool
 
-| copy was… | k=20 | k=30 (shipped) | k=75 |
+One confusion matrix, one code path, ground truth known by construction on both sides.
+
+**Positives:** a real function is lifted from the repository, transformed, and planted back as a probe. It counts as found only when the location returned is the file the function came from — a hit on some other file is a false positive, not a hit. **Negatives:** a real function from a *different* corpus repository, which this one provably does not contain, planted through the same code path. Any hit is a false positive.
+
+Held out: **38 repositories**, at the shipped `--min-tokens 30`. The bar was chosen on the other 28.
+
+| copy was… | recall | precision | specificity |
 |---|---|---|---|
-| pasted unchanged | 0.84 | 0.84 | 0.81 |
-| identifiers renamed | 0.81 | 0.81 | 0.81 |
-| + literals changed | 0.81 | 0.81 | 0.81 |
-| + reformatted | 0.81 | 0.81 | 0.81 |
-| + comments churned | 0.76 | 0.76 | 0.76 |
-| + statements reordered | 0.76 | **0.73** | 0.68 |
-| + subexpression extracted | 0.76 | 0.73 | 0.68 |
+| pasted unchanged | 0.84 | 1.00 | 1.00 |
+| identifiers renamed | 0.82 | 1.00 | 1.00 |
+| + literals changed | 0.82 | 1.00 | 1.00 |
+| + reformatted | 0.82 | 1.00 | 1.00 |
+| + comments churned | 0.76 | 1.00 | 1.00 |
+| + statements reordered | **0.74** | **1.00** | **1.00** |
+| + subexpression extracted | 0.74 | 1.00 | 1.00 |
 
-<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, on 37 repositories. All three thresholds sit together near 0.84 through reformatting, dip at comment churn, then separate once statements are reordered: k=20 ends at 0.76, k=30 at 0.73, k=75 at 0.68." width="740">
+At the hardest level: 28 true positives, 0 false positives, 10 false negatives, 38 true negatives. Precision 95% CI [0.88, 1]; recall [0.58, 0.85]; specificity [0.91, 1].
 
-n=37 held out, 95% CI [0.57, 0.85] at the shipped bar and hardest level.
+Precision is 1.00 because nothing ever came back wrong — no probe was answered with the wrong file, and no foreign function was ever claimed to exist. What seenit misses, it misses silently; what it reports, it got right.
 
-### Precision
+<img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/recall.png" alt="Line chart of held-out recall across seven cumulative transformations, on 38 repositories. All three thresholds sit together near 0.84 through reformatting, dip at comment churn, then separate once statements are reordered: k=20 ends at 0.76, k=30 at 0.73, k=75 at 0.68." width="740">
 
-Measured on 62 npm repositories, two ways.
+### `seenit` — the duplicate listing
 
-`find_existing` — what the hook and the MCP server call — was asked about a real function taken from a *different* repository, code the repository provably does not contain. It claimed a match **0 times out of 62**, 95% CI [0, 0.058].
+A different surface and a weaker one. Whether a reported pair is worth deduplicating is a judgement, so 107 flagged pairs were stripped of file paths and judged blind, mixed with 58 pairs seenit had **not** flagged, unmarked.
 
-The duplicate listing is weaker, and was sampled and judged blind: 107 flagged pairs with no file paths, mixed with 58 pairs seenit had **not** flagged as unmarked controls.
+**The judges accepted 1 of 58 controls and 58 of 107 flagged pairs** — Fisher p = 1.9e-13. The flagging is doing real work and the judging was not rubber-stamping, which is the precondition for reading anything else in this section.
 
 | | judged redundant | n |
 |---|---|---|
 | top 3 findings, which is what `seenit` prints | 0.62 | 60 |
 | findings past the third | 0.45 | 47 |
-| controls, which should be near zero | 0.02 | 58 |
+| unflagged controls | 0.02 | 58 |
 
-Read the listing as candidates, not defects. What survives is mostly parallel-but-distinct logic — two branches over different values, two readers with different defaults — which erasing identifiers cannot separate from a copy.
+The top three scored higher than the tail, but at these sample sizes that gap is not established — Fisher p = 0.12. Treat the ordering as unproven rather than as a reason to trust the first three more.
+
+Read the listing as candidates, not defects. What it gets wrong is mostly parallel-but-distinct logic — two branches over different values, two readers with different defaults — which erasing identifiers cannot separate from a copy.
 
 Method, judging protocol and raw labels: [calibration/](https://github.com/arjunmukeshh/seenit/tree/main/calibration).
 
@@ -160,6 +168,12 @@ Normalising the tree is most of the cost, so it is cached between runs and only 
 
 The floor on a large repository is jscpd comparing every file against every other, which caching cannot remove. Past roughly ten thousand files the hook exceeds its budget and goes quiet even when warm; raise `SEENIT_BUDGET_MS` if you would rather wait.
 
+### Who this is for
+
+That ceiling cuts against the problem. Duplication barely matters in a 95-file repository you can hold in your head, and matters most in a 17,000-file monorepo where nobody can — which is exactly where the hook runs out of budget.
+
+So: **seenit is for small and mid-sized repositories**, up to a few thousand files, where it answers in well under a second. On a large monorepo the CLI and the MCP tool still work if you accept a slower answer, but the hook is not the right shape for it yet, and pretending otherwise would waste your time.
+
 ## Languages
 
 Renamed-copy matching: JavaScript, TypeScript, JSX/TSX, Python, Go, Rust, Java, C#, C, C++, Ruby, PHP, CSS, Bash.
@@ -170,7 +184,7 @@ Other formats fall back to exact matching. The accuracy figures above cover Java
 
 The hook reports and steps aside. That is a decision the measurements above forced:
 
-- Recall is 0.84 on a verbatim copy, 0.73 once statements move, and 0 on a genuine reimplementation. Calling that a gate would imply nothing gets past it. Plenty does, and people stop checking once they believe something is enforced.
+- Recall is 0.84 on a verbatim copy, 0.74 once statements move, and 0 on a genuine reimplementation. Calling that a gate would imply nothing gets past it. Plenty does, and people stop checking once they believe something is enforced.
 - Blocking on the listing's 0.62 precision would reject real work often enough that the hook gets switched off within a day.
 
 `seenit check` exits 1 when it finds something, so a hard gate is one line of shell if you want one.
@@ -179,8 +193,9 @@ The hook reports and steps aside. That is a decision the measurements above forc
 
 - Finds copies, not reimplementations. A `for` loop rewritten as `reduce` shares nothing.
 - Statements inserted mid-function split a match into fragments, which may fall below `--min-tokens`.
-- The listing is about half right. `find_existing` is the accurate surface.
-- Verbatim recall is 0.84, not 1.0; the cause of the remaining misses is not known.
+- The listing runs at 0.62 on what it prints and 0.45 below that. `find_existing` is the accurate surface.
+- `find_existing` recall is 0.84 on an unchanged copy, not 1.0; the cause of the remaining misses is not known. It fails by staying silent, not by answering wrongly.
+- Best on repositories up to a few thousand files. The hook stops answering on much larger ones.
 - Tests, fixtures, examples and demos are left out of the listing. `find_existing` still searches them.
 - Pre-1.0: output format and defaults may change.
 

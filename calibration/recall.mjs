@@ -74,6 +74,9 @@ const MIN_TOKENS = (flag('min-tokens', '20,30,50,75')).split(',').map(Number)
 // answer this particular question.
 const ECOSYSTEMS = new Set((flag('ecosystems', 'npm')).split(','))
 const CONCURRENCY = Number(flag('concurrency', 4))
+// Repositories used only as a source of negative probes, held out of the
+// measured set.
+const DONOR_REPOS = Number(flag('donors', 8))
 
 function mulberry32(a) {
   return () => {
@@ -173,7 +176,7 @@ function donorFunction(src) {
   return null
 }
 
-async function measure(repo, dir, rng) {
+async function measure(repo, dir, rng, foreign) {
   const files = (await run('git', ['-C', dir, 'ls-files'], { maxBuffer: 1 << 28 })).stdout
     .split('\n')
     .filter((f) => f && /\.(js|mjs|ts)$/.test(f) && !isTest(f) && !f.includes('node_modules/'))
@@ -206,16 +209,48 @@ async function measure(repo, dir, rng) {
   // the entire cost of the study.
   const shadow = await mkdtemp(join(tmpdir(), 'seenit-recall-shadow-'))
   const found = {}
+  const negative = {}
   try {
     await buildShadow(dir, files, shadow)
+
+    // Which repository files did the planted probe get linked to? Answering
+    // with a boolean was the original mistake: a probe that matched some
+    // unrelated file counted as "found", so recall was measured as "something
+    // came back" rather than "the right thing came back".
+    const probeHits = async (bar) => {
+      const blocks = await detect([shadow], { minTokens: bar, base: shadow, includeSecondary: true })
+      return blocks
+        .filter((b) => (b.a === planted) !== (b.b === planted))
+        .map((b) => (b.a === planted ? b.b : b.a))
+    }
+
     for (const bar of MIN_TOKENS) {
       found[bar] = {}
       for (const [level, transform] of LEVELS) {
         const text = await normalizeSource(planted, `${transform(donor.body, rng)}\n`)
         await writeFile(join(shadow, planted), text ?? '')
-        const blocks = await detect([shadow], { minTokens: bar, base: shadow, includeSecondary: true })
-        // Did the planted copy get linked to anything other than itself?
-        found[bar][level] = blocks.some((b) => (b.a === planted) !== (b.b === planted))
+        const hits = await probeHits(bar)
+        found[bar][level] = {
+          hit: hits.length > 0,
+          // The planted copy came from donor.path. Anything else is a wrong
+          // answer, and a wrong answer is a false positive, not a hit.
+          correct: hits.includes(donor.path),
+          matched: hits.slice(0, 3),
+        }
+      }
+    }
+
+    // Negatives, through the same code path and the same shadow: a real
+    // function from a DIFFERENT repository, which this one provably does not
+    // contain. Measuring these separately, on a separate surface, was the other
+    // half of the labelling problem — specificity and recall have to come from
+    // the same thing before they can be read together.
+    if (foreign) {
+      const text = await normalizeSource(planted, `${foreign.body}\n`)
+      await writeFile(join(shadow, planted), text ?? '')
+      for (const bar of MIN_TOKENS) {
+        const hits = await probeHits(bar)
+        negative[bar] = { hit: hits.length > 0, matched: hits.slice(0, 3) }
       }
     }
   } finally {
@@ -228,14 +263,43 @@ async function measure(repo, dir, rng) {
     donor: donor.path,
     files: files.length,
     found,
+    negative,
+    foreignFrom: foreign?.repo ?? null,
   }
 }
 
-async function one(repo, rng) {
+// Clone a repository only to lift one function out of it, for use as a
+// negative probe elsewhere. Donor repositories are held out of the measured
+// set, so no repository is ever probed with a function from a repository that
+// is also a result.
+async function harvestDonor(repo) {
+  const dir = await mkdtemp(join(tmpdir(), 'seenit-recall-donor-'))
+  try {
+    await run('git', ['clone', '--depth', '1', '--quiet', repo.repository, dir], { timeout: 180_000 })
+    const files = (await run('git', ['-C', dir, 'ls-files'], { maxBuffer: 1 << 28 })).stdout
+      .split('\n')
+      .filter((f) => f && /\.(js|mjs|ts)$/.test(f) && !isTest(f) && !f.includes('node_modules/'))
+    for (const path of files.slice(0, 60)) {
+      try {
+        const body = donorFunction(await readFile(join(dir, path), 'utf8'))
+        if (body) return { repo: repo.repository, path, body }
+      } catch {
+        /* skip */
+      }
+    }
+    return null
+  } catch {
+    return null
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+}
+
+async function one(repo, rng, foreign) {
   const dir = await mkdtemp(join(tmpdir(), 'seenit-recall-'))
   try {
     await run('git', ['clone', '--depth', '1', '--quiet', repo.repository, dir], { timeout: 180_000 })
-    return await measure(repo, dir, rng)
+    return await measure(repo, dir, rng, foreign)
   } catch {
     return null
   } finally {
@@ -246,14 +310,22 @@ async function one(repo, rng) {
 const corpus = JSON.parse(await readFile(join(HERE, 'corpus.json'), 'utf8'))
 const repos = corpus.repos ?? corpus
 const rng = mulberry32(6060842)
-const shuffled = [...repos].filter((r) => ECOSYSTEMS.has(r.ecosystem)).sort(() => rng() - 0.5).slice(0, TARGET * 4)
+const pool = [...repos].filter((r) => ECOSYSTEMS.has(r.ecosystem)).sort(() => rng() - 0.5)
+const donorRepos = pool.slice(0, DONOR_REPOS)
+const shuffled = pool.slice(DONOR_REPOS, DONOR_REPOS + TARGET * 4)
+
+process.stderr.write(`  harvesting negative probes from ${donorRepos.length} repositories\n`)
+const donors = (await Promise.all(donorRepos.map(harvestDonor))).filter(Boolean)
+if (!donors.length) throw new Error('no negative probes could be harvested')
+process.stderr.write(`  ${donors.length} donors\n`)
 
 const results = []
 let done = 0
+let nextDonor = 0
 async function worker(queue) {
   while (queue.length && results.length < TARGET) {
     const repo = queue.pop()
-    const r = await one(repo, rng)
+    const r = await one(repo, rng, donors[nextDonor++ % donors.length])
     done++
     if (r) results.push(r)
     process.stderr.write(`\r  ${done} tried · ${results.length}/${TARGET} usable`)
@@ -263,10 +335,32 @@ const queue = [...shuffled]
 await Promise.all(Array.from({ length: CONCURRENCY }, () => worker(queue)))
 process.stderr.write('\n')
 
+// A probe that came back with the donor's own file is a true positive. A probe
+// that came back with some other file is a false positive, not a hit — scoring
+// it as one measured "something was returned" rather than "the right thing was
+// returned", which is a different and much easier question.
 const recallFor = (rows, pct, level) => {
   if (!rows.length) return null
-  const hits = rows.filter((r) => r.found[pct]?.[level]).length
-  return { found: hits, of: rows.length, recall: Number((hits / rows.length).toFixed(3)) }
+  const cells = rows.map((r) => r.found[pct]?.[level]).filter(Boolean)
+  const tp = cells.filter((c) => c.correct).length
+  const wrong = cells.filter((c) => c.hit && !c.correct).length
+  const missed = cells.filter((c) => !c.hit).length
+  return {
+    found: tp,
+    of: cells.length,
+    recall: cells.length ? Number((tp / cells.length).toFixed(3)) : null,
+    wrongFile: wrong,
+    missed,
+  }
+}
+
+// Negatives share the surface, the shadow and the code path with the positives
+// above, so the two compose into one confusion matrix instead of describing two
+// different things that happen to both be called accuracy.
+const negativesFor = (rows, pct) => {
+  const cells = rows.map((r) => r.negative?.[pct]).filter(Boolean)
+  const fp = cells.filter((c) => c.hit).length
+  return { of: cells.length, falsePositives: fp, trueNegatives: cells.length - fp }
 }
 
 // Wilson score interval — the normal approximation is badly wrong at these
@@ -293,13 +387,47 @@ const chosen = MIN_TOKENS.map((bar) => ({ pct: bar, r: recallFor(tune, bar, hard
   (a, b) => b.r - a.r || b.pct - a.pct,
 )[0]
 
+// One surface, both directions: precision, recall and specificity computed
+// from a single confusion matrix rather than assembled from separate studies.
+const matrixFor = (rows, pct, level) => {
+  const pos = recallFor(rows, pct, level)
+  const neg = negativesFor(rows, pct)
+  if (!pos) return null
+  const tp = pos.found
+  // Every wrong answer counts against precision, whichever probe produced it:
+  // a positive probe answered with the wrong file, and a negative probe
+  // answered at all, are both the tool claiming code exists where it does not.
+  const fp = pos.wrongFile + neg.falsePositives
+  const fn = pos.missed
+  const tn = neg.trueNegatives
+  return {
+    truePositives: tp,
+    falsePositives: fp,
+    falseNegatives: fn,
+    trueNegatives: tn,
+    precision: tp + fp ? Number((tp / (tp + fp)).toFixed(3)) : null,
+    precisionCi95: tp + fp ? wilson(tp, tp + fp) : null,
+    recall: tp + fn ? Number((tp / (tp + fn)).toFixed(3)) : null,
+    recallCi95: tp + fn ? wilson(tp, tp + fn) : null,
+    specificity: tn + neg.falsePositives ? Number((tn / (tn + neg.falsePositives)).toFixed(3)) : null,
+    specificityCi95: tn + neg.falsePositives ? wilson(tn, tn + neg.falsePositives) : null,
+  }
+}
+
 const summary = {
   measuredAt: new Date().toISOString().slice(0, 10),
+  surface: 'find_existing — the same call the MCP tool and the pre-write hook make. Not the listing.',
   method:
-    'A substantial function is lifted from each repository, transformed, and planted back into the working tree as a real file, then jscpd is run over the directory exactly as the product runs it. Ground truth is known by construction, so no hand-labelling is involved. Repositories are split by a stable hash of their URL: the min-tokens bar is chosen on the tuning half only, and the headline recall is reported on the held-out half.',
+    'Positives: a substantial function is lifted from the repository, transformed, and planted back as a probe; a hit counts only when the location returned is the file the function came from. Negatives: a real function from a different corpus repository, which this one provably does not contain, planted through the same code path — any hit is a false positive. Ground truth is known by construction on both sides, so nothing is hand-labelled. Repositories are split by a stable hash of their URL: the min-tokens bar is chosen on the tuning half only, and headline figures come from the held-out half.',
   repos: { total: results.length, tune: tune.length, holdout: holdout.length },
   engine: 'jscpd ' + JSCPD_VERSION,
   chosenOnTuningSplit: { minTokens: chosen?.pct ?? null, recallAtHardest: chosen?.r ?? null },
+  // The headline confusion matrix: held-out repositories, shipped bar, hardest
+  // transformation.
+  heldOutMatrix: Object.fromEntries(
+    MIN_TOKENS.map((pct) => [pct, Object.fromEntries(LEVELS.map(([level]) => [level, matrixFor(holdout, pct, level)]))]),
+  ),
+  heldOutNegatives: Object.fromEntries(MIN_TOKENS.map((pct) => [pct, negativesFor(holdout, pct)])),
   heldOut: Object.fromEntries(
     MIN_TOKENS.map((pct) => [
       pct,
@@ -323,4 +451,18 @@ const summary = {
 }
 
 await writeFile(join(HERE, 'results', 'recall.json'), JSON.stringify(summary, null, 2) + '\n')
-console.log(JSON.stringify({ chosen: summary.chosenOnTuningSplit, repos: summary.repos, heldOut: summary.heldOut[summary.chosenOnTuningSplit.minTokens] }, null, 2))
+const bar = summary.chosenOnTuningSplit.minTokens
+console.log(
+  JSON.stringify(
+    {
+      surface: summary.surface,
+      repos: summary.repos,
+      chosen: summary.chosenOnTuningSplit,
+      heldOutNegatives: summary.heldOutNegatives[bar],
+      matrixVerbatim: summary.heldOutMatrix[bar]?.verbatim,
+      matrixHardest: summary.heldOutMatrix[bar]?.['+extract'],
+    },
+    null,
+    2,
+  ),
+)

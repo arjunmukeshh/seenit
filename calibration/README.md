@@ -14,16 +14,29 @@ Each clones every repository shallow, measures, deletes. Twenty minutes and
 forty respectively, both needing network. They write `results/recall.json` and
 `results/precision.json`.
 
-## Recall
+## find_existing: one confusion matrix
 
-Recall needs no judgement, because the answer can be constructed:
+Recall, precision and specificity for `find_existing` come from a single run of
+a single code path, because reporting them from different surfaces would let
+them look composable when they are not.
+
+Positives are constructed:
 
 1. Take a real function from a real repository.
 2. Transform it the way an agent rewriting from memory would.
 3. Plant it back into the working tree as a new file.
 4. Ask seenit whether it finds it.
 
-Ground truth is known by construction, so nothing is hand-labelled.
+A planted probe counts as found only when the location returned is the file the
+function was lifted from. Answering with some other file is a false positive, not
+a hit — scoring it as one measured "something came back" rather than "the right
+thing came back".
+
+Negatives run through the same shadow and the same code path: a real function
+from a *different* corpus repository, which this one provably does not contain,
+so any hit is an error. Donor repositories are held out of the measured set.
+
+Ground truth is known by construction on both sides, so nothing is hand-labelled.
 
 Transformations are cumulative, so the output is a curve rather than a single
 number — it shows *where* matching gives out:
@@ -43,13 +56,12 @@ number — it shows *where* matching gives out:
 Precision cannot be constructed the same way, so it is measured in two halves
 and only the second needs a judge.
 
-**The half that needs no judge.** A real function is lifted from one repository
-and asked about in a *different* one, as an agent would ask `find_existing`
-before writing something. The target repository does not contain that function,
-so a match is an error by construction. Result: 0 matches in 63 repositories,
-95% CI [0, 0.057]. Donor repositories are held out of the measured set, so no
-repository is ever probed with a function from a repository that is also a
-result.
+**The half that needs no judge** now lives in the confusion matrix above, not
+here. It was previously reported as "precision", which it was not: asking only
+about code the repository provably lacks measures **specificity** — the
+false-positive rate on known negatives — and a tool hardcoded to answer "safe to
+write" would have scored identically. Precision needs cases where the tool says
+yes, which is what pairing the negatives with the planted positives supplies.
 
 **The half that needs a judge.** Whether a reported pair is worth deduplicating
 is an opinion, so the listing is sampled and judged blind — see
@@ -57,13 +69,19 @@ is an opinion, so the listing is sampled and judged blind — see
 0.62 on the three findings the CLI prints, 0.45 past that, against a control
 acceptance rate of 0.02.
 
+The gap that matters is flagged against controls: 58 of 107 versus 1 of 58,
+Fisher p = 1.9e-13. The gap between the top three and the tail does not clear
+significance at this sample — Fisher p = 0.12 — so the ordering is reported but
+not relied on.
+
 Two sampling rules, both learned from earlier mistakes in this project:
 
 - **At most two cases per repository.** The previous alignment study pooled
   every pair and one repository ended up owning 69% of the result.
 - **Sampled at two ranks.** One case from the top three, which is what the CLI
-  prints, and one from the tail. These score differently — 0.57 against 0.39 —
-  and reporting either as "precision" would be picking the flattering one.
+  prints, and one from the tail. Reporting either alone as "precision" would be
+  picking whichever flatters. The two differ by 0.17, which at n=60 and n=47 is
+  not a significant difference (Fisher p = 0.12).
 
 **Controls.** Every repository also contributes a pair of regions seenit did
 *not* flag, drawn at random, sized like the real cases, and shuffled in
@@ -95,15 +113,16 @@ rather than a fact about the language.
 
 - **The judge is a language model, not a human.** Six fresh Claude contexts, one
   batch each, none knowing what produced the pairs. An LLM asked whether two
-  things are alike leans toward yes; the 2-of-58 control rate is what that lean
+  things are alike leans toward yes; the 1-of-58 control rate is what that lean
   measures, and it is small, but it is not zero and it is not a human.
 - **Neither study re-clones at the pinned SHA.** `corpus.json` records a commit
   for every repository, but both harnesses shallow-clone the default branch. The
   corpus is frozen; the code measured is not, so a re-run months from now will
   not reproduce these numbers exactly.
 - **JavaScript and TypeScript only.**
-- **Verbatim recall is 0.86, not 1.0.** One exact copy in seven is missed and the
-  cause is not yet understood.
+- **Verbatim recall is 0.84, not 1.0.** One exact copy in six is missed and the
+  cause is not yet understood. The misses are silent, not wrong: precision over
+  the same 38 held-out repositories is 1.00, CI [0.88, 1].
 - **Listing precision is 0.54 and most of what remains is not addressable.** The
   ignore work below took it from 0.49; of the wrong findings that survive, the
   bulk is parallel-but-distinct logic, which normalising identifiers away cannot
