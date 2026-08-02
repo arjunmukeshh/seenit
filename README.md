@@ -1,6 +1,8 @@
 # seenit
 
-Check whether code already exists in a repository before writing it. Matching ignores identifier names, literal values, formatting and comments, so a copy that shares no text with the original is still found.
+Check whether code already exists in a repository before writing it.
+
+Coding agents rewrite helpers that are already there, because they search for text and a reimplementation shares none. seenit compares structure instead: rename every variable, change every string, reformat it and add comments, and it still matches.
 
 [![npm](https://img.shields.io/npm/v/seenit?style=flat-square&color=0b7285)](https://www.npmjs.com/package/seenit)
 [![node](https://img.shields.io/node/v/seenit?style=flat-square&color=0b7285)](https://nodejs.org)
@@ -13,11 +15,27 @@ Check whether code already exists in a repository before writing it. Matching ig
 npm install -g seenit          # or use npx, no install needed
 ```
 
-Requires Node 20.11+ and a git repository. The detector ships as a prebuilt binary; there is no compile step.
+Requires Node 20.11+ and a git repository. The detector ships as a prebuilt binary, so there is no compile step. Tested on macOS (arm64); Linux and Windows builds ship but are not yet covered by CI.
+
+## Quick start
+
+From inside any git repository, ask whether a file's contents already exist somewhere:
+
+```bash
+npx seenit check --file src/draft.js
+```
+
+```console
+  Already written
+
+  lib/utils.js:61-90  30 lines shared
+```
+
+It exits 1 when it finds something and 0 when it does not, so it drops straight into a script. To see what is already duplicated across the whole repository, run `npx seenit` with no arguments.
 
 ## Use with an AI agent
 
-Two ways in, and they answer different problems.
+This is what the tool is for. Two ways in, and they answer different problems.
 
 **As a hook**, so nothing has to remember to ask. Add to `.claude/settings.json`:
 
@@ -34,7 +52,15 @@ Two ways in, and they answer different problems.
 }
 ```
 
-Every write over a dozen lines gets checked against the repository. When the code already exists, the agent is told where; otherwise the hook is silent. It never blocks a write — see [Why it warns instead of blocking](#why-it-warns-instead-of-blocking).
+Every write over a dozen lines gets checked against the repository. When the code already exists, the agent is handed the location mid-task:
+
+```console
+seenit: this overlaps code already in the repository.
+  lib/orders.js:12-31  (19 lines shared)
+Reuse it, or continue if the duplication is deliberate.
+```
+
+Otherwise the hook says nothing at all. It never blocks a write — see [Why it warns instead of blocking](#why-it-warns-instead-of-blocking).
 
 Run `seenit prime` once per repository first. The hook has a five-second budget and stays quiet rather than stalling a write, so on a cold cache it will not have time to answer.
 
@@ -57,28 +83,17 @@ The two tool definitions total 247 tokens. Results are paths and line ranges.
 
 ## Use from the terminal
 
-Check a snippet. Exits 1 if it already exists, 0 if not.
+`seenit check` also reads from stdin, which is handy in a pipeline or a git hook:
 
 ```bash
 cat draft.js | seenit check
-seenit check --file draft.js
 ```
 
-```console
-  Already written
-
-  lib/utils.js:61-90  30 lines shared
-```
-
-List duplicated regions in the repository.
-
-```bash
-seenit
-```
+`seenit` with no arguments lists what is already duplicated, largest region first:
 
 <img src="https://raw.githubusercontent.com/arjunmukeshh/seenit/main/docs/media/cli.png" alt="Terminal running seenit. Under the heading 'Duplicated' it lists pairs of file paths with line ranges and the number of lines shared." width="760">
 
-Nothing is written to your working tree.
+Nothing is written to your working tree in either case.
 
 ## Options
 
